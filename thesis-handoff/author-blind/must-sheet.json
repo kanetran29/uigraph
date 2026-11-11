@@ -1,0 +1,5247 @@
+{
+ "built": "make-must-sheet.mjs",
+ "items": [
+  {
+   "id": "087acf8d1a",
+   "app": "k8sdash",
+   "file": "src/chrome/component.ts",
+   "line": 82,
+   "target": "/create",
+   "sources": [
+    "/cluster",
+    "/clusterrole",
+    "/clusterrole/:resourceName",
+    "/clusterrolebinding",
+    "/clusterrolebinding/:resourceName",
+    "/config",
+    "/configmap",
+    "/configmap/:resourceNamespace/:resourceName",
+    "/cronjob",
+    "/cronjob/:resourceNamespace/:resourceName",
+    "/customresourcedefinition",
+    "/customresourcedefinition/:crdName",
+    "/customresourcedefinition/:crdName/:namespace/:objectName",
+    "/customresourcedefinition/:crdName/:objectName",
+    "/daemonset",
+    "/daemonset/:resourceNamespace/:resourceName",
+    "/deployment",
+    "/deployment/:resourceNamespace/:resourceName",
+    "/discovery",
+    "/error",
+    "/event",
+    "/ingress",
+    "/ingress/:resourceNamespace/:resourceName",
+    "/ingressclass",
+    "/ingressclass/:resourceName",
+    "/job",
+    "/job/:resourceNamespace/:resourceName",
+    "/log/:resourceNamespace/:resourceName/:resourceType",
+    "/namespace",
+    "/namespace/:resourceName",
+    "/networkpolicy",
+    "/networkpolicy/:resourceNamespace/:resourceName",
+    "/node",
+    "/node/:resourceName",
+    "/overview",
+    "/persistentvolume",
+    "/persistentvolume/:resourceName",
+    "/persistentvolumeclaim",
+    "/persistentvolumeclaim/:resourceNamespace/:resourceName",
+    "/pod",
+    "/pod/:resourceNamespace/:resourceName",
+    "/replicaset",
+    "/replicaset/:resourceNamespace/:resourceName",
+    "/replicationcontroller",
+    "/replicationcontroller/:resourceNamespace/:resourceName",
+    "/role",
+    "/role/:resourceNamespace/:resourceName",
+    "/rolebinding",
+    "/rolebinding/:resourceNamespace/:resourceName",
+    "/secret",
+    "/secret/:resourceNamespace/:resourceName",
+    "/service",
+    "/service/:resourceNamespace/:resourceName",
+    "/serviceaccount",
+    "/serviceaccount/:resourceNamespace/:resourceName",
+    "/settings",
+    "/shell/:resourceNamespace/:resourceName",
+    "/shell/:resourceNamespace/:resourceName/:containerName",
+    "/statefulset",
+    "/statefulset/:resourceNamespace/:resourceName",
+    "/storageclass",
+    "/storageclass/:resourceName",
+    "/workloads"
+   ],
+   "lines": [
+    {
+     "n": 70,
+     "text": "      case 'error':",
+     "cited": false
+    },
+    {
+     "n": 71,
+     "text": "        return 'kd-bg-error-light';",
+     "cited": false
+    },
+    {
+     "n": 72,
+     "text": "      default:",
+     "cited": false
+    },
+    {
+     "n": 73,
+     "text": "        return 'kd-bg-success-light';",
+     "cited": false
+    },
+    {
+     "n": 74,
+     "text": "    }",
+     "cited": false
+    },
+    {
+     "n": 75,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 76,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 77,
+     "text": "  getSystemBannerMessage(): string {",
+     "cited": false
+    },
+    {
+     "n": 78,
+     "text": "    return this.systemBanner_ ? this.systemBanner_.message : '';",
+     "cited": false
+    },
+    {
+     "n": 79,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 80,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 81,
+     "text": "  goToCreateState(): void {",
+     "cited": false
+    },
+    {
+     "n": 82,
+     "text": "    this.router_.navigate(['create'], {queryParamsHandling: 'preserve'});",
+     "cited": true
+    },
+    {
+     "n": 83,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 84,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 85,
+     "text": "  private registerVisibilityChangeHandler_(): void {",
+     "cited": false
+    },
+    {
+     "n": 86,
+     "text": "    if (typeof this.document_.addEventListener === 'undefined') {",
+     "cited": false
+    },
+    {
+     "n": 87,
+     "text": "      console.log(",
+     "cited": false
+    },
+    {
+     "n": 88,
+     "text": "        'Your browser does not support Page Visibility API. Page cannot properly stop background tasks when tab is inactive.'",
+     "cited": false
+    },
+    {
+     "n": 89,
+     "text": "      );",
+     "cited": false
+    },
+    {
+     "n": 90,
+     "text": "      return;",
+     "cited": false
+    },
+    {
+     "n": 91,
+     "text": "    }",
+     "cited": false
+    },
+    {
+     "n": 92,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 93,
+     "text": "    this.document_.addEventListener('visibilitychange', this.handleVisibilityChange_.bind(this), false);",
+     "cited": false
+    },
+    {
+     "n": 94,
+     "text": "  }",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "18c532857b",
+   "app": "mifos",
+   "file": "src/app/system/system.component.html",
+   "line": 294,
+   "target": "/system/system-information",
+   "sources": [
+    "/system"
+   ],
+   "lines": [
+    {
+     "n": 282,
+     "text": "                }",
+     "cited": false
+    },
+    {
+     "n": 283,
+     "text": "                @if (arrowBooleans[7]) {",
+     "cited": false
+    },
+    {
+     "n": 284,
+     "text": "                  <fa-icon",
+     "cited": false
+    },
+    {
+     "n": 285,
+     "text": "                    (click)=\"arrowBooleansToggle(7); $event.stopPropagation()\"",
+     "cited": false
+    },
+    {
+     "n": 286,
+     "text": "                    icon=\"arrow-up\"",
+     "cited": false
+    },
+    {
+     "n": 287,
+     "text": "                    size=\"md\"",
+     "cited": false
+    },
+    {
+     "n": 288,
+     "text": "                  ></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 289,
+     "text": "                }",
+     "cited": false
+    },
+    {
+     "n": 290,
+     "text": "              </div>",
+     "cited": false
+    },
+    {
+     "n": 291,
+     "text": "            </div>",
+     "cited": false
+    },
+    {
+     "n": 292,
+     "text": "          </mat-list-item>",
+     "cited": false
+    },
+    {
+     "n": 293,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 294,
+     "text": "          <mat-list-item [routerLink]=\"['system-information']\">",
+     "cited": true
+    },
+    {
+     "n": 295,
+     "text": "            <div class=\"menu-list-item-content\">",
+     "cited": false
+    },
+    {
+     "n": 296,
+     "text": "              <div class=\"menu-left-section\" [routerLink]=\"['system-information']\">",
+     "cited": false
+    },
+    {
+     "n": 297,
+     "text": "                <mat-icon matListIcon>",
+     "cited": false
+    },
+    {
+     "n": 298,
+     "text": "                  <fa-icon icon=\"info-circle\" size=\"sm\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 299,
+     "text": "                </mat-icon>",
+     "cited": false
+    },
+    {
+     "n": 300,
+     "text": "                <div matLine>",
+     "cited": false
+    },
+    {
+     "n": 301,
+     "text": "                  {{ 'labels.heading.System Information' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 302,
+     "text": "                  @if (arrowBooleans[15]) {",
+     "cited": false
+    },
+    {
+     "n": 303,
+     "text": "                    <p matLine [routerLink]=\"['system-information']\" class=\"menu-explanation\">",
+     "cited": false
+    },
+    {
+     "n": 304,
+     "text": "                      {{ 'labels.text.View system version, server and licensing information' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 305,
+     "text": "                    </p>",
+     "cited": false
+    },
+    {
+     "n": 306,
+     "text": "                  }",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "2b1f6a578a",
+   "app": "mifos",
+   "file": "src/app/system/system.component.html",
+   "line": 606,
+   "target": "/system/about-us",
+   "sources": [
+    "/system"
+   ],
+   "lines": [
+    {
+     "n": 594,
+     "text": "                }",
+     "cited": false
+    },
+    {
+     "n": 595,
+     "text": "                @if (arrowBooleans[17]) {",
+     "cited": false
+    },
+    {
+     "n": 596,
+     "text": "                  <fa-icon",
+     "cited": false
+    },
+    {
+     "n": 597,
+     "text": "                    (click)=\"arrowBooleansToggle(17); $event.stopPropagation()\"",
+     "cited": false
+    },
+    {
+     "n": 598,
+     "text": "                    icon=\"arrow-up\"",
+     "cited": false
+    },
+    {
+     "n": 599,
+     "text": "                    size=\"md\"",
+     "cited": false
+    },
+    {
+     "n": 600,
+     "text": "                  ></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 601,
+     "text": "                }",
+     "cited": false
+    },
+    {
+     "n": 602,
+     "text": "              </div>",
+     "cited": false
+    },
+    {
+     "n": 603,
+     "text": "            </div>",
+     "cited": false
+    },
+    {
+     "n": 604,
+     "text": "          </mat-list-item>",
+     "cited": false
+    },
+    {
+     "n": 605,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 606,
+     "text": "          <mat-list-item [routerLink]=\"['about-us']\">",
+     "cited": true
+    },
+    {
+     "n": 607,
+     "text": "            <div class=\"menu-list-item-content\">",
+     "cited": false
+    },
+    {
+     "n": 608,
+     "text": "              <div class=\"menu-left-section\" [routerLink]=\"['about-us']\">",
+     "cited": false
+    },
+    {
+     "n": 609,
+     "text": "                <mat-icon matListIcon>",
+     "cited": false
+    },
+    {
+     "n": 610,
+     "text": "                  <fa-icon icon=\"users\" size=\"sm\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 611,
+     "text": "                </mat-icon>",
+     "cited": false
+    },
+    {
+     "n": 612,
+     "text": "                <div matLine>",
+     "cited": false
+    },
+    {
+     "n": 613,
+     "text": "                  {{ 'labels.heading.About Us' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 614,
+     "text": "                  @if (arrowBooleans[16]) {",
+     "cited": false
+    },
+    {
+     "n": 615,
+     "text": "                    <p matLine [routerLink]=\"['about-us']\" class=\"menu-explanation\">",
+     "cited": false
+    },
+    {
+     "n": 616,
+     "text": "                      {{ 'labels.text.Learn about the Mifos Initiative and our mission' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 617,
+     "text": "                    </p>",
+     "cited": false
+    },
+    {
+     "n": 618,
+     "text": "                  }",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "2b44d95556",
+   "app": "mifos",
+   "file": "src/app/groups/create-group/create-group.component.html",
+   "line": 169,
+   "target": "/groups",
+   "sources": [
+    "/groups/create"
+   ],
+   "lines": [
+    {
+     "n": 157,
+     "text": "                  <span class=\"member-name\">{{ client.displayName }}</span>",
+     "cited": false
+    },
+    {
+     "n": 158,
+     "text": "                  <button mat-icon-button color=\"warn\" (click)=\"removeClient(i)\">",
+     "cited": false
+    },
+    {
+     "n": 159,
+     "text": "                    <fa-icon icon=\"trash\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 160,
+     "text": "                  </button>",
+     "cited": false
+    },
+    {
+     "n": 161,
+     "text": "                </div>",
+     "cited": false
+    },
+    {
+     "n": 162,
+     "text": "              }",
+     "cited": false
+    },
+    {
+     "n": 163,
+     "text": "            </div>",
+     "cited": false
+    },
+    {
+     "n": 164,
+     "text": "          }",
+     "cited": false
+    },
+    {
+     "n": 165,
+     "text": "        </div>",
+     "cited": false
+    },
+    {
+     "n": 166,
+     "text": "      </mat-card-content>",
+     "cited": false
+    },
+    {
+     "n": 167,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 168,
+     "text": "      <mat-card-actions class=\"layout-row align-center gap-5px responsive-column\">",
+     "cited": false
+    },
+    {
+     "n": 169,
+     "text": "        <button type=\"button\" mat-raised-button [routerLink]=\"['../']\">",
+     "cited": true
+    },
+    {
+     "n": 170,
+     "text": "          {{ 'labels.buttons.Cancel' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 171,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 172,
+     "text": "        <button mat-raised-button color=\"primary\" [disabled]=\"!groupForm.valid\" (click)=\"submit()\">",
+     "cited": false
+    },
+    {
+     "n": 173,
+     "text": "          {{ 'labels.buttons.Submit' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 174,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 175,
+     "text": "      </mat-card-actions>",
+     "cited": false
+    },
+    {
+     "n": 176,
+     "text": "    </form>",
+     "cited": false
+    },
+    {
+     "n": 177,
+     "text": "  </mat-card>",
+     "cited": false
+    },
+    {
+     "n": 178,
+     "text": "</div>",
+     "cited": false
+    },
+    {
+     "n": 179,
+     "text": "",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "33d021d882",
+   "app": "mifos",
+   "file": "src/app/organization/working-days/working-days.component.html",
+   "line": 45,
+   "target": "/organization",
+   "sources": [
+    "/organization/working-days"
+   ],
+   "lines": [
+    {
+     "n": 33,
+     "text": "                </mat-option>",
+     "cited": false
+    },
+    {
+     "n": 34,
+     "text": "              }",
+     "cited": false
+    },
+    {
+     "n": 35,
+     "text": "            </mat-select>",
+     "cited": false
+    },
+    {
+     "n": 36,
+     "text": "          </mat-form-field>",
+     "cited": false
+    },
+    {
+     "n": 37,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 38,
+     "text": "          <mat-checkbox labelPosition=\"before\" formControlName=\"extendTermForDailyRepayments\">",
+     "cited": false
+    },
+    {
+     "n": 39,
+     "text": "            {{ 'labels.inputs.Loans daily repayment schedule' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 40,
+     "text": "          </mat-checkbox>",
+     "cited": false
+    },
+    {
+     "n": 41,
+     "text": "        </div>",
+     "cited": false
+    },
+    {
+     "n": 42,
+     "text": "      </mat-card-content>",
+     "cited": false
+    },
+    {
+     "n": 43,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 44,
+     "text": "      <mat-card-actions class=\"layout-row align-center gap-5px responsive-column\">",
+     "cited": false
+    },
+    {
+     "n": 45,
+     "text": "        <button mat-raised-button [routerLink]=\"['../']\">{{ 'labels.buttons.Cancel' | translate }}</button>",
+     "cited": true
+    },
+    {
+     "n": 46,
+     "text": "        <button",
+     "cited": false
+    },
+    {
+     "n": 47,
+     "text": "          mat-raised-button",
+     "cited": false
+    },
+    {
+     "n": 48,
+     "text": "          color=\"primary\"",
+     "cited": false
+    },
+    {
+     "n": 49,
+     "text": "          [disabled]=\"workingDaysForm.pristine\"",
+     "cited": false
+    },
+    {
+     "n": 50,
+     "text": "          *mifosxHasPermission=\"'UPDATE_WORKINGDAYS'\"",
+     "cited": false
+    },
+    {
+     "n": 51,
+     "text": "        >",
+     "cited": false
+    },
+    {
+     "n": 52,
+     "text": "          {{ 'labels.buttons.Submit' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 53,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 54,
+     "text": "      </mat-card-actions>",
+     "cited": false
+    },
+    {
+     "n": 55,
+     "text": "    </form>",
+     "cited": false
+    },
+    {
+     "n": 56,
+     "text": "  </mat-card>",
+     "cited": false
+    },
+    {
+     "n": 57,
+     "text": "</div>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "3f2e635a2f",
+   "app": "mifos",
+   "file": "src/app/accounting/accounting.component.html",
+   "line": 212,
+   "target": "/accounting/accounting-rules",
+   "sources": [
+    "/accounting"
+   ],
+   "lines": [
+    {
+     "n": 200,
+     "text": "                    <fa-icon (click)=\"arrowBooleansToggle(6)\" icon=\"arrow-down\" size=\"md\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 201,
+     "text": "                  }",
+     "cited": false
+    },
+    {
+     "n": 202,
+     "text": "                  @if (arrowBooleans[6]) {",
+     "cited": false
+    },
+    {
+     "n": 203,
+     "text": "                    <fa-icon (click)=\"arrowBooleansToggle(6)\" icon=\"arrow-up\" size=\"md\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 204,
+     "text": "                  }",
+     "cited": false
+    },
+    {
+     "n": 205,
+     "text": "                </div>",
+     "cited": false
+    },
+    {
+     "n": 206,
+     "text": "              </div>",
+     "cited": false
+    },
+    {
+     "n": 207,
+     "text": "            </mat-list-item>",
+     "cited": false
+    },
+    {
+     "n": 208,
+     "text": "          </div>",
+     "cited": false
+    },
+    {
+     "n": 209,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 210,
+     "text": "          <mat-list-item *mifosxHasPermission=\"'READ_ACCOUNTINGRULE'\">",
+     "cited": false
+    },
+    {
+     "n": 211,
+     "text": "            <div class=\"menu-list-item-content\">",
+     "cited": false
+    },
+    {
+     "n": 212,
+     "text": "              <div class=\"menu-left-section\" [routerLink]=\"['accounting-rules']\">",
+     "cited": true
+    },
+    {
+     "n": 213,
+     "text": "                <mat-icon matListIcon>",
+     "cited": false
+    },
+    {
+     "n": 214,
+     "text": "                  <fa-icon icon=\"list\" size=\"sm\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 215,
+     "text": "                </mat-icon>",
+     "cited": false
+    },
+    {
+     "n": 216,
+     "text": "                <div matLine>",
+     "cited": false
+    },
+    {
+     "n": 217,
+     "text": "                  {{ 'labels.heading.Accounting Rules' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 218,
+     "text": "                  @if (arrowBooleans[7]) {",
+     "cited": false
+    },
+    {
+     "n": 219,
+     "text": "                    <p matLine [routerLink]=\"['accounting-rules']\" class=\"menu-explanation\">",
+     "cited": false
+    },
+    {
+     "n": 220,
+     "text": "                      {{ 'labels.text.List of all accounting rules' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 221,
+     "text": "                    </p>",
+     "cited": false
+    },
+    {
+     "n": 222,
+     "text": "                  }",
+     "cited": false
+    },
+    {
+     "n": 223,
+     "text": "                </div>",
+     "cited": false
+    },
+    {
+     "n": 224,
+     "text": "              </div>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "4e62659a74",
+   "app": "mifos",
+   "file": "src/app/centers/create-center/create-center.component.html",
+   "line": 163,
+   "target": "/centers",
+   "sources": [
+    "/centers/create"
+   ],
+   "lines": [
+    {
+     "n": 151,
+     "text": "                  <button mat-icon-button (click)=\"removeGroup(i)\">",
+     "cited": false
+    },
+    {
+     "n": 152,
+     "text": "                    <fa-icon icon=\"trash\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 153,
+     "text": "                  </button>",
+     "cited": false
+    },
+    {
+     "n": 154,
+     "text": "                  <span matLine>{{ group.name }}</span>",
+     "cited": false
+    },
+    {
+     "n": 155,
+     "text": "                </div>",
+     "cited": false
+    },
+    {
+     "n": 156,
+     "text": "              }",
+     "cited": false
+    },
+    {
+     "n": 157,
+     "text": "            </mat-nav-list>",
+     "cited": false
+    },
+    {
+     "n": 158,
+     "text": "          }",
+     "cited": false
+    },
+    {
+     "n": 159,
+     "text": "        </div>",
+     "cited": false
+    },
+    {
+     "n": 160,
+     "text": "      </mat-card-content>",
+     "cited": false
+    },
+    {
+     "n": 161,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 162,
+     "text": "      <mat-card-actions class=\"layout-row align-center gap-5px responsive-column\">",
+     "cited": false
+    },
+    {
+     "n": 163,
+     "text": "        <button type=\"button\" mat-raised-button [routerLink]=\"['../']\">",
+     "cited": true
+    },
+    {
+     "n": 164,
+     "text": "          {{ 'labels.buttons.Cancel' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 165,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 166,
+     "text": "        <button",
+     "cited": false
+    },
+    {
+     "n": 167,
+     "text": "          mat-raised-button",
+     "cited": false
+    },
+    {
+     "n": 168,
+     "text": "          color=\"primary\"",
+     "cited": false
+    },
+    {
+     "n": 169,
+     "text": "          [disabled]=\"!centerForm.valid\"",
+     "cited": false
+    },
+    {
+     "n": 170,
+     "text": "          (click)=\"submit()\"",
+     "cited": false
+    },
+    {
+     "n": 171,
+     "text": "          *mifosxHasPermission=\"'CREATE_CENTER'\"",
+     "cited": false
+    },
+    {
+     "n": 172,
+     "text": "        >",
+     "cited": false
+    },
+    {
+     "n": 173,
+     "text": "          {{ 'labels.buttons.Submit' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 174,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 175,
+     "text": "      </mat-card-actions>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "579717348c",
+   "app": "mifos",
+   "file": "src/app/organization/password-preferences/password-preferences.component.html",
+   "line": 35,
+   "target": "/organization",
+   "sources": [
+    "/organization/password-preferences"
+   ],
+   "lines": [
+    {
+     "n": 23,
+     "text": "            </div>",
+     "cited": false
+    },
+    {
+     "n": 24,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 25,
+     "text": "            <div class=\"card-description\">",
+     "cited": false
+    },
+    {
+     "n": 26,
+     "text": "              <span class=\"description-wrap\">",
+     "cited": false
+    },
+    {
+     "n": 27,
+     "text": "                {{ passwordPreference.description | translateKey: 'passwordPreferences' }}",
+     "cited": false
+    },
+    {
+     "n": 28,
+     "text": "              </span>",
+     "cited": false
+    },
+    {
+     "n": 29,
+     "text": "            </div>",
+     "cited": false
+    },
+    {
+     "n": 30,
+     "text": "          </div>",
+     "cited": false
+    },
+    {
+     "n": 31,
+     "text": "        </mat-radio-group>",
+     "cited": false
+    },
+    {
+     "n": 32,
+     "text": "      </mat-card-content>",
+     "cited": false
+    },
+    {
+     "n": 33,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 34,
+     "text": "      <mat-card-actions class=\"layout-row align-center gap-5px responsive-column\">",
+     "cited": false
+    },
+    {
+     "n": 35,
+     "text": "        <button type=\"button\" mat-raised-button [routerLink]=\"['../']\">",
+     "cited": true
+    },
+    {
+     "n": 36,
+     "text": "          {{ 'labels.buttons.Cancel' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 37,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 38,
+     "text": "        <button",
+     "cited": false
+    },
+    {
+     "n": 39,
+     "text": "          mat-raised-button",
+     "cited": false
+    },
+    {
+     "n": 40,
+     "text": "          color=\"primary\"",
+     "cited": false
+    },
+    {
+     "n": 41,
+     "text": "          [disabled]=\"passwordPreferencesForm.pristine\"",
+     "cited": false
+    },
+    {
+     "n": 42,
+     "text": "          *mifosxHasPermission=\"'UPDATE_PASSWORD_VALIDATION_POLICY'\"",
+     "cited": false
+    },
+    {
+     "n": 43,
+     "text": "        >",
+     "cited": false
+    },
+    {
+     "n": 44,
+     "text": "          {{ 'labels.buttons.Submit' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 45,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 46,
+     "text": "      </mat-card-actions>",
+     "cited": false
+    },
+    {
+     "n": 47,
+     "text": "    </form>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "5a711b55c4",
+   "app": "mifos",
+   "file": "src/app/system/system.component.html",
+   "line": 572,
+   "target": "/system/manage-dashboards",
+   "sources": [
+    "/system"
+   ],
+   "lines": [
+    {
+     "n": 560,
+     "text": "                }",
+     "cited": false
+    },
+    {
+     "n": 561,
+     "text": "                @if (arrowBooleans[13]) {",
+     "cited": false
+    },
+    {
+     "n": 562,
+     "text": "                  <fa-icon",
+     "cited": false
+    },
+    {
+     "n": 563,
+     "text": "                    (click)=\"arrowBooleansToggle(13); $event.stopPropagation()\"",
+     "cited": false
+    },
+    {
+     "n": 564,
+     "text": "                    icon=\"arrow-up\"",
+     "cited": false
+    },
+    {
+     "n": 565,
+     "text": "                    size=\"md\"",
+     "cited": false
+    },
+    {
+     "n": 566,
+     "text": "                  ></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 567,
+     "text": "                }",
+     "cited": false
+    },
+    {
+     "n": 568,
+     "text": "              </div>",
+     "cited": false
+    },
+    {
+     "n": 569,
+     "text": "            </div>",
+     "cited": false
+    },
+    {
+     "n": 570,
+     "text": "          </mat-list-item>",
+     "cited": false
+    },
+    {
+     "n": 571,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 572,
+     "text": "          <mat-list-item [routerLink]=\"['manage-dashboards']\">",
+     "cited": true
+    },
+    {
+     "n": 573,
+     "text": "            <div class=\"menu-list-item-content\">",
+     "cited": false
+    },
+    {
+     "n": 574,
+     "text": "              <div class=\"menu-left-section\" [routerLink]=\"['manage-dashboards']\">",
+     "cited": false
+    },
+    {
+     "n": 575,
+     "text": "                <mat-icon matListIcon>",
+     "cited": false
+    },
+    {
+     "n": 576,
+     "text": "                  <fa-icon icon=\"tachometer-alt\" size=\"sm\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 577,
+     "text": "                </mat-icon>",
+     "cited": false
+    },
+    {
+     "n": 578,
+     "text": "                <div matLine>",
+     "cited": false
+    },
+    {
+     "n": 579,
+     "text": "                  {{ 'labels.heading.Manage Dashboards' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 580,
+     "text": "                  @if (arrowBooleans[17]) {",
+     "cited": false
+    },
+    {
+     "n": 581,
+     "text": "                    <p matLine [routerLink]=\"['manage-dashboards']\" class=\"menu-explanation\">",
+     "cited": false
+    },
+    {
+     "n": 582,
+     "text": "                      {{ 'labels.text.Configure dashboard widgets, roles and monitor system performance' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 583,
+     "text": "                    </p>",
+     "cited": false
+    },
+    {
+     "n": 584,
+     "text": "                  }",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "5e92b4d347",
+   "app": "mifos",
+   "file": "src/app/accounting/accounting-rules/view-rule/view-rule.component.html",
+   "line": 11,
+   "target": "/accounting/accounting-rules/view/:id/edit",
+   "sources": [
+    "/accounting/accounting-rules/view/:id"
+   ],
+   "lines": [
+    {
+     "n": 1,
+     "text": "<!--",
+     "cited": false
+    },
+    {
+     "n": 2,
+     "text": "  Copyright since 2025 Mifos Initiative",
+     "cited": false
+    },
+    {
+     "n": 3,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 4,
+     "text": "  This Source Code Form is subject to the terms of the Mozilla Public",
+     "cited": false
+    },
+    {
+     "n": 5,
+     "text": "  License, v. 2.0. If a copy of the MPL was not distributed with this",
+     "cited": false
+    },
+    {
+     "n": 6,
+     "text": "  file, You can obtain one at http://mozilla.org/MPL/2.0/.",
+     "cited": false
+    },
+    {
+     "n": 7,
+     "text": "-->",
+     "cited": false
+    },
+    {
+     "n": 8,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 9,
+     "text": "<div class=\"container\">",
+     "cited": false
+    },
+    {
+     "n": 10,
+     "text": "  <div class=\"layout-row align-end gap-2px responsive-column m-b-20\">",
+     "cited": false
+    },
+    {
+     "n": 11,
+     "text": "    <button mat-raised-button color=\"primary\" [routerLink]=\"['edit']\" *mifosxHasPermission=\"'UPDATE_ACCOUNTINGRULE'\">",
+     "cited": true
+    },
+    {
+     "n": 12,
+     "text": "      <fa-icon icon=\"edit\" class=\"m-r-10\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 13,
+     "text": "      {{ 'labels.buttons.Edit' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 14,
+     "text": "    </button>",
+     "cited": false
+    },
+    {
+     "n": 15,
+     "text": "    <button",
+     "cited": false
+    },
+    {
+     "n": 16,
+     "text": "      mat-raised-button",
+     "cited": false
+    },
+    {
+     "n": 17,
+     "text": "      color=\"warn\"",
+     "cited": false
+    },
+    {
+     "n": 18,
+     "text": "      (click)=\"deleteAccountingRule()\"",
+     "cited": false
+    },
+    {
+     "n": 19,
+     "text": "      *mifosxHasPermission=\"'DELETE_ACCOUNTINGRULE'\"",
+     "cited": false
+    },
+    {
+     "n": 20,
+     "text": "    >",
+     "cited": false
+    },
+    {
+     "n": 21,
+     "text": "      <fa-icon icon=\"trash\" class=\"m-r-10\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 22,
+     "text": "      {{ 'labels.buttons.Delete' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 23,
+     "text": "    </button>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "5ec3e5ae6c",
+   "app": "k8sdash",
+   "file": "src/chrome/template.html",
+   "line": 30,
+   "target": "/workloads",
+   "sources": [
+    "/cluster",
+    "/clusterrole",
+    "/clusterrole/:resourceName",
+    "/clusterrolebinding",
+    "/clusterrolebinding/:resourceName",
+    "/config",
+    "/configmap",
+    "/configmap/:resourceNamespace/:resourceName",
+    "/cronjob",
+    "/cronjob/:resourceNamespace/:resourceName",
+    "/customresourcedefinition",
+    "/customresourcedefinition/:crdName",
+    "/customresourcedefinition/:crdName/:namespace/:objectName",
+    "/customresourcedefinition/:crdName/:objectName",
+    "/daemonset",
+    "/daemonset/:resourceNamespace/:resourceName",
+    "/deployment",
+    "/deployment/:resourceNamespace/:resourceName",
+    "/discovery",
+    "/error",
+    "/event",
+    "/ingress",
+    "/ingress/:resourceNamespace/:resourceName",
+    "/ingressclass",
+    "/ingressclass/:resourceName",
+    "/job",
+    "/job/:resourceNamespace/:resourceName",
+    "/log/:resourceNamespace/:resourceName/:resourceType",
+    "/namespace",
+    "/namespace/:resourceName",
+    "/networkpolicy",
+    "/networkpolicy/:resourceNamespace/:resourceName",
+    "/node",
+    "/node/:resourceName",
+    "/overview",
+    "/persistentvolume",
+    "/persistentvolume/:resourceName",
+    "/persistentvolumeclaim",
+    "/persistentvolumeclaim/:resourceNamespace/:resourceName",
+    "/pod",
+    "/pod/:resourceNamespace/:resourceName",
+    "/replicaset",
+    "/replicaset/:resourceNamespace/:resourceName",
+    "/replicationcontroller",
+    "/replicationcontroller/:resourceNamespace/:resourceName",
+    "/role",
+    "/role/:resourceNamespace/:resourceName",
+    "/rolebinding",
+    "/rolebinding/:resourceNamespace/:resourceName",
+    "/secret",
+    "/secret/:resourceNamespace/:resourceName",
+    "/service",
+    "/service/:resourceNamespace/:resourceName",
+    "/serviceaccount",
+    "/serviceaccount/:resourceNamespace/:resourceName",
+    "/settings",
+    "/shell/:resourceNamespace/:resourceName",
+    "/shell/:resourceNamespace/:resourceName/:containerName",
+    "/statefulset",
+    "/statefulset/:resourceNamespace/:resourceName",
+    "/storageclass",
+    "/storageclass/:resourceName"
+   ],
+   "lines": [
+    {
+     "n": 18,
+     "text": "  fxLayout=\"column\"",
+     "cited": false
+    },
+    {
+     "n": 19,
+     "text": "  fxFill",
+     "cited": false
+    },
+    {
+     "n": 20,
+     "text": "  fxFlexFill",
+     "cited": false
+    },
+    {
+     "n": 21,
+     "text": ">",
+     "cited": false
+    },
+    {
+     "n": 22,
+     "text": "  <mat-toolbar class=\"kd-toolbar kd-primary-toolbar\">",
+     "cited": false
+    },
+    {
+     "n": 23,
+     "text": "    <div",
+     "cited": false
+    },
+    {
+     "n": 24,
+     "text": "      class=\"kd-toolbar-tools\"",
+     "cited": false
+    },
+    {
+     "n": 25,
+     "text": "      fxLayout=\"row\"",
+     "cited": false
+    },
+    {
+     "n": 26,
+     "text": "      fxFlex=\"auto\"",
+     "cited": false
+    },
+    {
+     "n": 27,
+     "text": "    >",
+     "cited": false
+    },
+    {
+     "n": 28,
+     "text": "      <div class=\"kd-logo-bar\">",
+     "cited": false
+    },
+    {
+     "n": 29,
+     "text": "        <a",
+     "cited": false
+    },
+    {
+     "n": 30,
+     "text": "          [routerLink]=\"getWorkloadsStateName()\"",
+     "cited": true
+    },
+    {
+     "n": 31,
+     "text": "          queryParamsHandling=\"preserve\"",
+     "cited": false
+    },
+    {
+     "n": 32,
+     "text": "          class=\"kd-toolbar-logo-link\"",
+     "cited": false
+    },
+    {
+     "n": 33,
+     "text": "        >",
+     "cited": false
+    },
+    {
+     "n": 34,
+     "text": "          <mat-icon",
+     "cited": false
+    },
+    {
+     "n": 35,
+     "text": "            [svgIcon]=\"assets.getAppLogo()\"",
+     "cited": false
+    },
+    {
+     "n": 36,
+     "text": "            class=\"kd-toolbar-logo\"",
+     "cited": false
+    },
+    {
+     "n": 37,
+     "text": "          >",
+     "cited": false
+    },
+    {
+     "n": 38,
+     "text": "          </mat-icon>",
+     "cited": false
+    },
+    {
+     "n": 39,
+     "text": "          <mat-icon",
+     "cited": false
+    },
+    {
+     "n": 40,
+     "text": "            [svgIcon]=\"assets.getAppLogoText()\"",
+     "cited": false
+    },
+    {
+     "n": 41,
+     "text": "            class=\"kd-toolbar-logo-text\"",
+     "cited": false
+    },
+    {
+     "n": 42,
+     "text": "          >",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "5fe21f9a53",
+   "app": "bitwarden",
+   "file": "../../libs/components/src/landing-layout/landing-header.component.html",
+   "line": 4,
+   "target": "/",
+   "sources": [
+    "/2fa",
+    "/accept-emergency",
+    "/admin-approval-requested",
+    "/authentication-timeout",
+    "/browser-extension-prompt",
+    "/change-password",
+    "/confirm-key-connector-domain",
+    "/device-verification",
+    "/finish-signup",
+    "/hint",
+    "/join/:organizationId/:inviteLinkCode",
+    "/lock",
+    "/login",
+    "/login-initiated",
+    "/login-with-device",
+    "/login-with-passkey",
+    "/organization-invite-link-invalid",
+    "/premium/checkout/success",
+    "/recover-2fa",
+    "/recover-delete",
+    "/remove-password",
+    "/secrets-manager-trial-initiation",
+    "/send/:sendId/:key",
+    "/set-initial-password",
+    "/signup",
+    "/signup-link-expired",
+    "/sso",
+    "/sso-login-failed",
+    "/trial-initiation",
+    "/verify-recover-delete"
+   ],
+   "lines": [
+    {
+     "n": 1,
+     "text": "<header class=\"tw-flex tw-w-full tw-bg-background-alt tw-px-5\">",
+     "cited": false
+    },
+    {
+     "n": 2,
+     "text": "  @if (!hideLogo()) {",
+     "cited": false
+    },
+    {
+     "n": 3,
+     "text": "    <a",
+     "cited": false
+    },
+    {
+     "n": 4,
+     "text": "      [routerLink]=\"['/']\"",
+     "cited": true
+    },
+    {
+     "n": 5,
+     "text": "      class=\"tw-w-32 tw-py-5 sm:tw-w-[200px] tw-self-center sm:tw-self-start tw-block [&>*]:tw-align-top\"",
+     "cited": false
+    },
+    {
+     "n": 6,
+     "text": "    >",
+     "cited": false
+    },
+    {
+     "n": 7,
+     "text": "      <bit-svg [content]=\"logo\" [ariaLabel]=\"'appLogoLabel' | i18n\"></bit-svg>",
+     "cited": false
+    },
+    {
+     "n": 8,
+     "text": "    </a>",
+     "cited": false
+    },
+    {
+     "n": 9,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 10,
+     "text": "  <div class=\"[&:has(*)]:tw-ms-auto [&:has(*)]:tw-py-5\">",
+     "cited": false
+    },
+    {
+     "n": 11,
+     "text": "    <ng-content></ng-content>",
+     "cited": false
+    },
+    {
+     "n": 12,
+     "text": "  </div>",
+     "cited": false
+    },
+    {
+     "n": 13,
+     "text": "</header>",
+     "cited": false
+    },
+    {
+     "n": 14,
+     "text": "",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "6782891b23",
+   "app": "mifos",
+   "file": "src/app/system/system.component.html",
+   "line": 296,
+   "target": "/system/system-information",
+   "sources": [
+    "/system"
+   ],
+   "lines": [
+    {
+     "n": 284,
+     "text": "                  <fa-icon",
+     "cited": false
+    },
+    {
+     "n": 285,
+     "text": "                    (click)=\"arrowBooleansToggle(7); $event.stopPropagation()\"",
+     "cited": false
+    },
+    {
+     "n": 286,
+     "text": "                    icon=\"arrow-up\"",
+     "cited": false
+    },
+    {
+     "n": 287,
+     "text": "                    size=\"md\"",
+     "cited": false
+    },
+    {
+     "n": 288,
+     "text": "                  ></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 289,
+     "text": "                }",
+     "cited": false
+    },
+    {
+     "n": 290,
+     "text": "              </div>",
+     "cited": false
+    },
+    {
+     "n": 291,
+     "text": "            </div>",
+     "cited": false
+    },
+    {
+     "n": 292,
+     "text": "          </mat-list-item>",
+     "cited": false
+    },
+    {
+     "n": 293,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 294,
+     "text": "          <mat-list-item [routerLink]=\"['system-information']\">",
+     "cited": false
+    },
+    {
+     "n": 295,
+     "text": "            <div class=\"menu-list-item-content\">",
+     "cited": false
+    },
+    {
+     "n": 296,
+     "text": "              <div class=\"menu-left-section\" [routerLink]=\"['system-information']\">",
+     "cited": true
+    },
+    {
+     "n": 297,
+     "text": "                <mat-icon matListIcon>",
+     "cited": false
+    },
+    {
+     "n": 298,
+     "text": "                  <fa-icon icon=\"info-circle\" size=\"sm\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 299,
+     "text": "                </mat-icon>",
+     "cited": false
+    },
+    {
+     "n": 300,
+     "text": "                <div matLine>",
+     "cited": false
+    },
+    {
+     "n": 301,
+     "text": "                  {{ 'labels.heading.System Information' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 302,
+     "text": "                  @if (arrowBooleans[15]) {",
+     "cited": false
+    },
+    {
+     "n": 303,
+     "text": "                    <p matLine [routerLink]=\"['system-information']\" class=\"menu-explanation\">",
+     "cited": false
+    },
+    {
+     "n": 304,
+     "text": "                      {{ 'labels.text.View system version, server and licensing information' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 305,
+     "text": "                    </p>",
+     "cited": false
+    },
+    {
+     "n": 306,
+     "text": "                  }",
+     "cited": false
+    },
+    {
+     "n": 307,
+     "text": "                </div>",
+     "cited": false
+    },
+    {
+     "n": 308,
+     "text": "              </div>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "74f393e1f4",
+   "app": "mifos",
+   "file": "src/app/accounting/create-journal-entry/create-journal-entry.component.html",
+   "line": 212,
+   "target": "/accounting",
+   "sources": [
+    "/accounting/journal-entries/create"
+   ],
+   "lines": [
+    {
+     "n": 200,
+     "text": "            <mat-label>{{ 'labels.inputs.Bank Number' | translate }}</mat-label>",
+     "cited": false
+    },
+    {
+     "n": 201,
+     "text": "            <input matInput formControlName=\"bankNumber\" />",
+     "cited": false
+    },
+    {
+     "n": 202,
+     "text": "          </mat-form-field>",
+     "cited": false
+    },
+    {
+     "n": 203,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 204,
+     "text": "          <mat-form-field class=\"flex-98\">",
+     "cited": false
+    },
+    {
+     "n": 205,
+     "text": "            <mat-label>{{ 'labels.inputs.Comments' | translate }}</mat-label>",
+     "cited": false
+    },
+    {
+     "n": 206,
+     "text": "            <textarea matInput formControlName=\"comments\" cdkTextareaAutosize cdkAutosizeMinRows=\"2\"></textarea>",
+     "cited": false
+    },
+    {
+     "n": 207,
+     "text": "          </mat-form-field>",
+     "cited": false
+    },
+    {
+     "n": 208,
+     "text": "        </div>",
+     "cited": false
+    },
+    {
+     "n": 209,
+     "text": "      </mat-card-content>",
+     "cited": false
+    },
+    {
+     "n": 210,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 211,
+     "text": "      <mat-card-actions class=\"layout-row align-center gap-5px responsive-column\">",
+     "cited": false
+    },
+    {
+     "n": 212,
+     "text": "        <button type=\"button\" mat-raised-button [routerLink]=\"['../../']\">",
+     "cited": true
+    },
+    {
+     "n": 213,
+     "text": "          {{ 'labels.buttons.Cancel' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 214,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 215,
+     "text": "        <button",
+     "cited": false
+    },
+    {
+     "n": 216,
+     "text": "          mat-raised-button",
+     "cited": false
+    },
+    {
+     "n": 217,
+     "text": "          color=\"primary\"",
+     "cited": false
+    },
+    {
+     "n": 218,
+     "text": "          [disabled]=\"!journalEntryForm.valid || isSubmitting\"",
+     "cited": false
+    },
+    {
+     "n": 219,
+     "text": "          *mifosxHasPermission=\"'CREATE_JOURNALENTRY'\"",
+     "cited": false
+    },
+    {
+     "n": 220,
+     "text": "        >",
+     "cited": false
+    },
+    {
+     "n": 221,
+     "text": "          {{ 'labels.buttons.Submit' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 222,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 223,
+     "text": "      </mat-card-actions>",
+     "cited": false
+    },
+    {
+     "n": 224,
+     "text": "    </form>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "7bf95c4b75",
+   "app": "mifos",
+   "file": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html",
+   "line": 77,
+   "target": "/checker-inbox-and-tasks/requests",
+   "sources": [
+    "/checker-inbox-and-tasks",
+    "/checker-inbox-and-tasks/checker-inbox",
+    "/checker-inbox-and-tasks/client-approval",
+    "/checker-inbox-and-tasks/council-approval",
+    "/checker-inbox-and-tasks/credit",
+    "/checker-inbox-and-tasks/enrollment-status",
+    "/checker-inbox-and-tasks/loan-approval",
+    "/checker-inbox-and-tasks/loan-disbursal",
+    "/checker-inbox-and-tasks/pending-prospects",
+    "/checker-inbox-and-tasks/reschedule-loan"
+   ],
+   "lines": [
+    {
+     "n": 65,
+     "text": "        <a",
+     "cited": false
+    },
+    {
+     "n": 66,
+     "text": "          mat-tab-link",
+     "cited": false
+    },
+    {
+     "n": 67,
+     "text": "          [routerLink]=\"['./reschedule-loan']\"",
+     "cited": false
+    },
+    {
+     "n": 68,
+     "text": "          routerLinkActive",
+     "cited": false
+    },
+    {
+     "n": 69,
+     "text": "          #rescheduleLoan=\"routerLinkActive\"",
+     "cited": false
+    },
+    {
+     "n": 70,
+     "text": "          [active]=\"rescheduleLoan.isActive\"",
+     "cited": false
+    },
+    {
+     "n": 71,
+     "text": "          *mifosxHasPermission=\"'RESCHEDULE_LOAN'\"",
+     "cited": false
+    },
+    {
+     "n": 72,
+     "text": "        >",
+     "cited": false
+    },
+    {
+     "n": 73,
+     "text": "          {{ 'labels.inputs.Reschedule Loan' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 74,
+     "text": "        </a>",
+     "cited": false
+    },
+    {
+     "n": 75,
+     "text": "        <a",
+     "cited": false
+    },
+    {
+     "n": 76,
+     "text": "          mat-tab-link",
+     "cited": false
+    },
+    {
+     "n": 77,
+     "text": "          [routerLink]=\"['./requests']\"",
+     "cited": true
+    },
+    {
+     "n": 78,
+     "text": "          routerLinkActive",
+     "cited": false
+    },
+    {
+     "n": 79,
+     "text": "          #creditRequests=\"routerLinkActive\"",
+     "cited": false
+    },
+    {
+     "n": 80,
+     "text": "          [active]=\"creditRequests.isActive\"",
+     "cited": false
+    },
+    {
+     "n": 81,
+     "text": "        >",
+     "cited": false
+    },
+    {
+     "n": 82,
+     "text": "          {{ 'labels.inputs.Requests' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 83,
+     "text": "        </a>",
+     "cited": false
+    },
+    {
+     "n": 84,
+     "text": "        <a",
+     "cited": false
+    },
+    {
+     "n": 85,
+     "text": "          mat-tab-link",
+     "cited": false
+    },
+    {
+     "n": 86,
+     "text": "          [routerLink]=\"['./credit']\"",
+     "cited": false
+    },
+    {
+     "n": 87,
+     "text": "          routerLinkActive",
+     "cited": false
+    },
+    {
+     "n": 88,
+     "text": "          #creditTaskSection=\"routerLinkActive\"",
+     "cited": false
+    },
+    {
+     "n": 89,
+     "text": "          [active]=\"creditTaskSection.isActive\"",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "828886aba8",
+   "app": "realworld",
+   "file": "src/app/features/profile/pages/profile/profile.component.html",
+   "line": 42,
+   "target": "/profile/:username",
+   "sources": [
+    "/profile/:username"
+   ],
+   "lines": [
+    {
+     "n": 30,
+     "text": "    </div>",
+     "cited": false
+    },
+    {
+     "n": 31,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 32,
+     "text": "    <div class=\"container\">",
+     "cited": false
+    },
+    {
+     "n": 33,
+     "text": "      <div class=\"row\">",
+     "cited": false
+    },
+    {
+     "n": 34,
+     "text": "        <div class=\"col-xs-12 col-md-10 offset-md-1\">",
+     "cited": false
+    },
+    {
+     "n": 35,
+     "text": "          <div class=\"articles-toggle\">",
+     "cited": false
+    },
+    {
+     "n": 36,
+     "text": "            <ul class=\"nav nav-pills outline-active\">",
+     "cited": false
+    },
+    {
+     "n": 37,
+     "text": "              <li class=\"nav-item\">",
+     "cited": false
+    },
+    {
+     "n": 38,
+     "text": "                <a",
+     "cited": false
+    },
+    {
+     "n": 39,
+     "text": "                  class=\"nav-link\"",
+     "cited": false
+    },
+    {
+     "n": 40,
+     "text": "                  routerLinkActive=\"active\"",
+     "cited": false
+    },
+    {
+     "n": 41,
+     "text": "                  [routerLinkActiveOptions]=\"{ exact: true }\"",
+     "cited": false
+    },
+    {
+     "n": 42,
+     "text": "                  [routerLink]=\"['/profile', p.username]\"",
+     "cited": true
+    },
+    {
+     "n": 43,
+     "text": "                >",
+     "cited": false
+    },
+    {
+     "n": 44,
+     "text": "                  My Posts",
+     "cited": false
+    },
+    {
+     "n": 45,
+     "text": "                </a>",
+     "cited": false
+    },
+    {
+     "n": 46,
+     "text": "              </li>",
+     "cited": false
+    },
+    {
+     "n": 47,
+     "text": "              <li class=\"nav-item\">",
+     "cited": false
+    },
+    {
+     "n": 48,
+     "text": "                <a",
+     "cited": false
+    },
+    {
+     "n": 49,
+     "text": "                  class=\"nav-link\"",
+     "cited": false
+    },
+    {
+     "n": 50,
+     "text": "                  routerLinkActive=\"active\"",
+     "cited": false
+    },
+    {
+     "n": 51,
+     "text": "                  [routerLinkActiveOptions]=\"{ exact: true }\"",
+     "cited": false
+    },
+    {
+     "n": 52,
+     "text": "                  [routerLink]=\"['/profile', p.username, 'favorites']\"",
+     "cited": false
+    },
+    {
+     "n": 53,
+     "text": "                >",
+     "cited": false
+    },
+    {
+     "n": 54,
+     "text": "                  Favorited Posts",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "925c7aaa2d",
+   "app": "mifos",
+   "file": "src/app/clients/clients-view/clients-view.component.html",
+   "line": 264,
+   "target": "/clients/:clientId/loans-accounts/create",
+   "sources": [
+    "/clients/:clientId"
+   ],
+   "lines": [
+    {
+     "n": 252,
+     "text": "          <mat-icon matListIcon>",
+     "cited": false
+    },
+    {
+     "n": 253,
+     "text": "            <fa-icon icon=\"user-tie\" size=\"sm\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 254,
+     "text": "          </mat-icon>",
+     "cited": false
+    },
+    {
+     "n": 255,
+     "text": "          <span>{{ 'labels.buttons.Unassign Staff' | translate }}</span>",
+     "cited": false
+    },
+    {
+     "n": 256,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 257,
+     "text": "      </span>",
+     "cited": false
+    },
+    {
+     "n": 258,
+     "text": "    }",
+     "cited": false
+    },
+    {
+     "n": 259,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 260,
+     "text": "    <button mat-menu-item [matMenuTriggerFor]=\"More\">{{ 'labels.buttons.More' | translate }}</button>",
+     "cited": false
+    },
+    {
+     "n": 261,
+     "text": "  </mat-menu>",
+     "cited": false
+    },
+    {
+     "n": 262,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 263,
+     "text": "  <mat-menu #accountApplications=\"matMenu\">",
+     "cited": false
+    },
+    {
+     "n": 264,
+     "text": "    <button mat-menu-item *mifosxHasPermission=\"'CREATE_LOAN'\" [routerLink]=\"['loans-accounts', 'create']\">",
+     "cited": true
+    },
+    {
+     "n": 265,
+     "text": "      {{ 'labels.buttons.New Loan Account' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 266,
+     "text": "    </button>",
+     "cited": false
+    },
+    {
+     "n": 267,
+     "text": "    <button mat-menu-item *mifosxHasPermission=\"'CREATE_SAVINGSACCOUNT'\" [routerLink]=\"['savings-accounts', 'create']\">",
+     "cited": false
+    },
+    {
+     "n": 268,
+     "text": "      {{ 'labels.buttons.New Savings Account' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 269,
+     "text": "    </button>",
+     "cited": false
+    },
+    {
+     "n": 270,
+     "text": "    <button mat-menu-item *mifosxHasPermission=\"'CREATE_SHAREACCOUNT'\" [routerLink]=\"['shares-accounts', 'create']\">",
+     "cited": false
+    },
+    {
+     "n": 271,
+     "text": "      {{ 'labels.buttons.New Share Account' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 272,
+     "text": "    </button>",
+     "cited": false
+    },
+    {
+     "n": 273,
+     "text": "    <button",
+     "cited": false
+    },
+    {
+     "n": 274,
+     "text": "      mat-menu-item",
+     "cited": false
+    },
+    {
+     "n": 275,
+     "text": "      *mifosxHasPermission=\"'CREATE_RECURRINGDEPOSITACCOUNT'\"",
+     "cited": false
+    },
+    {
+     "n": 276,
+     "text": "      [routerLink]=\"['recurring-deposits-accounts', 'create-recurring-deposits-account']\"",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "9867ae43a8",
+   "app": "mifos",
+   "file": "src/app/accounting/accounting-rules/create-rule/create-rule.component.html",
+   "line": 146,
+   "target": "/accounting",
+   "sources": [
+    "/accounting/accounting-rules/create"
+   ],
+   "lines": [
+    {
+     "n": 134,
+     "text": "              </div>",
+     "cited": false
+    },
+    {
+     "n": 135,
+     "text": "            </div>",
+     "cited": false
+    },
+    {
+     "n": 136,
+     "text": "          }",
+     "cited": false
+    },
+    {
+     "n": 137,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 138,
+     "text": "          <mat-form-field class=\"flex-98\">",
+     "cited": false
+    },
+    {
+     "n": 139,
+     "text": "            <mat-label>{{ 'labels.inputs.Description' | translate }}</mat-label>",
+     "cited": false
+    },
+    {
+     "n": 140,
+     "text": "            <textarea matInput formControlName=\"description\" cdkTextareaAutosize cdkAutosizeMinRows=\"2\"></textarea>",
+     "cited": false
+    },
+    {
+     "n": 141,
+     "text": "          </mat-form-field>",
+     "cited": false
+    },
+    {
+     "n": 142,
+     "text": "        </div>",
+     "cited": false
+    },
+    {
+     "n": 143,
+     "text": "      </mat-card-content>",
+     "cited": false
+    },
+    {
+     "n": 144,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 145,
+     "text": "      <mat-card-actions class=\"layout-row align-center gap-5px responsive-column\">",
+     "cited": false
+    },
+    {
+     "n": 146,
+     "text": "        <button type=\"button\" mat-raised-button [routerLink]=\"['../../']\">",
+     "cited": true
+    },
+    {
+     "n": 147,
+     "text": "          {{ 'labels.buttons.Cancel' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 148,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 149,
+     "text": "        <button",
+     "cited": false
+    },
+    {
+     "n": 150,
+     "text": "          mat-raised-button",
+     "cited": false
+    },
+    {
+     "n": 151,
+     "text": "          color=\"primary\"",
+     "cited": false
+    },
+    {
+     "n": 152,
+     "text": "          [disabled]=\"!accountingRuleForm.valid\"",
+     "cited": false
+    },
+    {
+     "n": 153,
+     "text": "          *mifosxHasPermission=\"'CREATE_ACCOUNTINGRULE'\"",
+     "cited": false
+    },
+    {
+     "n": 154,
+     "text": "        >",
+     "cited": false
+    },
+    {
+     "n": 155,
+     "text": "          {{ 'labels.buttons.Submit' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 156,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 157,
+     "text": "      </mat-card-actions>",
+     "cited": false
+    },
+    {
+     "n": 158,
+     "text": "    </form>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "9c71deb13f",
+   "app": "bitwarden",
+   "file": "src/app/vault/components/setup-extension/setup-extension.component.html",
+   "line": 63,
+   "target": "/",
+   "sources": [
+    "/setup-extension"
+   ],
+   "lines": [
+    {
+     "n": 51,
+     "text": "      <p>",
+     "cited": false
+    },
+    {
+     "n": 52,
+     "text": "        {{ \"openExtensionToAutofill\" | i18n }}",
+     "cited": false
+    },
+    {
+     "n": 53,
+     "text": "      </p>",
+     "cited": false
+    },
+    {
+     "n": 54,
+     "text": "      <button",
+     "cited": false
+    },
+    {
+     "n": 55,
+     "text": "        type=\"button\"",
+     "cited": false
+    },
+    {
+     "n": 56,
+     "text": "        bitButton",
+     "cited": false
+    },
+    {
+     "n": 57,
+     "text": "        buttonType=\"primary\"",
+     "cited": false
+    },
+    {
+     "n": 58,
+     "text": "        class=\"tw-mb-2\"",
+     "cited": false
+    },
+    {
+     "n": 59,
+     "text": "        (click)=\"openExtension()\"",
+     "cited": false
+    },
+    {
+     "n": 60,
+     "text": "      >",
+     "cited": false
+    },
+    {
+     "n": 61,
+     "text": "        {{ \"openBitwardenExtension\" | i18n }}",
+     "cited": false
+    },
+    {
+     "n": 62,
+     "text": "      </button>",
+     "cited": false
+    },
+    {
+     "n": 63,
+     "text": "      <a bitButton buttonType=\"secondary\" routerLink=\"/vault\">",
+     "cited": true
+    },
+    {
+     "n": 64,
+     "text": "        {{ \"skipToWebApp\" | i18n }}",
+     "cited": false
+    },
+    {
+     "n": 65,
+     "text": "      </a>",
+     "cited": false
+    },
+    {
+     "n": 66,
+     "text": "      @if (state === SetupExtensionState.ManualOpen) {",
+     "cited": false
+    },
+    {
+     "n": 67,
+     "text": "        <div aria-live=\"polite\" class=\"tw-text-center tw-mt-4\">",
+     "cited": false
+    },
+    {
+     "n": 68,
+     "text": "          <vault-manually-open-extension></vault-manually-open-extension>",
+     "cited": false
+    },
+    {
+     "n": 69,
+     "text": "        </div>",
+     "cited": false
+    },
+    {
+     "n": 70,
+     "text": "      }",
+     "cited": false
+    },
+    {
+     "n": 71,
+     "text": "    </div>",
+     "cited": false
+    },
+    {
+     "n": 72,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 73,
+     "text": "    <p class=\"tw-mt-4 tw-max-w-96 tw-text-center\">",
+     "cited": false
+    },
+    {
+     "n": 74,
+     "text": "      {{ \"gettingStartedWithBitwardenPart1\" | i18n }}",
+     "cited": false
+    },
+    {
+     "n": 75,
+     "text": "      <a target=\"_blank\" bitLink href=\"https://bitwarden.com/help/learning-center/\">",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "9cecd5d9ec",
+   "app": "realworld",
+   "file": "src/app/core/layout/header.component.html",
+   "line": 3,
+   "target": "/",
+   "sources": [
+    "/article/:slug",
+    "/editor",
+    "/editor/:slug",
+    "/login",
+    "/profile/:username",
+    "/profile/:username/favorites",
+    "/register",
+    "/settings",
+    "/tag/:tag"
+   ],
+   "lines": [
+    {
+     "n": 1,
+     "text": "<nav class=\"navbar navbar-light\">",
+     "cited": false
+    },
+    {
+     "n": 2,
+     "text": "  <div class=\"container\">",
+     "cited": false
+    },
+    {
+     "n": 3,
+     "text": "    <a class=\"navbar-brand\" routerLink=\"/\"><img src=\"assets/conduit-logo.svg\" alt=\"Conduit\" class=\"navbar-logo\" /></a>",
+     "cited": true
+    },
+    {
+     "n": 4,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 5,
+     "text": "    @if (authState$ | async; as authState) {",
+     "cited": false
+    },
+    {
+     "n": 6,
+     "text": "      <!-- Show this for logged out users -->",
+     "cited": false
+    },
+    {
+     "n": 7,
+     "text": "      @if (authState === 'unauthenticated') {",
+     "cited": false
+    },
+    {
+     "n": 8,
+     "text": "        <ul class=\"nav navbar-nav pull-xs-right\">",
+     "cited": false
+    },
+    {
+     "n": 9,
+     "text": "          <li class=\"nav-item\">",
+     "cited": false
+    },
+    {
+     "n": 10,
+     "text": "            <a class=\"nav-link\" routerLink=\"/\"> Home </a>",
+     "cited": false
+    },
+    {
+     "n": 11,
+     "text": "          </li>",
+     "cited": false
+    },
+    {
+     "n": 12,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 13,
+     "text": "          <li class=\"nav-item\">",
+     "cited": false
+    },
+    {
+     "n": 14,
+     "text": "            <a class=\"nav-link\" routerLink=\"/login\" routerLinkActive=\"active\"> Sign in </a>",
+     "cited": false
+    },
+    {
+     "n": 15,
+     "text": "          </li>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "a2778d9e17",
+   "app": "mifos",
+   "file": "src/app/organization/bulk-loan-reassignmnet/bulk-loan-reassignmnet.component.html",
+   "line": 163,
+   "target": "/organization",
+   "sources": [
+    "/organization/bulkloan"
+   ],
+   "lines": [
+    {
+     "n": 151,
+     "text": "                        </tr>",
+     "cited": false
+    },
+    {
+     "n": 152,
+     "text": "                      }",
+     "cited": false
+    },
+    {
+     "n": 153,
+     "text": "                    </table>",
+     "cited": false
+    },
+    {
+     "n": 154,
+     "text": "                  </tr>",
+     "cited": false
+    },
+    {
+     "n": 155,
+     "text": "                }",
+     "cited": false
+    },
+    {
+     "n": 156,
+     "text": "              </tbody>",
+     "cited": false
+    },
+    {
+     "n": 157,
+     "text": "            </table>",
+     "cited": false
+    },
+    {
+     "n": 158,
+     "text": "          }",
+     "cited": false
+    },
+    {
+     "n": 159,
+     "text": "        </div>",
+     "cited": false
+    },
+    {
+     "n": 160,
+     "text": "      </mat-card-content>",
+     "cited": false
+    },
+    {
+     "n": 161,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 162,
+     "text": "      <mat-card-actions class=\"layout-row align-center gap-5px responsive-column\">",
+     "cited": false
+    },
+    {
+     "n": 163,
+     "text": "        <button type=\"button\" mat-raised-button [routerLink]=\"['../']\">",
+     "cited": true
+    },
+    {
+     "n": 164,
+     "text": "          {{ 'labels.buttons.Cancel' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 165,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 166,
+     "text": "        <button",
+     "cited": false
+    },
+    {
+     "n": 167,
+     "text": "          type=\"submit\"",
+     "cited": false
+    },
+    {
+     "n": 168,
+     "text": "          mat-raised-button",
+     "cited": false
+    },
+    {
+     "n": 169,
+     "text": "          color=\"primary\"",
+     "cited": false
+    },
+    {
+     "n": 170,
+     "text": "          [disabled]=\"!bulkLoanForm.valid\"",
+     "cited": false
+    },
+    {
+     "n": 171,
+     "text": "          *mifosxHasPermission=\"'BULKREASSIGN_LOAN'\"",
+     "cited": false
+    },
+    {
+     "n": 172,
+     "text": "        >",
+     "cited": false
+    },
+    {
+     "n": 173,
+     "text": "          {{ 'labels.buttons.Submit' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 174,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 175,
+     "text": "      </mat-card-actions>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "a2bfa49aa4",
+   "app": "mifos",
+   "file": "src/app/home/home.component.html",
+   "line": 12,
+   "target": "/dashboard",
+   "sources": [
+    "/home"
+   ],
+   "lines": [
+    {
+     "n": 1,
+     "text": "<!--",
+     "cited": false
+    },
+    {
+     "n": 2,
+     "text": "  Copyright since 2025 Mifos Initiative",
+     "cited": false
+    },
+    {
+     "n": 3,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 4,
+     "text": "  This Source Code Form is subject to the terms of the Mozilla Public",
+     "cited": false
+    },
+    {
+     "n": 5,
+     "text": "  License, v. 2.0. If a copy of the MPL was not distributed with this",
+     "cited": false
+    },
+    {
+     "n": 6,
+     "text": "  file, You can obtain one at http://mozilla.org/MPL/2.0/.",
+     "cited": false
+    },
+    {
+     "n": 7,
+     "text": "-->",
+     "cited": false
+    },
+    {
+     "n": 8,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 9,
+     "text": "@if (enableGlobalDashboard) {",
+     "cited": false
+    },
+    {
+     "n": 10,
+     "text": "  <div class=\"layout-row align-end gap-2px responsive-column container m-b-20\">",
+     "cited": false
+    },
+    {
+     "n": 11,
+     "text": "    <div #buttonDashboard class=\"in-block\">",
+     "cited": false
+    },
+    {
+     "n": 12,
+     "text": "      <button mat-raised-button color=\"primary\" [routerLink]=\"['/dashboard']\">",
+     "cited": true
+    },
+    {
+     "n": 13,
+     "text": "        <fa-icon icon=\"tachometer-alt\" class=\"m-r-10\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 14,
+     "text": "        {{ 'labels.menus.Global Financial Dashboard' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 15,
+     "text": "      </button>",
+     "cited": false
+    },
+    {
+     "n": 16,
+     "text": "    </div>",
+     "cited": false
+    },
+    {
+     "n": 17,
+     "text": "  </div>",
+     "cited": false
+    },
+    {
+     "n": 18,
+     "text": "}",
+     "cited": false
+    },
+    {
+     "n": 19,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 20,
+     "text": "<div class=\"container\">",
+     "cited": false
+    },
+    {
+     "n": 21,
+     "text": "  <mat-card>",
+     "cited": false
+    },
+    {
+     "n": 22,
+     "text": "    <mat-card-header>",
+     "cited": false
+    },
+    {
+     "n": 23,
+     "text": "      <mat-card-title class=\"title\">",
+     "cited": false
+    },
+    {
+     "n": 24,
+     "text": "        {{ 'labels.text.Welcome' | translate }} {{ username }} {{ 'labels.text.To' | translate }}",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "a34b774d5a",
+   "app": "mifos",
+   "file": "src/app/accounting/periodic-accruals/periodic-accruals.component.html",
+   "line": 37,
+   "target": "/accounting",
+   "sources": [
+    "/accounting/periodic-accruals"
+   ],
+   "lines": [
+    {
+     "n": 25,
+     "text": "            <mat-datepicker #tillDatePicker></mat-datepicker>",
+     "cited": false
+    },
+    {
+     "n": 26,
+     "text": "            @if (periodicAccrualsForm.controls.tillDate.hasError('required')) {",
+     "cited": false
+    },
+    {
+     "n": 27,
+     "text": "              <mat-error>",
+     "cited": false
+    },
+    {
+     "n": 28,
+     "text": "                {{ 'labels.inputs.Accrue Date' | translate }} {{ 'labels.commons.is' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 29,
+     "text": "                <strong>{{ 'labels.commons.required' | translate }}</strong>",
+     "cited": false
+    },
+    {
+     "n": 30,
+     "text": "              </mat-error>",
+     "cited": false
+    },
+    {
+     "n": 31,
+     "text": "            }",
+     "cited": false
+    },
+    {
+     "n": 32,
+     "text": "          </mat-form-field>",
+     "cited": false
+    },
+    {
+     "n": 33,
+     "text": "        </div>",
+     "cited": false
+    },
+    {
+     "n": 34,
+     "text": "      </mat-card-content>",
+     "cited": false
+    },
+    {
+     "n": 35,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 36,
+     "text": "      <mat-card-actions class=\"layout-row align-center gap-5px responsive-column\">",
+     "cited": false
+    },
+    {
+     "n": 37,
+     "text": "        <button type=\"button\" mat-raised-button [routerLink]=\"['../']\">",
+     "cited": true
+    },
+    {
+     "n": 38,
+     "text": "          {{ 'labels.buttons.Cancel' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 39,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 40,
+     "text": "        <button",
+     "cited": false
+    },
+    {
+     "n": 41,
+     "text": "          mat-raised-button",
+     "cited": false
+    },
+    {
+     "n": 42,
+     "text": "          color=\"primary\"",
+     "cited": false
+    },
+    {
+     "n": 43,
+     "text": "          [disabled]=\"!periodicAccrualsForm.valid\"",
+     "cited": false
+    },
+    {
+     "n": 44,
+     "text": "          *mifosxHasPermission=\"'EXECUTE_PERIODICACCRUALACCOUNTING'\"",
+     "cited": false
+    },
+    {
+     "n": 45,
+     "text": "        >",
+     "cited": false
+    },
+    {
+     "n": 46,
+     "text": "          <fa-icon icon=\"play\" class=\"m-r-10\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 47,
+     "text": "          {{ 'labels.buttons.Run Periodic Accruals' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 48,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 49,
+     "text": "      </mat-card-actions>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "ac90ee04bc",
+   "app": "mifos",
+   "file": "src/app/system/system.component.html",
+   "line": 538,
+   "target": "/system/external-services",
+   "sources": [
+    "/system"
+   ],
+   "lines": [
+    {
+     "n": 526,
+     "text": "                }",
+     "cited": false
+    },
+    {
+     "n": 527,
+     "text": "                @if (arrowBooleans[12]) {",
+     "cited": false
+    },
+    {
+     "n": 528,
+     "text": "                  <fa-icon",
+     "cited": false
+    },
+    {
+     "n": 529,
+     "text": "                    (click)=\"arrowBooleansToggle(12); $event.stopPropagation()\"",
+     "cited": false
+    },
+    {
+     "n": 530,
+     "text": "                    icon=\"arrow-up\"",
+     "cited": false
+    },
+    {
+     "n": 531,
+     "text": "                    size=\"md\"",
+     "cited": false
+    },
+    {
+     "n": 532,
+     "text": "                  ></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 533,
+     "text": "                }",
+     "cited": false
+    },
+    {
+     "n": 534,
+     "text": "              </div>",
+     "cited": false
+    },
+    {
+     "n": 535,
+     "text": "            </div>",
+     "cited": false
+    },
+    {
+     "n": 536,
+     "text": "          </mat-list-item>",
+     "cited": false
+    },
+    {
+     "n": 537,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 538,
+     "text": "          <mat-list-item [routerLink]=\"['external-services']\">",
+     "cited": true
+    },
+    {
+     "n": 539,
+     "text": "            <div class=\"menu-list-item-content\">",
+     "cited": false
+    },
+    {
+     "n": 540,
+     "text": "              <div class=\"menu-left-section\" [routerLink]=\"['external-services']\">",
+     "cited": false
+    },
+    {
+     "n": 541,
+     "text": "                <mat-icon matListIcon>",
+     "cited": false
+    },
+    {
+     "n": 542,
+     "text": "                  <fa-icon icon=\"cog\" size=\"sm\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 543,
+     "text": "                </mat-icon>",
+     "cited": false
+    },
+    {
+     "n": 544,
+     "text": "                <div matLine>",
+     "cited": false
+    },
+    {
+     "n": 545,
+     "text": "                  {{ 'labels.heading.External Services' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 546,
+     "text": "                  @if (arrowBooleans[13]) {",
+     "cited": false
+    },
+    {
+     "n": 547,
+     "text": "                    <p matLine [routerLink]=\"['external-services']\" class=\"menu-explanation\">",
+     "cited": false
+    },
+    {
+     "n": 548,
+     "text": "                      {{ 'labels.text.External Services Configuration' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 549,
+     "text": "                    </p>",
+     "cited": false
+    },
+    {
+     "n": 550,
+     "text": "                  }",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "adb05a8530",
+   "app": "mifos",
+   "file": "src/app/account-transfers/make-account-transfers/make-account-transfers.component.html",
+   "line": 225,
+   "target": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/general",
+   "sources": [
+    "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/standing-instructions/make-account-transfer",
+    "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/make-account-transfer"
+   ],
+   "lines": [
+    {
+     "n": 213,
+     "text": "        <button mat-raised-button matStepperPrevious disabled>",
+     "cited": false
+    },
+    {
+     "n": 214,
+     "text": "          <fa-icon icon=\"arrow-left\" class=\"m-r-10\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 215,
+     "text": "          {{ 'labels.buttons.Previous' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 216,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 217,
+     "text": "        <button",
+     "cited": false
+    },
+    {
+     "n": 218,
+     "text": "          mat-raised-button",
+     "cited": false
+    },
+    {
+     "n": 219,
+     "text": "          matStepperNext",
+     "cited": false
+    },
+    {
+     "n": 220,
+     "text": "          [disabled]=\"interbank ? !interbankTransferForm : !beneficiaryForm.valid\"",
+     "cited": false
+    },
+    {
+     "n": 221,
+     "text": "        >",
+     "cited": false
+    },
+    {
+     "n": 222,
+     "text": "          {{ 'labels.buttons.Next' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 223,
+     "text": "          <fa-icon icon=\"arrow-right\" class=\"m-l-10\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 224,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 225,
+     "text": "        <button mat-raised-button [routerLink]=\"['../..']\">",
+     "cited": true
+    },
+    {
+     "n": 226,
+     "text": "          {{ 'labels.buttons.Cancel' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 227,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 228,
+     "text": "      </div>",
+     "cited": false
+    },
+    {
+     "n": 229,
+     "text": "    </mat-step>",
+     "cited": false
+    },
+    {
+     "n": 230,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 231,
+     "text": "    <!-- ==================== STEP 2: Transfer Details ==================== -->",
+     "cited": false
+    },
+    {
+     "n": 232,
+     "text": "    <mat-step [stepControl]=\"transferDetailsForm\" [editable]=\"!transferComplete\">",
+     "cited": false
+    },
+    {
+     "n": 233,
+     "text": "      <ng-template matStepLabel>{{ 'labels.heading.Transfer Details' | translate }}</ng-template>",
+     "cited": false
+    },
+    {
+     "n": 234,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 235,
+     "text": "      @if (isLoading) {",
+     "cited": false
+    },
+    {
+     "n": 236,
+     "text": "        <div class=\"spinner-center\">",
+     "cited": false
+    },
+    {
+     "n": 237,
+     "text": "          <mat-spinner diameter=\"60\"></mat-spinner>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "be49f56f54",
+   "app": "mifos",
+   "file": "src/app/system/system.component.html",
+   "line": 574,
+   "target": "/system/manage-dashboards",
+   "sources": [
+    "/system"
+   ],
+   "lines": [
+    {
+     "n": 562,
+     "text": "                  <fa-icon",
+     "cited": false
+    },
+    {
+     "n": 563,
+     "text": "                    (click)=\"arrowBooleansToggle(13); $event.stopPropagation()\"",
+     "cited": false
+    },
+    {
+     "n": 564,
+     "text": "                    icon=\"arrow-up\"",
+     "cited": false
+    },
+    {
+     "n": 565,
+     "text": "                    size=\"md\"",
+     "cited": false
+    },
+    {
+     "n": 566,
+     "text": "                  ></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 567,
+     "text": "                }",
+     "cited": false
+    },
+    {
+     "n": 568,
+     "text": "              </div>",
+     "cited": false
+    },
+    {
+     "n": 569,
+     "text": "            </div>",
+     "cited": false
+    },
+    {
+     "n": 570,
+     "text": "          </mat-list-item>",
+     "cited": false
+    },
+    {
+     "n": 571,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 572,
+     "text": "          <mat-list-item [routerLink]=\"['manage-dashboards']\">",
+     "cited": false
+    },
+    {
+     "n": 573,
+     "text": "            <div class=\"menu-list-item-content\">",
+     "cited": false
+    },
+    {
+     "n": 574,
+     "text": "              <div class=\"menu-left-section\" [routerLink]=\"['manage-dashboards']\">",
+     "cited": true
+    },
+    {
+     "n": 575,
+     "text": "                <mat-icon matListIcon>",
+     "cited": false
+    },
+    {
+     "n": 576,
+     "text": "                  <fa-icon icon=\"tachometer-alt\" size=\"sm\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 577,
+     "text": "                </mat-icon>",
+     "cited": false
+    },
+    {
+     "n": 578,
+     "text": "                <div matLine>",
+     "cited": false
+    },
+    {
+     "n": 579,
+     "text": "                  {{ 'labels.heading.Manage Dashboards' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 580,
+     "text": "                  @if (arrowBooleans[17]) {",
+     "cited": false
+    },
+    {
+     "n": 581,
+     "text": "                    <p matLine [routerLink]=\"['manage-dashboards']\" class=\"menu-explanation\">",
+     "cited": false
+    },
+    {
+     "n": 582,
+     "text": "                      {{ 'labels.text.Configure dashboard widgets, roles and monitor system performance' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 583,
+     "text": "                    </p>",
+     "cited": false
+    },
+    {
+     "n": 584,
+     "text": "                  }",
+     "cited": false
+    },
+    {
+     "n": 585,
+     "text": "                </div>",
+     "cited": false
+    },
+    {
+     "n": 586,
+     "text": "              </div>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "c127f8259c",
+   "app": "mifos",
+   "file": "src/app/accounting/financial-activity-mappings/view-financial-activity-mapping/view-financial-activity-mapping.component.html",
+   "line": 13,
+   "target": "/accounting/financial-activity-mappings/view/:id/edit",
+   "sources": [
+    "/accounting/financial-activity-mappings/view/:id"
+   ],
+   "lines": [
+    {
+     "n": 1,
+     "text": "<!--",
+     "cited": false
+    },
+    {
+     "n": 2,
+     "text": "  Copyright since 2025 Mifos Initiative",
+     "cited": false
+    },
+    {
+     "n": 3,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 4,
+     "text": "  This Source Code Form is subject to the terms of the Mozilla Public",
+     "cited": false
+    },
+    {
+     "n": 5,
+     "text": "  License, v. 2.0. If a copy of the MPL was not distributed with this",
+     "cited": false
+    },
+    {
+     "n": 6,
+     "text": "  file, You can obtain one at http://mozilla.org/MPL/2.0/.",
+     "cited": false
+    },
+    {
+     "n": 7,
+     "text": "-->",
+     "cited": false
+    },
+    {
+     "n": 8,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 9,
+     "text": "<div class=\"layout-row align-end gap-2percent container m-b-20\">",
+     "cited": false
+    },
+    {
+     "n": 10,
+     "text": "  <button",
+     "cited": false
+    },
+    {
+     "n": 11,
+     "text": "    mat-raised-button",
+     "cited": false
+    },
+    {
+     "n": 12,
+     "text": "    color=\"primary\"",
+     "cited": false
+    },
+    {
+     "n": 13,
+     "text": "    [routerLink]=\"['edit']\"",
+     "cited": true
+    },
+    {
+     "n": 14,
+     "text": "    *mifosxHasPermission=\"'UPDATE_FINANCIALACTIVITYACCOUNT'\"",
+     "cited": false
+    },
+    {
+     "n": 15,
+     "text": "  >",
+     "cited": false
+    },
+    {
+     "n": 16,
+     "text": "    <fa-icon icon=\"edit\" class=\"m-r-10\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 17,
+     "text": "    {{ 'labels.buttons.Edit' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 18,
+     "text": "  </button>",
+     "cited": false
+    },
+    {
+     "n": 19,
+     "text": "  <button",
+     "cited": false
+    },
+    {
+     "n": 20,
+     "text": "    mat-raised-button",
+     "cited": false
+    },
+    {
+     "n": 21,
+     "text": "    color=\"warn\"",
+     "cited": false
+    },
+    {
+     "n": 22,
+     "text": "    (click)=\"deleteFinancialActivityAccount()\"",
+     "cited": false
+    },
+    {
+     "n": 23,
+     "text": "    *mifosxHasPermission=\"'DELETE_FINANCIALACTIVITYACCOUNT'\"",
+     "cited": false
+    },
+    {
+     "n": 24,
+     "text": "  >",
+     "cited": false
+    },
+    {
+     "n": 25,
+     "text": "    <fa-icon icon=\"trash\" class=\"m-r-10\"></fa-icon>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "c26d1a38d5",
+   "app": "mifos",
+   "file": "src/app/organization/exchange-rates/view-exchange-rate/view-exchange-rate.component.html",
+   "line": 55,
+   "target": "/organization",
+   "sources": [
+    "/organization/exchange-rates/:id"
+   ],
+   "lines": [
+    {
+     "n": 43,
+     "text": "        <div class=\"flex-50\">{{ exchangeRateData.referenceRate }}</div>",
+     "cited": false
+    },
+    {
+     "n": 44,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 45,
+     "text": "        <div class=\"flex-50 mat-body-strong\">{{ 'labels.inputs.Rate Date' | translate }}</div>",
+     "cited": false
+    },
+    {
+     "n": 46,
+     "text": "        <div class=\"flex-50\">{{ exchangeRateData.rateDate | dateFormat }}</div>",
+     "cited": false
+    },
+    {
+     "n": 47,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 48,
+     "text": "        <div class=\"flex-50 mat-body-strong\">{{ 'labels.inputs.Latest' | translate }}</div>",
+     "cited": false
+    },
+    {
+     "n": 49,
+     "text": "        <div class=\"flex-50\">",
+     "cited": false
+    },
+    {
+     "n": 50,
+     "text": "          {{ (exchangeRateData.latest ? 'tooltips.Yes' : 'tooltips.No') | translate }}",
+     "cited": false
+    },
+    {
+     "n": 51,
+     "text": "        </div>",
+     "cited": false
+    },
+    {
+     "n": 52,
+     "text": "      </div>",
+     "cited": false
+    },
+    {
+     "n": 53,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 54,
+     "text": "      <div class=\"layout-row layout-align-center gap-2percent column-on-mobile\">",
+     "cited": false
+    },
+    {
+     "n": 55,
+     "text": "        <button type=\"button\" mat-raised-button color=\"primary\" [routerLink]=\"['../../']\">",
+     "cited": true
+    },
+    {
+     "n": 56,
+     "text": "          {{ 'labels.buttons.Back' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 57,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 58,
+     "text": "      </div>",
+     "cited": false
+    },
+    {
+     "n": 59,
+     "text": "    </mat-card-content>",
+     "cited": false
+    },
+    {
+     "n": 60,
+     "text": "  </mat-card>",
+     "cited": false
+    },
+    {
+     "n": 61,
+     "text": "</div>",
+     "cited": false
+    },
+    {
+     "n": 62,
+     "text": "",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "cc1b6e6562",
+   "app": "mifos",
+   "file": "src/app/accounting/frequent-postings/frequent-postings.component.html",
+   "line": 226,
+   "target": "/accounting",
+   "sources": [
+    "/accounting/journal-entries/frequent-postings"
+   ],
+   "lines": [
+    {
+     "n": 214,
+     "text": "            <mat-label>{{ 'labels.inputs.Bank Number' | translate }}</mat-label>",
+     "cited": false
+    },
+    {
+     "n": 215,
+     "text": "            <input matInput formControlName=\"bankNumber\" />",
+     "cited": false
+    },
+    {
+     "n": 216,
+     "text": "          </mat-form-field>",
+     "cited": false
+    },
+    {
+     "n": 217,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 218,
+     "text": "          <mat-form-field class=\"flex-98\">",
+     "cited": false
+    },
+    {
+     "n": 219,
+     "text": "            <mat-label>{{ 'labels.inputs.Comments' | translate }}</mat-label>",
+     "cited": false
+    },
+    {
+     "n": 220,
+     "text": "            <textarea matInput formControlName=\"comments\" cdkTextareaAutosize cdkAutosizeMinRows=\"2\"></textarea>",
+     "cited": false
+    },
+    {
+     "n": 221,
+     "text": "          </mat-form-field>",
+     "cited": false
+    },
+    {
+     "n": 222,
+     "text": "        </div>",
+     "cited": false
+    },
+    {
+     "n": 223,
+     "text": "      </mat-card-content>",
+     "cited": false
+    },
+    {
+     "n": 224,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 225,
+     "text": "      <mat-card-actions class=\"layout-row align-center gap-5px responsive-column\">",
+     "cited": false
+    },
+    {
+     "n": 226,
+     "text": "        <button type=\"button\" mat-raised-button [routerLink]=\"['../../']\">",
+     "cited": true
+    },
+    {
+     "n": 227,
+     "text": "          {{ 'labels.buttons.Cancel' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 228,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 229,
+     "text": "        <button",
+     "cited": false
+    },
+    {
+     "n": 230,
+     "text": "          mat-raised-button",
+     "cited": false
+    },
+    {
+     "n": 231,
+     "text": "          color=\"primary\"",
+     "cited": false
+    },
+    {
+     "n": 232,
+     "text": "          [disabled]=\"!frequentPostingsForm.valid\"",
+     "cited": false
+    },
+    {
+     "n": 233,
+     "text": "          *mifosxHasPermission=\"'CREATE_JOURNALENTRY'\"",
+     "cited": false
+    },
+    {
+     "n": 234,
+     "text": "        >",
+     "cited": false
+    },
+    {
+     "n": 235,
+     "text": "          {{ 'labels.buttons.Submit' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 236,
+     "text": "        </button>",
+     "cited": false
+    },
+    {
+     "n": 237,
+     "text": "      </mat-card-actions>",
+     "cited": false
+    },
+    {
+     "n": 238,
+     "text": "    </form>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "cd1863276b",
+   "app": "realworld",
+   "file": "src/app/features/profile/pages/profile/profile.component.html",
+   "line": 23,
+   "target": "/settings",
+   "sources": [
+    "/profile/:username"
+   ],
+   "lines": [
+    {
+     "n": 11,
+     "text": "  @if (profile(); as p) {",
+     "cited": false
+    },
+    {
+     "n": 12,
+     "text": "    <div class=\"user-info\">",
+     "cited": false
+    },
+    {
+     "n": 13,
+     "text": "      <div class=\"container\">",
+     "cited": false
+    },
+    {
+     "n": 14,
+     "text": "        <div class=\"row\">",
+     "cited": false
+    },
+    {
+     "n": 15,
+     "text": "          <div class=\"col-xs-12 col-md-10 offset-md-1\">",
+     "cited": false
+    },
+    {
+     "n": 16,
+     "text": "            <img [src]=\"p.image | defaultImage\" class=\"user-img\" />",
+     "cited": false
+    },
+    {
+     "n": 17,
+     "text": "            <h4>{{ p.username }}</h4>",
+     "cited": false
+    },
+    {
+     "n": 18,
+     "text": "            <p>{{ p.bio ?? '' }}</p>",
+     "cited": false
+    },
+    {
+     "n": 19,
+     "text": "            @if (!isUser()) {",
+     "cited": false
+    },
+    {
+     "n": 20,
+     "text": "              <app-follow-button [profile]=\"p\" (toggle)=\"onToggleFollowing($event)\" />",
+     "cited": false
+    },
+    {
+     "n": 21,
+     "text": "            }",
+     "cited": false
+    },
+    {
+     "n": 22,
+     "text": "            @if (isUser()) {",
+     "cited": false
+    },
+    {
+     "n": 23,
+     "text": "              <a [routerLink]=\"['/settings']\" class=\"btn btn-sm btn-outline-secondary action-btn\">",
+     "cited": true
+    },
+    {
+     "n": 24,
+     "text": "                <i class=\"ion-gear-a\"></i> Edit Profile Settings",
+     "cited": false
+    },
+    {
+     "n": 25,
+     "text": "              </a>",
+     "cited": false
+    },
+    {
+     "n": 26,
+     "text": "            }",
+     "cited": false
+    },
+    {
+     "n": 27,
+     "text": "          </div>",
+     "cited": false
+    },
+    {
+     "n": 28,
+     "text": "        </div>",
+     "cited": false
+    },
+    {
+     "n": 29,
+     "text": "      </div>",
+     "cited": false
+    },
+    {
+     "n": 30,
+     "text": "    </div>",
+     "cited": false
+    },
+    {
+     "n": 31,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 32,
+     "text": "    <div class=\"container\">",
+     "cited": false
+    },
+    {
+     "n": 33,
+     "text": "      <div class=\"row\">",
+     "cited": false
+    },
+    {
+     "n": 34,
+     "text": "        <div class=\"col-xs-12 col-md-10 offset-md-1\">",
+     "cited": false
+    },
+    {
+     "n": 35,
+     "text": "          <div class=\"articles-toggle\">",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "db0d34043b",
+   "app": "mifos",
+   "file": "src/app/products/collaterals/collaterals.component.html",
+   "line": 51,
+   "target": "/products/collaterals/:id",
+   "sources": [
+    "/products/collaterals"
+   ],
+   "lines": [
+    {
+     "n": 39,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 40,
+     "text": "      <ng-container matColumnDef=\"basePercentage\">",
+     "cited": false
+    },
+    {
+     "n": 41,
+     "text": "        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'labels.inputs.Base Percentage' | translate }}</th>",
+     "cited": false
+    },
+    {
+     "n": 42,
+     "text": "        <td mat-cell *matCellDef=\"let collateral\">{{ collateral.pctToBase }}</td>",
+     "cited": false
+    },
+    {
+     "n": 43,
+     "text": "      </ng-container>",
+     "cited": false
+    },
+    {
+     "n": 44,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 45,
+     "text": "      <ng-container matColumnDef=\"unitType\">",
+     "cited": false
+    },
+    {
+     "n": 46,
+     "text": "        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'labels.inputs.Unit Type' | translate }}</th>",
+     "cited": false
+    },
+    {
+     "n": 47,
+     "text": "        <td mat-cell *matCellDef=\"let collateral\">{{ collateral.unitType }}</td>",
+     "cited": false
+    },
+    {
+     "n": 48,
+     "text": "      </ng-container>",
+     "cited": false
+    },
+    {
+     "n": 49,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 50,
+     "text": "      <tr mat-header-row *matHeaderRowDef=\"displayedColumns\"></tr>",
+     "cited": false
+    },
+    {
+     "n": 51,
+     "text": "      <tr mat-row *matRowDef=\"let row; columns: displayedColumns\" [routerLink]=\"[row.id]\" class=\"select-row\"></tr>",
+     "cited": true
+    },
+    {
+     "n": 52,
+     "text": "    </table>",
+     "cited": false
+    },
+    {
+     "n": 53,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 54,
+     "text": "    <mat-paginator [pageSizeOptions]=\"[10, 25, 50, 100]\" showFirstLastButtons></mat-paginator>",
+     "cited": false
+    },
+    {
+     "n": 55,
+     "text": "  </div>",
+     "cited": false
+    },
+    {
+     "n": 56,
+     "text": "</div>",
+     "cited": false
+    },
+    {
+     "n": 57,
+     "text": "",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "e2fa85354c",
+   "app": "realworld",
+   "file": "src/app/core/layout/footer.component.html",
+   "line": 3,
+   "target": "/",
+   "sources": [
+    "/article/:slug",
+    "/editor",
+    "/editor/:slug",
+    "/login",
+    "/profile/:username",
+    "/profile/:username/favorites",
+    "/register",
+    "/settings",
+    "/tag/:tag"
+   ],
+   "lines": [
+    {
+     "n": 1,
+     "text": "<footer>",
+     "cited": false
+    },
+    {
+     "n": 2,
+     "text": "  <div class=\"container\">",
+     "cited": false
+    },
+    {
+     "n": 3,
+     "text": "    <a class=\"logo-font\" routerLink=\"/\"><img src=\"assets/conduit-logo.svg\" alt=\"Conduit\" class=\"footer-logo\" /></a>",
+     "cited": true
+    },
+    {
+     "n": 4,
+     "text": "    <span class=\"attribution\">",
+     "cited": false
+    },
+    {
+     "n": 5,
+     "text": "      &copy; {{ today | date: 'yyyy' }}. An interactive learning project from",
+     "cited": false
+    },
+    {
+     "n": 6,
+     "text": "      <a href=\"https://github.com/gothinkster/realworld\">RealWorld OSS Project</a>. Code licensed under MIT.",
+     "cited": false
+    },
+    {
+     "n": 7,
+     "text": "    </span>",
+     "cited": false
+    },
+    {
+     "n": 8,
+     "text": "  </div>",
+     "cited": false
+    },
+    {
+     "n": 9,
+     "text": "</footer>",
+     "cited": false
+    },
+    {
+     "n": 10,
+     "text": "",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "ea4809b59b",
+   "app": "realworld",
+   "file": "src/app/features/article/pages/home/home.component.html",
+   "line": 35,
+   "target": "/",
+   "sources": [
+    "/tag/:tag"
+   ],
+   "lines": [
+    {
+     "n": 23,
+     "text": "                routerLink=\"/\"",
+     "cited": false
+    },
+    {
+     "n": 24,
+     "text": "                [queryParams]=\"{ feed: 'following' }\"",
+     "cited": false
+    },
+    {
+     "n": 25,
+     "text": "              >",
+     "cited": false
+    },
+    {
+     "n": 26,
+     "text": "                Your Feed",
+     "cited": false
+    },
+    {
+     "n": 27,
+     "text": "              </a>",
+     "cited": false
+    },
+    {
+     "n": 28,
+     "text": "            </li>",
+     "cited": false
+    },
+    {
+     "n": 29,
+     "text": "            <li class=\"nav-item\">",
+     "cited": false
+    },
+    {
+     "n": 30,
+     "text": "              <a",
+     "cited": false
+    },
+    {
+     "n": 31,
+     "text": "                class=\"nav-link\"",
+     "cited": false
+    },
+    {
+     "n": 32,
+     "text": "                [ngClass]=\"{",
+     "cited": false
+    },
+    {
+     "n": 33,
+     "text": "                  active: listConfig().type === 'all' && !listConfig().filters.tag,",
+     "cited": false
+    },
+    {
+     "n": 34,
+     "text": "                }\"",
+     "cited": false
+    },
+    {
+     "n": 35,
+     "text": "                routerLink=\"/\"",
+     "cited": true
+    },
+    {
+     "n": 36,
+     "text": "              >",
+     "cited": false
+    },
+    {
+     "n": 37,
+     "text": "                Global Feed",
+     "cited": false
+    },
+    {
+     "n": 38,
+     "text": "              </a>",
+     "cited": false
+    },
+    {
+     "n": 39,
+     "text": "            </li>",
+     "cited": false
+    },
+    {
+     "n": 40,
+     "text": "            <li class=\"nav-item\" [hidden]=\"!listConfig().filters.tag\">",
+     "cited": false
+    },
+    {
+     "n": 41,
+     "text": "              <a class=\"nav-link active\"> <i class=\"ion-pound\"></i> {{ listConfig().filters.tag }} </a>",
+     "cited": false
+    },
+    {
+     "n": 42,
+     "text": "            </li>",
+     "cited": false
+    },
+    {
+     "n": 43,
+     "text": "          </ul>",
+     "cited": false
+    },
+    {
+     "n": 44,
+     "text": "        </div>",
+     "cited": false
+    },
+    {
+     "n": 45,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 46,
+     "text": "        <app-article-list",
+     "cited": false
+    },
+    {
+     "n": 47,
+     "text": "          [limit]=\"10\"",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "eaf43caac3",
+   "app": "mifos",
+   "file": "src/app/system/system.component.html",
+   "line": 608,
+   "target": "/system/about-us",
+   "sources": [
+    "/system"
+   ],
+   "lines": [
+    {
+     "n": 596,
+     "text": "                  <fa-icon",
+     "cited": false
+    },
+    {
+     "n": 597,
+     "text": "                    (click)=\"arrowBooleansToggle(17); $event.stopPropagation()\"",
+     "cited": false
+    },
+    {
+     "n": 598,
+     "text": "                    icon=\"arrow-up\"",
+     "cited": false
+    },
+    {
+     "n": 599,
+     "text": "                    size=\"md\"",
+     "cited": false
+    },
+    {
+     "n": 600,
+     "text": "                  ></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 601,
+     "text": "                }",
+     "cited": false
+    },
+    {
+     "n": 602,
+     "text": "              </div>",
+     "cited": false
+    },
+    {
+     "n": 603,
+     "text": "            </div>",
+     "cited": false
+    },
+    {
+     "n": 604,
+     "text": "          </mat-list-item>",
+     "cited": false
+    },
+    {
+     "n": 605,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 606,
+     "text": "          <mat-list-item [routerLink]=\"['about-us']\">",
+     "cited": false
+    },
+    {
+     "n": 607,
+     "text": "            <div class=\"menu-list-item-content\">",
+     "cited": false
+    },
+    {
+     "n": 608,
+     "text": "              <div class=\"menu-left-section\" [routerLink]=\"['about-us']\">",
+     "cited": true
+    },
+    {
+     "n": 609,
+     "text": "                <mat-icon matListIcon>",
+     "cited": false
+    },
+    {
+     "n": 610,
+     "text": "                  <fa-icon icon=\"users\" size=\"sm\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 611,
+     "text": "                </mat-icon>",
+     "cited": false
+    },
+    {
+     "n": 612,
+     "text": "                <div matLine>",
+     "cited": false
+    },
+    {
+     "n": 613,
+     "text": "                  {{ 'labels.heading.About Us' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 614,
+     "text": "                  @if (arrowBooleans[16]) {",
+     "cited": false
+    },
+    {
+     "n": 615,
+     "text": "                    <p matLine [routerLink]=\"['about-us']\" class=\"menu-explanation\">",
+     "cited": false
+    },
+    {
+     "n": 616,
+     "text": "                      {{ 'labels.text.Learn about the Mifos Initiative and our mission' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 617,
+     "text": "                    </p>",
+     "cited": false
+    },
+    {
+     "n": 618,
+     "text": "                  }",
+     "cited": false
+    },
+    {
+     "n": 619,
+     "text": "                </div>",
+     "cited": false
+    },
+    {
+     "n": 620,
+     "text": "              </div>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "ecb3831b89",
+   "app": "realworld",
+   "file": "src/app/features/article/pages/home/home.component.html",
+   "line": 61,
+   "target": "/tag/:tag",
+   "sources": [
+    "/",
+    "/tag/:tag"
+   ],
+   "lines": [
+    {
+     "n": 49,
+     "text": "          [currentPage]=\"currentPage()\"",
+     "cited": false
+    },
+    {
+     "n": 50,
+     "text": "          [isFollowingFeed]=\"isFollowingFeed()\"",
+     "cited": false
+    },
+    {
+     "n": 51,
+     "text": "          (pageChange)=\"onPageChange($event)\"",
+     "cited": false
+    },
+    {
+     "n": 52,
+     "text": "        />",
+     "cited": false
+    },
+    {
+     "n": 53,
+     "text": "      </div>",
+     "cited": false
+    },
+    {
+     "n": 54,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 55,
+     "text": "      <div class=\"col-md-3\" *rxLet=\"tags$; let tags\">",
+     "cited": false
+    },
+    {
+     "n": 56,
+     "text": "        <div class=\"sidebar\">",
+     "cited": false
+    },
+    {
+     "n": 57,
+     "text": "          <p>Popular Tags</p>",
+     "cited": false
+    },
+    {
+     "n": 58,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 59,
+     "text": "          <div class=\"tag-list\">",
+     "cited": false
+    },
+    {
+     "n": 60,
+     "text": "            @for (tag of tags; track tag) {",
+     "cited": false
+    },
+    {
+     "n": 61,
+     "text": "              <a class=\"tag-default tag-pill\" [routerLink]=\"['/tag', tag]\">",
+     "cited": true
+    },
+    {
+     "n": 62,
+     "text": "                {{ tag }}",
+     "cited": false
+    },
+    {
+     "n": 63,
+     "text": "              </a>",
+     "cited": false
+    },
+    {
+     "n": 64,
+     "text": "            }",
+     "cited": false
+    },
+    {
+     "n": 65,
+     "text": "          </div>",
+     "cited": false
+    },
+    {
+     "n": 66,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 67,
+     "text": "          <div [hidden]=\"tagsLoaded()\">Loading tags...</div>",
+     "cited": false
+    },
+    {
+     "n": 68,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 69,
+     "text": "          <div [hidden]=\"!tagsLoaded() || tags.length > 0\">No tags are here... yet.</div>",
+     "cited": false
+    },
+    {
+     "n": 70,
+     "text": "        </div>",
+     "cited": false
+    },
+    {
+     "n": 71,
+     "text": "      </div>",
+     "cited": false
+    },
+    {
+     "n": 72,
+     "text": "    </div>",
+     "cited": false
+    },
+    {
+     "n": 73,
+     "text": "  </div>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "f240778d06",
+   "app": "bitwarden",
+   "file": "src/app/secrets-manager/secrets-manager-landing/request-sm-access.component.html",
+   "line": 32,
+   "target": "/sm-landing",
+   "sources": [
+    "/request-sm-access"
+   ],
+   "lines": [
+    {
+     "n": 20,
+     "text": "            <bit-option",
+     "cited": false
+    },
+    {
+     "n": 21,
+     "text": "              *ngFor=\"let org of organizations\"",
+     "cited": false
+    },
+    {
+     "n": 22,
+     "text": "              [value]=\"org\"",
+     "cited": false
+    },
+    {
+     "n": 23,
+     "text": "              [label]=\"org.name\"",
+     "cited": false
+    },
+    {
+     "n": 24,
+     "text": "              required",
+     "cited": false
+    },
+    {
+     "n": 25,
+     "text": "            ></bit-option>",
+     "cited": false
+    },
+    {
+     "n": 26,
+     "text": "          </bit-select>",
+     "cited": false
+    },
+    {
+     "n": 27,
+     "text": "        </bit-form-field>",
+     "cited": false
+    },
+    {
+     "n": 28,
+     "text": "        <div class=\"tw-flex tw-gap-x-4 tw-mt-4\">",
+     "cited": false
+    },
+    {
+     "n": 29,
+     "text": "          <button bitButton bitFormButton type=\"submit\" buttonType=\"primary\">",
+     "cited": false
+    },
+    {
+     "n": 30,
+     "text": "            {{ \"sendRequest\" | i18n }}",
+     "cited": false
+    },
+    {
+     "n": 31,
+     "text": "          </button>",
+     "cited": false
+    },
+    {
+     "n": 32,
+     "text": "          <button type=\"button\" bitButton buttonType=\"secondary\" [routerLink]=\"'/sm-landing'\">",
+     "cited": true
+    },
+    {
+     "n": 33,
+     "text": "            {{ \"cancel\" | i18n }}",
+     "cited": false
+    },
+    {
+     "n": 34,
+     "text": "          </button>",
+     "cited": false
+    },
+    {
+     "n": 35,
+     "text": "        </div>",
+     "cited": false
+    },
+    {
+     "n": 36,
+     "text": "      </div>",
+     "cited": false
+    },
+    {
+     "n": 37,
+     "text": "    </div>",
+     "cited": false
+    },
+    {
+     "n": 38,
+     "text": "  </form>",
+     "cited": false
+    },
+    {
+     "n": 39,
+     "text": "</bit-container>",
+     "cited": false
+    },
+    {
+     "n": 40,
+     "text": "",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "f414297163",
+   "app": "mifos",
+   "file": "src/app/system/system.component.html",
+   "line": 540,
+   "target": "/system/external-services",
+   "sources": [
+    "/system"
+   ],
+   "lines": [
+    {
+     "n": 528,
+     "text": "                  <fa-icon",
+     "cited": false
+    },
+    {
+     "n": 529,
+     "text": "                    (click)=\"arrowBooleansToggle(12); $event.stopPropagation()\"",
+     "cited": false
+    },
+    {
+     "n": 530,
+     "text": "                    icon=\"arrow-up\"",
+     "cited": false
+    },
+    {
+     "n": 531,
+     "text": "                    size=\"md\"",
+     "cited": false
+    },
+    {
+     "n": 532,
+     "text": "                  ></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 533,
+     "text": "                }",
+     "cited": false
+    },
+    {
+     "n": 534,
+     "text": "              </div>",
+     "cited": false
+    },
+    {
+     "n": 535,
+     "text": "            </div>",
+     "cited": false
+    },
+    {
+     "n": 536,
+     "text": "          </mat-list-item>",
+     "cited": false
+    },
+    {
+     "n": 537,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 538,
+     "text": "          <mat-list-item [routerLink]=\"['external-services']\">",
+     "cited": false
+    },
+    {
+     "n": 539,
+     "text": "            <div class=\"menu-list-item-content\">",
+     "cited": false
+    },
+    {
+     "n": 540,
+     "text": "              <div class=\"menu-left-section\" [routerLink]=\"['external-services']\">",
+     "cited": true
+    },
+    {
+     "n": 541,
+     "text": "                <mat-icon matListIcon>",
+     "cited": false
+    },
+    {
+     "n": 542,
+     "text": "                  <fa-icon icon=\"cog\" size=\"sm\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 543,
+     "text": "                </mat-icon>",
+     "cited": false
+    },
+    {
+     "n": 544,
+     "text": "                <div matLine>",
+     "cited": false
+    },
+    {
+     "n": 545,
+     "text": "                  {{ 'labels.heading.External Services' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 546,
+     "text": "                  @if (arrowBooleans[13]) {",
+     "cited": false
+    },
+    {
+     "n": 547,
+     "text": "                    <p matLine [routerLink]=\"['external-services']\" class=\"menu-explanation\">",
+     "cited": false
+    },
+    {
+     "n": 548,
+     "text": "                      {{ 'labels.text.External Services Configuration' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 549,
+     "text": "                    </p>",
+     "cited": false
+    },
+    {
+     "n": 550,
+     "text": "                  }",
+     "cited": false
+    },
+    {
+     "n": 551,
+     "text": "                </div>",
+     "cited": false
+    },
+    {
+     "n": 552,
+     "text": "              </div>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "f992c5059d",
+   "app": "mifos",
+   "file": "src/app/system/system.component.html",
+   "line": 470,
+   "target": "/system/theme",
+   "sources": [
+    "/system"
+   ],
+   "lines": [
+    {
+     "n": 458,
+     "text": "                }",
+     "cited": false
+    },
+    {
+     "n": 459,
+     "text": "                @if (arrowBooleans[11]) {",
+     "cited": false
+    },
+    {
+     "n": 460,
+     "text": "                  <fa-icon",
+     "cited": false
+    },
+    {
+     "n": 461,
+     "text": "                    (click)=\"arrowBooleansToggle(11); $event.stopPropagation()\"",
+     "cited": false
+    },
+    {
+     "n": 462,
+     "text": "                    icon=\"arrow-up\"",
+     "cited": false
+    },
+    {
+     "n": 463,
+     "text": "                    size=\"md\"",
+     "cited": false
+    },
+    {
+     "n": 464,
+     "text": "                  ></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 465,
+     "text": "                }",
+     "cited": false
+    },
+    {
+     "n": 466,
+     "text": "              </div>",
+     "cited": false
+    },
+    {
+     "n": 467,
+     "text": "            </div>",
+     "cited": false
+    },
+    {
+     "n": 468,
+     "text": "          </mat-list-item>",
+     "cited": false
+    },
+    {
+     "n": 469,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 470,
+     "text": "          <mat-list-item [routerLink]=\"['theme']\" *mifosxHasPermission=\"'READ_CONFIGURATION'\">",
+     "cited": true
+    },
+    {
+     "n": 471,
+     "text": "            <div class=\"menu-list-item-content\">",
+     "cited": false
+    },
+    {
+     "n": 472,
+     "text": "              <div class=\"menu-left-section\" [routerLink]=\"['theme']\">",
+     "cited": false
+    },
+    {
+     "n": 473,
+     "text": "                <mat-icon>",
+     "cited": false
+    },
+    {
+     "n": 474,
+     "text": "                  <fa-icon icon=\"fill-drip\" size=\"sm\"></fa-icon>",
+     "cited": false
+    },
+    {
+     "n": 475,
+     "text": "                </mat-icon>",
+     "cited": false
+    },
+    {
+     "n": 476,
+     "text": "                <div matLine>",
+     "cited": false
+    },
+    {
+     "n": 477,
+     "text": "                  {{ 'labels.heading.Theme' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 478,
+     "text": "                  @if (arrowBooleans[17]) {",
+     "cited": false
+    },
+    {
+     "n": 479,
+     "text": "                    <p matLine [routerLink]=\"['theme']\" class=\"menu-explanation\">",
+     "cited": false
+    },
+    {
+     "n": 480,
+     "text": "                      {{ 'labels.text.Set the primary color used across this tenant' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 481,
+     "text": "                    </p>",
+     "cited": false
+    },
+    {
+     "n": 482,
+     "text": "                  }",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "fc5bed006a",
+   "app": "k8sdash",
+   "file": "src/resource/cluster/persistentvolume/detail/template.html",
+   "line": 54,
+   "target": "/",
+   "sources": [
+    "/persistentvolume/:resourceName"
+   ],
+   "lines": [
+    {
+     "n": 42,
+     "text": "      <div value>{{ persistentVolume.status }}</div>",
+     "cited": false
+    },
+    {
+     "n": 43,
+     "text": "    </kd-property>",
+     "cited": false
+    },
+    {
+     "n": 44,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 45,
+     "text": "    <kd-property *ngIf=\"persistentVolume?.claim\">",
+     "cited": false
+    },
+    {
+     "n": 46,
+     "text": "      <div",
+     "cited": false
+    },
+    {
+     "n": 47,
+     "text": "        key",
+     "cited": false
+    },
+    {
+     "n": 48,
+     "text": "        i18n",
+     "cited": false
+    },
+    {
+     "n": 49,
+     "text": "      >",
+     "cited": false
+    },
+    {
+     "n": 50,
+     "text": "        Claim",
+     "cited": false
+    },
+    {
+     "n": 51,
+     "text": "      </div>",
+     "cited": false
+    },
+    {
+     "n": 52,
+     "text": "      <div value>",
+     "cited": false
+    },
+    {
+     "n": 53,
+     "text": "        <a",
+     "cited": false
+    },
+    {
+     "n": 54,
+     "text": "          [routerLink]=\"getClaimHref(persistentVolume.claim)\"",
+     "cited": true
+    },
+    {
+     "n": 55,
+     "text": "          queryParamsHandling=\"preserve\"",
+     "cited": false
+    },
+    {
+     "n": 56,
+     "text": "        >",
+     "cited": false
+    },
+    {
+     "n": 57,
+     "text": "          {{ persistentVolume.claim }}",
+     "cited": false
+    },
+    {
+     "n": 58,
+     "text": "        </a>",
+     "cited": false
+    },
+    {
+     "n": 59,
+     "text": "      </div>",
+     "cited": false
+    },
+    {
+     "n": 60,
+     "text": "    </kd-property>",
+     "cited": false
+    },
+    {
+     "n": 61,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 62,
+     "text": "    <kd-property *ngIf=\"persistentVolume?.reclaimPolicy\">",
+     "cited": false
+    },
+    {
+     "n": 63,
+     "text": "      <div",
+     "cited": false
+    },
+    {
+     "n": 64,
+     "text": "        key",
+     "cited": false
+    },
+    {
+     "n": 65,
+     "text": "        i18n",
+     "cited": false
+    },
+    {
+     "n": 66,
+     "text": "      >",
+     "cited": false
+    }
+   ]
+  }
+ ]
+}
