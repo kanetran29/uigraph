@@ -50,6 +50,7 @@ tool's output have no licence).
 | `earlier` | ch4, appendix | git history (f17a302, 7d109c7) |
 | `sweep` | appendix | repo `results-must/mutation-sweep.json` |
 | `must-witness` | tab:oracles, tab:before-after; ch5–7 | repo `results-must/witness/` |
+| `must-run` | tab:ai-readings, tab:threats; ch5 | repo `must-run/results/` (runtime check of the must tier) |
 | `probe` | tab:scope; ch5–7 | repo `route-probe/results*/` |
 | `probe-final` | ch5 sec:res-probe, ch4 | repo `route-probe/results/` (runtime reading) and `results-final/` (that reading against the final graph) |
 | `rima` | tab:rima, tab:earlier; ch5, ch7 | repo `rima/graphs/` + work dir (their reference) |

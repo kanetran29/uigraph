@@ -147,6 +147,32 @@ rules address.
 Neither source inspection nor this mechanical check independently
 proves Claim~\ref{claim:must}.
 
+\paragraph{The must tier at run time.} A runtime check of the must edges of realworld and mifos
+was preregistered (\texttt{must-run/PREREGISTRATION.txt}, commit \texttt{1eaae6c}) before it was
+first run. A temporary build of each application marked the element at each must construct's
+template line, and a navigation logger recorded where the router landed; the extractor and the
+graph were not changed. A \emph{check} is one must edge with one must construct it cites: a
+browser loaded the edge's source screen, clicked the marked element and compared the first
+completed navigation with the edge's target. The \MustRunAllChecks{} checks cover all
+\MustRunAllEdges{} must edges and \MustRunAllConstructs{} must constructs of the two applications;
+constructs that a merged edge cites without earning must were not clicked. All
+\MustRunAllConstructs{} are template links (\texttt{routerLink}), so no navigation from component
+code was run. Of the \MustRunAllTriggered{} checks whose construct was clicked,
+\MustRunAllConfirmed{} landed on the target (\MustRunAllShare{}, as the first prediction stated);
+\MustRunAllOtherTarget{} landed elsewhere and \MustRunAllNoNavigation{} did not navigate. Checks
+whose construct was absent from a loaded source screen: \MustRunAllNotRendered{}. The other
+\MustRunAllUnreached{} checks did not run because their source screen could not be loaded:
+\MustRunRealworldUnreached{} on realworld's signed-in screens, since, departing from the
+preregistration, the run did not create an account on its public backend, which is not pinned;
+and \MustRunMifosUnreached{} on mifos, whose source screen needs an exchange-rate identifier that
+the driver was not given. The second prediction, that such checks would lie mostly on mifos,
+failed. Mifos ran against the pinned Fineract image, signed in as its seeded super-user. One input
+per check can refute Claim~\ref{claim:must} but cannot establish it. The check excludes k8s
+dashboard and bitwarden, whose backends (a cluster and a vault server) do not run here; k8s
+dashboard holds \CensusMustKdash{} of the \CensusMust{} must edges, including all
+\MustWitnessUnread{} whose destination the witness check cannot read. Deviations from the
+preregistration are listed in \texttt{must-run/DEVIATIONS.txt}.
+
 Most of the must tier rests on the route-order assumption A1 (Section~\ref{sec:model}). Of the
 \RouteOrderMust{} must edges, \RouteOrderResting{} hold only under A1, and these come from
 \RouteOrderRestingSites{} constructs in \RouteOrderRestingApps{} applications. Without A1,

@@ -3,14 +3,14 @@
   "id": "src/app/core/layout/footer.component.html:3",
   "site": "src/app/core/layout/footer.component.html:3",
   "from": "/tag/:tag",
-  "fromUrl": null,
+  "fromUrl": "/tag/ai",
   "to": "/"
  },
  {
   "id": "src/app/core/layout/footer.component.html:3",
   "site": "src/app/core/layout/footer.component.html:3",
   "from": "/article/:slug",
-  "fromUrl": null,
+  "fromUrl": "/article/introduction-to-machine-learning-for-developers",
   "to": "/"
  },
  {
@@ -24,7 +24,7 @@
   "id": "src/app/core/layout/footer.component.html:3",
   "site": "src/app/core/layout/footer.component.html:3",
   "from": "/editor/:slug",
-  "fromUrl": null,
+  "fromUrl": "/editor/introduction-to-machine-learning-for-developers",
   "to": "/"
  },
  {
@@ -38,14 +38,14 @@
   "id": "src/app/core/layout/footer.component.html:3",
   "site": "src/app/core/layout/footer.component.html:3",
   "from": "/profile/:username",
-  "fromUrl": null,
+  "fromUrl": "/profile/sarahchen",
   "to": "/"
  },
  {
   "id": "src/app/core/layout/footer.component.html:3",
   "site": "src/app/core/layout/footer.component.html:3",
   "from": "/profile/:username/favorites",
-  "fromUrl": null,
+  "fromUrl": "/profile/sarahchen/favorites",
   "to": "/"
  },
  {
@@ -66,14 +66,14 @@
   "id": "src/app/core/layout/header.component.html:3",
   "site": "src/app/core/layout/header.component.html:3",
   "from": "/tag/:tag",
-  "fromUrl": null,
+  "fromUrl": "/tag/ai",
   "to": "/"
  },
  {
   "id": "src/app/core/layout/header.component.html:3",
   "site": "src/app/core/layout/header.component.html:3",
   "from": "/article/:slug",
-  "fromUrl": null,
+  "fromUrl": "/article/introduction-to-machine-learning-for-developers",
   "to": "/"
  },
  {
@@ -87,7 +87,7 @@
   "id": "src/app/core/layout/header.component.html:3",
   "site": "src/app/core/layout/header.component.html:3",
   "from": "/editor/:slug",
-  "fromUrl": null,
+  "fromUrl": "/editor/introduction-to-machine-learning-for-developers",
   "to": "/"
  },
  {
@@ -101,14 +101,14 @@
   "id": "src/app/core/layout/header.component.html:3",
   "site": "src/app/core/layout/header.component.html:3",
   "from": "/profile/:username",
-  "fromUrl": null,
+  "fromUrl": "/profile/sarahchen",
   "to": "/"
  },
  {
   "id": "src/app/core/layout/header.component.html:3",
   "site": "src/app/core/layout/header.component.html:3",
   "from": "/profile/:username/favorites",
-  "fromUrl": null,
+  "fromUrl": "/profile/sarahchen/favorites",
   "to": "/"
  },
  {
@@ -129,7 +129,7 @@
   "id": "src/app/features/article/pages/home/home.component.html:35",
   "site": "src/app/features/article/pages/home/home.component.html:35",
   "from": "/tag/:tag",
-  "fromUrl": null,
+  "fromUrl": "/tag/ai",
   "to": "/"
  }
 ]

@@ -10,3 +10,20 @@ Deviations from PREREGISTRATION.txt (must-tier runtime check)
 3. drive.mjs (drafted by an assistant from a written specification) was given one guard before
    the first run: an edge whose source screen has no concrete URL is recorded as unreached
    instead of crashing the driver. mifos's /organization/exchange-rates/:id had no value.
+4. realworld, 11 Nov 2026: no sign-in. Method step 2 says "signed in where the application
+   requires it", but signing in to realworld's public backend needs a new account there, which
+   was not created. Its signed-in screens (/editor, /editor/:slug, /settings) redirected to
+   /login and were recorded as unreached, as step 3 provides: 6 of its 19 checks.
+5. realworld: the work copy had no installed dependencies and an empty theme submodule. They
+   were installed from the committed bun.lock (bun install --frozen-lockfile --ignore-scripts)
+   and the submodule checked out at its pinned commit (ffbd690) before the dev server built;
+   no edge ran before the build succeeded.
+6. mifos: edges-mifos.json was built without a params map, so the driver had no identifier for
+   /organization/exchange-rates/:id; Method step 3 asks for an existing record id from the
+   backend, and whether the pinned Fineract held an exchange rate was not checked. Its one check
+   is recorded as unreached. realworld's identifiers (params-realworld.json, used by edges.mjs
+   --params for edges-realworld.json) were taken from records on its public backend.
+7. The opening line ("before any must construct was triggered in a running application") holds
+   for this check only: the earlier end-to-end check (e2e-nav) ran both applications' own test
+   suites, and its realworld log already holds navigations to / from /login, /register,
+   /tag/:tag, /article/:slug and /settings. This check was preregistered before its own first run.

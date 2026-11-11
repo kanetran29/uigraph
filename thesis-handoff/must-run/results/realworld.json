@@ -1,0 +1,204 @@
+{
+  "base": "http://localhost:4200",
+  "hash": false,
+  "startedAt": "2026-11-11T16:50:14.628Z",
+  "edges": [
+    {
+      "id": "src/app/core/layout/footer.component.html:3",
+      "site": "src/app/core/layout/footer.component.html:3",
+      "from": "/tag/:tag",
+      "fromUrl": "/tag/ai",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/footer.component.html:3",
+      "site": "src/app/core/layout/footer.component.html:3",
+      "from": "/article/:slug",
+      "fromUrl": "/article/introduction-to-machine-learning-for-developers",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/footer.component.html:3",
+      "site": "src/app/core/layout/footer.component.html:3",
+      "from": "/editor",
+      "fromUrl": "/editor",
+      "to": "/",
+      "outcome": "unreached",
+      "landed": "/login",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/footer.component.html:3",
+      "site": "src/app/core/layout/footer.component.html:3",
+      "from": "/editor/:slug",
+      "fromUrl": "/editor/introduction-to-machine-learning-for-developers",
+      "to": "/",
+      "outcome": "unreached",
+      "landed": "/login",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/footer.component.html:3",
+      "site": "src/app/core/layout/footer.component.html:3",
+      "from": "/login",
+      "fromUrl": "/login",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/footer.component.html:3",
+      "site": "src/app/core/layout/footer.component.html:3",
+      "from": "/profile/:username",
+      "fromUrl": "/profile/sarahchen",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/footer.component.html:3",
+      "site": "src/app/core/layout/footer.component.html:3",
+      "from": "/profile/:username/favorites",
+      "fromUrl": "/profile/sarahchen/favorites",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/footer.component.html:3",
+      "site": "src/app/core/layout/footer.component.html:3",
+      "from": "/register",
+      "fromUrl": "/register",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/footer.component.html:3",
+      "site": "src/app/core/layout/footer.component.html:3",
+      "from": "/settings",
+      "fromUrl": "/settings",
+      "to": "/",
+      "outcome": "unreached",
+      "landed": "/login",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/header.component.html:3",
+      "site": "src/app/core/layout/header.component.html:3",
+      "from": "/tag/:tag",
+      "fromUrl": "/tag/ai",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/header.component.html:3",
+      "site": "src/app/core/layout/header.component.html:3",
+      "from": "/article/:slug",
+      "fromUrl": "/article/introduction-to-machine-learning-for-developers",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/header.component.html:3",
+      "site": "src/app/core/layout/header.component.html:3",
+      "from": "/editor",
+      "fromUrl": "/editor",
+      "to": "/",
+      "outcome": "unreached",
+      "landed": "/login",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/header.component.html:3",
+      "site": "src/app/core/layout/header.component.html:3",
+      "from": "/editor/:slug",
+      "fromUrl": "/editor/introduction-to-machine-learning-for-developers",
+      "to": "/",
+      "outcome": "unreached",
+      "landed": "/login",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/header.component.html:3",
+      "site": "src/app/core/layout/header.component.html:3",
+      "from": "/login",
+      "fromUrl": "/login",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/header.component.html:3",
+      "site": "src/app/core/layout/header.component.html:3",
+      "from": "/profile/:username",
+      "fromUrl": "/profile/sarahchen",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/header.component.html:3",
+      "site": "src/app/core/layout/header.component.html:3",
+      "from": "/profile/:username/favorites",
+      "fromUrl": "/profile/sarahchen/favorites",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/header.component.html:3",
+      "site": "src/app/core/layout/header.component.html:3",
+      "from": "/register",
+      "fromUrl": "/register",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/header.component.html:3",
+      "site": "src/app/core/layout/header.component.html:3",
+      "from": "/settings",
+      "fromUrl": "/settings",
+      "to": "/",
+      "outcome": "unreached",
+      "landed": "/login",
+      "detail": null
+    },
+    {
+      "id": "src/app/features/article/pages/home/home.component.html:35",
+      "site": "src/app/features/article/pages/home/home.component.html:35",
+      "from": "/tag/:tag",
+      "fromUrl": "/tag/ai",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    }
+  ],
+  "counts": {
+    "confirmed": 13,
+    "other-target": 0,
+    "no-navigation": 0,
+    "not-rendered": 0,
+    "unreached": 6
+  }
+}

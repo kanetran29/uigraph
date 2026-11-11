@@ -1,0 +1,7 @@
+{
+ "/article/:slug": "/article/introduction-to-machine-learning-for-developers",
+ "/editor/:slug": "/editor/introduction-to-machine-learning-for-developers",
+ "/profile/:username": "/profile/sarahchen",
+ "/profile/:username/favorites": "/profile/sarahchen/favorites",
+ "/tag/:tag": "/tag/ai"
+}
