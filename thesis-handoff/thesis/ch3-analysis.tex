@@ -37,7 +37,7 @@ edge relation. An \emph{unplaced origin} represents a component and navigation s
 could not be assigned to a screen. A \emph{dynamic target} represents an unresolved
 destination. These preserve unplaced sites, which the loss counts need, and unresolved destinations that may
 still occur at run time. An edge from an unplaced origin is labelled \emph{may}, or \emph{unknown}
-if it reaches a dynamic target, and counts in its tier despite its nonscreen source. An edge to a dynamic target records outgoing navigation without identifying the destination
+if it reaches a dynamic target, and counts in its tier although, with a nonscreen source, it lies outside $E$. An edge to a dynamic target records outgoing navigation without identifying the destination
 screen. Claim~\ref{claim:must} and must conversion (RQ1) concern only edges between screens.
 
 \textbf{Modalities.} A \emph{must} edge is claimed to fire for every input on which the
@@ -604,6 +604,6 @@ each case above.
 
 The graph model uses three modality labels. Its must-tier soundness claim rests on four
 assumptions about routes and route order, selectors, unresolved calls and the execution model.
-The evaluation tests a necessary condition of the claim. Scope attribution computes screen sets as a least fixpoint over five relations.
+The evaluation tests a necessary condition of the claim. The model of scope attribution computes screen sets as a least fixpoint over five relations.
 The prototype implements three (the call graph without per-injector bindings), substitutes stand-ins for dispatch and guards, and adds
 fallbacks outside the model.

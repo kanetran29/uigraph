@@ -126,8 +126,7 @@ Table~\ref{tab:defects}; guards are assessed separately (Section~\ref{sec:metric
 
 Under the loss rules' precedence, attribution is the largest loss category in every application.
 The two attribution categories contain \AttrLost{} of \RoundTwoInScopeAll{} constructs; no other
-loss category contains a tenth as many. Unresolved destinations are counted separately and number
-about a third as many.
+loss category contains a tenth as many. Unresolved destinations are counted separately (Table~\ref{tab:loss}).
 
 Ownership is tested before the target. Among attribution losses, \AttrNonLiteral{} targets fail the
 literal test; reversing this order would make target losses larger than attribution on
@@ -727,7 +726,7 @@ Application & pairs & precision & recall & pairs & precision & recall \\
 \hhrow{Corpus without mifos}{CorpusNoMifos}
 \bottomrule
 \end{tabularx}
-\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Recall} is relative: the share of the real pairs either tool finds. Real pairs are estimated per stratum from a reading of at most 12 pairs, so a figure over a large stratum is an estimate; the size of each stratum and the pairs read in it are in \texttt{rima/head2head/results-v3/score.json}. Routes are identified by declaration site, and the row without mifos was added after reading (both post hoc). All cells are generated figures.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} \emph{Recall} is relative: the share of the real pairs either tool finds. Real pairs are estimated per stratum from a reading of at most 12 pairs, fewer in three mifos strata, so a figure over a large stratum is an estimate; the size of each stratum and the pairs read in it are in \texttt{rima/head2head/results-v3/score.json}. Routes are identified by declaration site, and the row without mifos was added after reading (both post hoc). All cells are generated figures.}
 \end{table}
 
 Table~\ref{tab:h2h} reports point estimates. On their seven subjects, the tools are close: theirs
