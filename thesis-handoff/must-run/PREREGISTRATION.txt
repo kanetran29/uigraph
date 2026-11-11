@@ -1,0 +1,47 @@
+Pre-registration: runtime check of the must tier (realworld and mifos)
+Written 11 Nov 2026, before any must construct was triggered in a running application.
+
+Question
+  Of the must edges the final graph holds on realworld and mifos, how many does the running
+  application confirm: triggering the cited construct on the edge's source screen lands on the
+  edge's target screen?
+
+Population
+  The 22 must constructs of realworld (3) and mifos (19) in route-oracle/results-must/
+  tier-reading.json (listed in sites.json), with every must edge the final graph
+  (~/personal/uigraph-corpus/<app>/uigraph.db, packages/ as at a9d29df) draws from them.
+  k8s dashboard (2 constructs) and bitwarden (1) are excluded: neither runs here without a
+  backend (cluster, vault server). This exclusion is fixed now and reported.
+
+Method
+  1. Instrumentation, not extraction: a temporary build of each application adds
+     data-must-site="<id>" to the element at each cited template line, and the existing
+     navigation logger (e2e-nav/nav-trace.ts) records NavigationEnd with the route pattern.
+     The extractor and the graph are not changed.
+  2. For each must edge (source screen s, construct c, target t): load s (signed in where the
+     application requires it; mifos against the pinned apache/fineract image with its default
+     demo user; realworld against its public backend, which is not pinned), wait for the
+     element, click it, and record the first NavigationEnd pattern after the click.
+  3. Parameterised source screens use an existing record id from the backend; a source
+     screen that cannot be reached is recorded as unreached, not as a failure.
+
+Outcomes per edge (exactly one)
+  confirmed     the click lands on t (pattern equality after redirect closure).
+  other-target  the click lands on another screen.
+  no-navigation the click causes no NavigationEnd within 5 s.
+  not-rendered  s loads but the element with data-must-site=c is absent or hidden.
+  unreached     s cannot be loaded as itself (redirect away, error, missing data).
+
+Measures
+  M1 confirmed / (confirmed + other-target + no-navigation): the share of triggered must edges
+     that hold at run time.
+  M2 the counts of not-rendered and unreached, reported beside M1, never folded into it.
+  Every count goes through generated macros (must-run/score.mjs -> generated-must-run.tex).
+
+Predictions (fixed before running)
+  P1 M1 is 100 % on both applications: every triggered must edge lands on its target.
+  P2 Some edges are not-rendered or unreached, mostly on mifos (permissions, data).
+  If P1 fails, each failing edge is reported with its construct and source screen; the
+  extractor is NOT repaired in response before submission, and the must tier is not edited.
+
+Deviations will be recorded in must-run/DEVIATIONS.txt.

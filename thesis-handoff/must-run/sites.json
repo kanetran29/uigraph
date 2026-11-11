@@ -1,0 +1,178 @@
+[
+ {
+  "app": "realworld",
+  "site": "src/app/core/layout/footer.component.html:3",
+  "targets": [
+   "/"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "realworld",
+  "site": "src/app/core/layout/header.component.html:3",
+  "targets": [
+   "/"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "realworld",
+  "site": "src/app/features/article/pages/home/home.component.html:35",
+  "targets": [
+   "/"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/accounting/accounting-rules/create-rule/create-rule.component.html:146",
+  "targets": [
+   "/accounting"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/accounting/create-journal-entry/create-journal-entry.component.html:212",
+  "targets": [
+   "/accounting"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/accounting/frequent-postings/frequent-postings.component.html:226",
+  "targets": [
+   "/accounting"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/accounting/periodic-accruals/periodic-accruals.component.html:37",
+  "targets": [
+   "/accounting"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/centers/create-center/create-center.component.html:163",
+  "targets": [
+   "/centers"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/groups/create-group/create-group.component.html:169",
+  "targets": [
+   "/groups"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/organization/bulk-loan-reassignmnet/bulk-loan-reassignmnet.component.html:163",
+  "targets": [
+   "/organization"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/organization/exchange-rates/view-exchange-rate/view-exchange-rate.component.html:55",
+  "targets": [
+   "/organization"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/organization/password-preferences/password-preferences.component.html:35",
+  "targets": [
+   "/organization"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/organization/working-days/working-days.component.html:45",
+  "targets": [
+   "/organization"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/system/system.component.html:294",
+  "targets": [
+   "/system/system-information"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/system/system.component.html:296",
+  "targets": [
+   "/system/system-information"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/system/system.component.html:538",
+  "targets": [
+   "/system/external-services"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/system/system.component.html:540",
+  "targets": [
+   "/system/external-services"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/system/system.component.html:572",
+  "targets": [
+   "/system/manage-dashboards"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/system/system.component.html:574",
+  "targets": [
+   "/system/manage-dashboards"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/system/system.component.html:606",
+  "targets": [
+   "/system/about-us"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/system/system.component.html:608",
+  "targets": [
+   "/system/about-us"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "mifos",
+  "site": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "targets": [
+   "/checker-inbox-and-tasks/requests"
+  ],
+  "verdict": "must"
+ }
+]
