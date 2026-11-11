@@ -1,0 +1,2097 @@
+{
+ "built": "make-alfresco-sheet.mjs",
+ "title": "alfresco navigation sites",
+ "intro": "Each item highlights a navigation site in alfresco (projects/aca-content at b88d47f): a routerLink, or a Router.navigate or navigateByUrl call. Tick every screen the site can fire from. A site in a component fires from the screens whose routed component renders that component, directly or through template element selectors; what the shell renders around the primary outlet is on every screen. A site in a service fires from the screens from which its enclosing method can actually be called: search for the callers, not for the components that inject the service. Screens are the 26 primary-outlet routes listed under each item; routes on the secondary 'viewer' outlet are not screens. Some components are placed by configuration (assets/app.extensions.json) or by layouts from @alfresco libraries outside the source tree. Answer 'unsure' when the source does not settle the set, and tick what you can.",
+ "questions": [
+  {
+   "key": "screens",
+   "text": "Screens it can fire from:",
+   "options": [
+    "/",
+    "/all/libraries",
+    "/favorite/libraries",
+    "/favorite/libraries/:folderId",
+    "/favorites",
+    "/libraries",
+    "/libraries/:folderId",
+    "/nodes/:nodeId/rules",
+    "/personal-files",
+    "/personal-files/:folderId",
+    "/personal-files/details/:nodeId",
+    "/personal-files/details/:nodeId/:activeTab",
+    "/preview/s/:id",
+    "/profile",
+    "/recent-files",
+    "/repository",
+    "/repository/:folderId",
+    "/repository/details/:nodeId",
+    "/repository/details/:nodeId/:activeTab",
+    "/rules",
+    "/saved-searches",
+    "/search",
+    "/search-libraries",
+    "/shared",
+    "/trashcan",
+    "/view"
+   ],
+   "multi": true
+  },
+  {
+   "key": "sure",
+   "text": "Does the source settle the ticked set?",
+   "options": [
+    "sure",
+    "unsure"
+   ]
+  }
+ ],
+ "items": [
+  {
+   "id": "012bbedd64",
+   "app": "alfresco",
+   "file": "folder-rules/src/rule-list/rule-list/rule-list.ui-component.html",
+   "line": 75,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 63,
+     "text": "      @if (mainRuleSetGroupingItems.length > 0) {",
+     "cited": false
+    },
+    {
+     "n": 64,
+     "text": "        <aca-rule-list-grouping",
+     "cited": false
+    },
+    {
+     "n": 65,
+     "text": "          [items]=\"mainRuleSetGroupingItems\"",
+     "cited": false
+    },
+    {
+     "n": 66,
+     "text": "          [selectedRule]=\"selectedRule\"",
+     "cited": false
+    },
+    {
+     "n": 67,
+     "text": "          [showEnabledToggles]=\"isMainRuleSetOwned\"",
+     "cited": false
+    },
+    {
+     "n": 68,
+     "text": "          (selectRule)=\"onSelectRule($event)\"",
+     "cited": false
+    },
+    {
+     "n": 69,
+     "text": "          (ruleEnabledChanged)=\"onRuleEnabledChanged($event)\"",
+     "cited": false
+    },
+    {
+     "n": 70,
+     "text": "          (loadMoreRules)=\"onLoadMoreRules($event)\" />",
+     "cited": false
+    },
+    {
+     "n": 71,
+     "text": "      } @else {",
+     "cited": false
+    },
+    {
+     "n": 72,
+     "text": "      <div class=\"aca-rule-list__item__all-linked-rules-are-disabled\">",
+     "cited": false
+    },
+    {
+     "n": 73,
+     "text": "        {{ 'ACA_FOLDER_RULES.RULE_LIST.ALL_LINKED_RULES_ARE_DISABLED' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 74,
+     "text": "        @if (mainRuleSet?.owningFolder?.id) {",
+     "cited": false
+    },
+    {
+     "n": 75,
+     "text": "          <button mat-stroked-button [routerLink]=\"['/nodes', mainRuleSet.owningFolder.id, 'rules']\">",
+     "cited": true
+    },
+    {
+     "n": 76,
+     "text": "            {{ 'ACA_FOLDER_RULES.MANAGE_RULES.TOOLBAR.ACTIONS.SEE_IN_FOLDER' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 77,
+     "text": "          </button>",
+     "cited": false
+    },
+    {
+     "n": 78,
+     "text": "        }",
+     "cited": false
+    },
+    {
+     "n": 79,
+     "text": "      </div>",
+     "cited": false
+    },
+    {
+     "n": 80,
+     "text": "      }",
+     "cited": false
+    },
+    {
+     "n": 81,
+     "text": "    </mat-expansion-panel>",
+     "cited": false
+    },
+    {
+     "n": 82,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 83,
+     "text": "</mat-accordion>",
+     "cited": false
+    },
+    {
+     "n": 84,
+     "text": "",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "02eaeb0711",
+   "app": "alfresco",
+   "file": "src/lib/components/search/search-navigation.service.ts",
+   "line": 55,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 43,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 44,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 45,
+     "text": "  get onSearchResults(): boolean {",
+     "cited": false
+    },
+    {
+     "n": 46,
+     "text": "    return !this.onLibrariesSearchResults && this.router?.url.indexOf('/search') === 0;",
+     "cited": false
+    },
+    {
+     "n": 47,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 48,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 49,
+     "text": "  saveRoute(route: string): void {",
+     "cited": false
+    },
+    {
+     "n": 50,
+     "text": "    this._previousRoute = route;",
+     "cited": false
+    },
+    {
+     "n": 51,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 52,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 53,
+     "text": "  navigateBack(): void {",
+     "cited": false
+    },
+    {
+     "n": 54,
+     "text": "    if (this.previousRoute) {",
+     "cited": false
+    },
+    {
+     "n": 55,
+     "text": "      this.router.navigateByUrl(this.previousRoute);",
+     "cited": true
+    },
+    {
+     "n": 56,
+     "text": "    } else {",
+     "cited": false
+    },
+    {
+     "n": 57,
+     "text": "      this.router.navigate(['/personal-files']);",
+     "cited": false
+    },
+    {
+     "n": 58,
+     "text": "    }",
+     "cited": false
+    },
+    {
+     "n": 59,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 60,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 61,
+     "text": "  navigateToSearch(): void {",
+     "cited": false
+    },
+    {
+     "n": 62,
+     "text": "    this.saveRoute(this.router.url);",
+     "cited": false
+    },
+    {
+     "n": 63,
+     "text": "    this.router.navigate(['/search']);",
+     "cited": false
+    },
+    {
+     "n": 64,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 65,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 66,
+     "text": "  getUrlSearchTerm(): string {",
+     "cited": false
+    },
+    {
+     "n": 67,
+     "text": "    if (!this.onSearchResults && !this.onLibrariesSearchResults) {",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "2238e072e6",
+   "app": "alfresco",
+   "file": "src/lib/components/files/files.component.ts",
+   "line": 143,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 131,
+     "text": "      const nodeId = folderId || data.defaultNodeId;",
+     "cited": false
+    },
+    {
+     "n": 132,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 133,
+     "text": "      this.contentApi",
+     "cited": false
+    },
+    {
+     "n": 134,
+     "text": "        .getNode(nodeId)",
+     "cited": false
+    },
+    {
+     "n": 135,
+     "text": "        .pipe(takeUntilDestroyed(this.destroyRef))",
+     "cited": false
+    },
+    {
+     "n": 136,
+     "text": "        .subscribe(",
+     "cited": false
+    },
+    {
+     "n": 137,
+     "text": "          (node) => {",
+     "cited": false
+    },
+    {
+     "n": 138,
+     "text": "            this.isValidPath = true;",
+     "cited": false
+    },
+    {
+     "n": 139,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 140,
+     "text": "            if (node?.entry?.isFolder) {",
+     "cited": false
+    },
+    {
+     "n": 141,
+     "text": "              void this.updateCurrentNode(node.entry);",
+     "cited": false
+    },
+    {
+     "n": 142,
+     "text": "            } else {",
+     "cited": false
+    },
+    {
+     "n": 143,
+     "text": "              void this.router.navigate([this.navigationPath, node.entry.parentId], {",
+     "cited": true
+    },
+    {
+     "n": 144,
+     "text": "                replaceUrl: true",
+     "cited": false
+    },
+    {
+     "n": 145,
+     "text": "              });",
+     "cited": false
+    },
+    {
+     "n": 146,
+     "text": "            }",
+     "cited": false
+    },
+    {
+     "n": 147,
+     "text": "          },",
+     "cited": false
+    },
+    {
+     "n": 148,
+     "text": "          (error: HttpErrorResponse) => this.onError(error)",
+     "cited": false
+    },
+    {
+     "n": 149,
+     "text": "        );",
+     "cited": false
+    },
+    {
+     "n": 150,
+     "text": "    });",
+     "cited": false
+    },
+    {
+     "n": 151,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 152,
+     "text": "    this.subscriptions = this.subscriptions.concat([",
+     "cited": false
+    },
+    {
+     "n": 153,
+     "text": "      this.nodeActionsService.contentCopied.subscribe((nodes) => this.onContentAdded(nodes)),",
+     "cited": false
+    },
+    {
+     "n": 154,
+     "text": "      this.nodeActionsService.contentLinked.subscribe(({ succeeded }) => this.onContentAdded(succeeded)),",
+     "cited": false
+    },
+    {
+     "n": 155,
+     "text": "      this.uploadService.fileUploadComplete.pipe(debounceTime(300)).subscribe((file) => this.onFileUploadedEvent(file)),",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "37aaf363ff",
+   "app": "alfresco",
+   "file": "src/lib/components/sidenav/components/sidenav-header.component.html",
+   "line": 20,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 8,
+     "text": "      #toggleNavbarButton>",
+     "cited": false
+    },
+    {
+     "n": 9,
+     "text": "      <img",
+     "cited": false
+    },
+    {
+     "n": 10,
+     "text": "        src=\"{{ logoUrl }}\"",
+     "cited": false
+    },
+    {
+     "n": 11,
+     "text": "        title=\"{{ 'APP.TOOLTIPS.COLLAPSE_NAVIGATION' | translate }}\"",
+     "cited": false
+    },
+    {
+     "n": 12,
+     "text": "        alt=\"{{ 'APP.TOOLTIPS.COLLAPSE_NAVIGATION_ALT' | translate }}\"",
+     "cited": false
+    },
+    {
+     "n": 13,
+     "text": "        aria-hidden=\"true\"",
+     "cited": false
+    },
+    {
+     "n": 14,
+     "text": "      />",
+     "cited": false
+    },
+    {
+     "n": 15,
+     "text": "    </button>",
+     "cited": false
+    },
+    {
+     "n": 16,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 17,
+     "text": "    <a",
+     "cited": false
+    },
+    {
+     "n": 18,
+     "text": "      class=\"aca-sidenav-header-title-text\"",
+     "cited": false
+    },
+    {
+     "n": 19,
+     "text": "      data-automation-id=\"app-sidenav-header-title-text\"",
+     "cited": false
+    },
+    {
+     "n": 20,
+     "text": "      [routerLink]=\"landingPage\">",
+     "cited": true
+    },
+    {
+     "n": 21,
+     "text": "      {{ appName | translate }}",
+     "cited": false
+    },
+    {
+     "n": 22,
+     "text": "    </a>",
+     "cited": false
+    },
+    {
+     "n": 23,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 24,
+     "text": "    <aca-toolbar [items]=\"actions\" />",
+     "cited": false
+    },
+    {
+     "n": 25,
+     "text": "  </div>",
+     "cited": false
+    },
+    {
+     "n": 26,
+     "text": "</div>",
+     "cited": false
+    },
+    {
+     "n": 27,
+     "text": "",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "37c503787e",
+   "app": "alfresco",
+   "file": "src/lib/components/home/home.component.ts",
+   "line": 39,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 27,
+     "text": "import { AppSettingsService } from '@alfresco/aca-shared';",
+     "cited": false
+    },
+    {
+     "n": 28,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 29,
+     "text": "@Component({",
+     "cited": false
+    },
+    {
+     "n": 30,
+     "text": "  standalone: true,",
+     "cited": false
+    },
+    {
+     "n": 31,
+     "text": "  template: '',",
+     "cited": false
+    },
+    {
+     "n": 32,
+     "text": "  encapsulation: ViewEncapsulation.None",
+     "cited": false
+    },
+    {
+     "n": 33,
+     "text": "})",
+     "cited": false
+    },
+    {
+     "n": 34,
+     "text": "export class HomeComponent implements OnInit {",
+     "cited": false
+    },
+    {
+     "n": 35,
+     "text": "  private readonly appSettings = inject(AppSettingsService);",
+     "cited": false
+    },
+    {
+     "n": 36,
+     "text": "  private readonly router = inject(Router);",
+     "cited": false
+    },
+    {
+     "n": 37,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 38,
+     "text": "  ngOnInit() {",
+     "cited": false
+    },
+    {
+     "n": 39,
+     "text": "    this.router.navigateByUrl(this.appSettings.landingPage);",
+     "cited": true
+    },
+    {
+     "n": 40,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 41,
+     "text": "}",
+     "cited": false
+    },
+    {
+     "n": 42,
+     "text": "",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "43eb45fe1b",
+   "app": "alfresco",
+   "file": "src/lib/components/sidenav/directives/action.directive.ts",
+   "line": 51,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 39,
+     "text": "  private readonly store = inject<Store<AppStore>>(Store);",
+     "cited": false
+    },
+    {
+     "n": 40,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 41,
+     "text": "  @Input() action;",
+     "cited": false
+    },
+    {
+     "n": 42,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 43,
+     "text": "  @Output() actionClicked = new EventEmitter<NavBarLinkRef>();",
+     "cited": false
+    },
+    {
+     "n": 44,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 45,
+     "text": "  @HostListener('click')",
+     "cited": false
+    },
+    {
+     "n": 46,
+     "text": "  onClick() {",
+     "cited": false
+    },
+    {
+     "n": 47,
+     "text": "    if (this.action.url) {",
+     "cited": false
+    },
+    {
+     "n": 48,
+     "text": "      if (this.isExternalUrl(this.action.url)) {",
+     "cited": false
+    },
+    {
+     "n": 49,
+     "text": "        window.open(this.action.url, '_blank', 'noopener,noreferrer');",
+     "cited": false
+    },
+    {
+     "n": 50,
+     "text": "      } else {",
+     "cited": false
+    },
+    {
+     "n": 51,
+     "text": "        this.router.navigate(this.getNavigationCommands(this.action.url), { queryParams: this.getNavigationQueryParams(this.action.url) });",
+     "cited": true
+    },
+    {
+     "n": 52,
+     "text": "      }",
+     "cited": false
+    },
+    {
+     "n": 53,
+     "text": "    } else if (this.action.click) {",
+     "cited": false
+    },
+    {
+     "n": 54,
+     "text": "      this.store.dispatch({",
+     "cited": false
+    },
+    {
+     "n": 55,
+     "text": "        type: this.action.click.action,",
+     "cited": false
+    },
+    {
+     "n": 56,
+     "text": "        payload: this.getNavigationCommands(this.action.click.payload)",
+     "cited": false
+    },
+    {
+     "n": 57,
+     "text": "      });",
+     "cited": false
+    },
+    {
+     "n": 58,
+     "text": "    }",
+     "cited": false
+    },
+    {
+     "n": 59,
+     "text": "    this.actionClicked.next(this.action);",
+     "cited": false
+    },
+    {
+     "n": 60,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 61,
+     "text": "  private getNavigationCommands(url: string): any[] {",
+     "cited": false
+    },
+    {
+     "n": 62,
+     "text": "    const urlTree = this.router.parseUrl(url);",
+     "cited": false
+    },
+    {
+     "n": 63,
+     "text": "    const urlSegmentGroup = urlTree.root.children[PRIMARY_OUTLET];",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "965f558d68",
+   "app": "alfresco",
+   "file": "src/lib/components/view-profile/view-profile.component.ts",
+   "line": 141,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 129,
+     "text": "      location: userInfo?.location || '',",
+     "cited": false
+    },
+    {
+     "n": 130,
+     "text": "      telephone: userInfo?.telephone || '',",
+     "cited": false
+    },
+    {
+     "n": 131,
+     "text": "      mobile: userInfo?.mobile || '',",
+     "cited": false
+    },
+    {
+     "n": 132,
+     "text": "      companyName: userInfo?.company?.organization || '',",
+     "cited": false
+    },
+    {
+     "n": 133,
+     "text": "      companyPostCode: userInfo?.company?.postcode || '',",
+     "cited": false
+    },
+    {
+     "n": 134,
+     "text": "      companyAddress: userInfo?.company?.address1 || '',",
+     "cited": false
+    },
+    {
+     "n": 135,
+     "text": "      companyTelephone: userInfo?.company?.telephone || '',",
+     "cited": false
+    },
+    {
+     "n": 136,
+     "text": "      companyEmail: userInfo?.company?.email || ''",
+     "cited": false
+    },
+    {
+     "n": 137,
+     "text": "    });",
+     "cited": false
+    },
+    {
+     "n": 138,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 139,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 140,
+     "text": "  navigateToPersonalFiles() {",
+     "cited": false
+    },
+    {
+     "n": 141,
+     "text": "    this.router.navigate(['/personal-files'], {",
+     "cited": true
+    },
+    {
+     "n": 142,
+     "text": "      replaceUrl: true",
+     "cited": false
+    },
+    {
+     "n": 143,
+     "text": "    });",
+     "cited": false
+    },
+    {
+     "n": 144,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 145,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 146,
+     "text": "  toggleGeneralSection() {",
+     "cited": false
+    },
+    {
+     "n": 147,
+     "text": "    this.generalSectionExpanded = !this.generalSectionExpanded;",
+     "cited": false
+    },
+    {
+     "n": 148,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 149,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 150,
+     "text": "  toggleGeneralSectionEditMode() {",
+     "cited": false
+    },
+    {
+     "n": 151,
+     "text": "    this.generalSectionEditMode = !this.generalSectionEditMode;",
+     "cited": false
+    },
+    {
+     "n": 152,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 153,
+     "text": "    if (this.generalSectionEditMode) {",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "9a4d88281f",
+   "app": "alfresco",
+   "file": "folder-rules/src/manage-rules/manage-rules.smart-component.html",
+   "line": 98,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 86,
+     "text": "                <div class=\"aca-manage-rules__container__rule-details__header__buttons\">",
+     "cited": false
+    },
+    {
+     "n": 87,
+     "text": "                  <ng-container *ngIf=\"canEditSelectedRule; else goToFolderButton\">",
+     "cited": false
+    },
+    {
+     "n": 88,
+     "text": "                    <button mat-stroked-button (click)=\"onRuleDeleteButtonClicked(selectedRule)\" id=\"delete-rule-btn\"",
+     "cited": false
+    },
+    {
+     "n": 89,
+     "text": "                            [attr.aria-label]=\"'ACA_FOLDER_RULES.CONFIRMATION_DIALOG.DELETE_RULE.TITLE' | translate\">",
+     "cited": false
+    },
+    {
+     "n": 90,
+     "text": "                      <mat-icon>delete_outline</mat-icon>",
+     "cited": false
+    },
+    {
+     "n": 91,
+     "text": "                    </button>",
+     "cited": false
+    },
+    {
+     "n": 92,
+     "text": "                    <button mat-stroked-button (click)=\"openCreateUpdateRuleDialog(selectedRule)\" id=\"edit-rule-btn\">",
+     "cited": false
+    },
+    {
+     "n": 93,
+     "text": "                      {{ 'ACA_FOLDER_RULES.MANAGE_RULES.TOOLBAR.ACTIONS.EDIT_RULE' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 94,
+     "text": "                    </button>",
+     "cited": false
+    },
+    {
+     "n": 95,
+     "text": "                  </ng-container>",
+     "cited": false
+    },
+    {
+     "n": 96,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 97,
+     "text": "                  <ng-template #goToFolderButton>",
+     "cited": false
+    },
+    {
+     "n": 98,
+     "text": "                    <button mat-stroked-button [routerLink]=\"['/nodes', (selectedRuleSet$ | async).owningFolder.id, 'rules']\">",
+     "cited": true
+    },
+    {
+     "n": 99,
+     "text": "                      {{ 'ACA_FOLDER_RULES.MANAGE_RULES.TOOLBAR.ACTIONS.SEE_IN_FOLDER' | translate }}",
+     "cited": false
+    },
+    {
+     "n": 100,
+     "text": "                    </button>",
+     "cited": false
+    },
+    {
+     "n": 101,
+     "text": "                  </ng-template>",
+     "cited": false
+    },
+    {
+     "n": 102,
+     "text": "                </div>",
+     "cited": false
+    },
+    {
+     "n": 103,
+     "text": "              </div>",
+     "cited": false
+    },
+    {
+     "n": 104,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 105,
+     "text": "              <div class=\"aca-manage-rules__container__rule-details__content\" *ngIf=\"(selectedRule$ | async) as selectedRule\">",
+     "cited": false
+    },
+    {
+     "n": 106,
+     "text": "                <aca-rule-details",
+     "cited": false
+    },
+    {
+     "n": 107,
+     "text": "                  [actionDefinitions]=\"actionDefinitions$ | async\"",
+     "cited": false
+    },
+    {
+     "n": 108,
+     "text": "                  [parameterConstraints]=\"parameterConstraints$ | async\"",
+     "cited": false
+    },
+    {
+     "n": 109,
+     "text": "                  [readOnly]=\"true\"",
+     "cited": false
+    },
+    {
+     "n": 110,
+     "text": "                  [preview]=\"true\"",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "9d6bb2711d",
+   "app": "alfresco",
+   "file": "src/lib/components/sidenav/directives/menu-panel.directive.ts",
+   "line": 48,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 36,
+     "text": "export class MenuPanelDirective implements OnInit {",
+     "cited": false
+    },
+    {
+     "n": 37,
+     "text": "  private readonly store = inject<Store<any>>(Store);",
+     "cited": false
+    },
+    {
+     "n": 38,
+     "text": "  private readonly router = inject(Router);",
+     "cited": false
+    },
+    {
+     "n": 39,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 40,
+     "text": "  @Input() acaMenuPanel;",
+     "cited": false
+    },
+    {
+     "n": 41,
+     "text": "  hasActiveChildren = false;",
+     "cited": false
+    },
+    {
+     "n": 42,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 43,
+     "text": "  @HostListener('menuOpened')",
+     "cited": false
+    },
+    {
+     "n": 44,
+     "text": "  menuOpened() {",
+     "cited": false
+    },
+    {
+     "n": 45,
+     "text": "    if (this.acaMenuPanel.children && !this.hasActiveLinks()) {",
+     "cited": false
+    },
+    {
+     "n": 46,
+     "text": "      const firstChild = this.acaMenuPanel.children[0];",
+     "cited": false
+    },
+    {
+     "n": 47,
+     "text": "      if (firstChild.url) {",
+     "cited": false
+    },
+    {
+     "n": 48,
+     "text": "        this.router.navigate(this.getNavigationCommands(firstChild.url));",
+     "cited": true
+    },
+    {
+     "n": 49,
+     "text": "      } else {",
+     "cited": false
+    },
+    {
+     "n": 50,
+     "text": "        this.store.dispatch({",
+     "cited": false
+    },
+    {
+     "n": 51,
+     "text": "          type: firstChild.action.action,",
+     "cited": false
+    },
+    {
+     "n": 52,
+     "text": "          payload: this.getNavigationCommands(firstChild.action.payload)",
+     "cited": false
+    },
+    {
+     "n": 53,
+     "text": "        });",
+     "cited": false
+    },
+    {
+     "n": 54,
+     "text": "      }",
+     "cited": false
+    },
+    {
+     "n": 55,
+     "text": "    }",
+     "cited": false
+    },
+    {
+     "n": 56,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 57,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 58,
+     "text": "  private readonly destroyRef = inject(DestroyRef);",
+     "cited": false
+    },
+    {
+     "n": 59,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 60,
+     "text": "  hasActiveLinks() {",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "a85875c63b",
+   "app": "alfresco",
+   "file": "src/lib/components/search/search-save/list/ui-list/saved-searches-list.ui-component.ts",
+   "line": 163,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 151,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 152,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 153,
+     "text": "  openDeleteSavedSearchDialog(savedSearch: SavedSearch, fromContextMenu = false): void {",
+     "cited": false
+    },
+    {
+     "n": 154,
+     "text": "    this.savedSearchesListUiService.confirmDeleteSavedSearch(savedSearch, fromContextMenu);",
+     "cited": false
+    },
+    {
+     "n": 155,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 156,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 157,
+     "text": "  copyToClipboard(savedSearch: SavedSearch): void {",
+     "cited": false
+    },
+    {
+     "n": 158,
+     "text": "    this.clipboard.copy(this.getFullUrl(savedSearch.encodedUrl));",
+     "cited": false
+    },
+    {
+     "n": 159,
+     "text": "    this.notificationService.showInfo('APP.BROWSE.SEARCH.SAVE_SEARCH.LIST.COPY_TO_CLIPBOARD_SUCCESS');",
+     "cited": false
+    },
+    {
+     "n": 160,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 161,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 162,
+     "text": "  executeSearch(savedSearch: SavedSearch): void {",
+     "cited": false
+    },
+    {
+     "n": 163,
+     "text": "    this.router.navigate(['/search'], {",
+     "cited": true
+    },
+    {
+     "n": 164,
+     "text": "      queryParams: { q: decodeURIComponent(savedSearch.encodedUrl) }",
+     "cited": false
+    },
+    {
+     "n": 165,
+     "text": "    });",
+     "cited": false
+    },
+    {
+     "n": 166,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 167,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 168,
+     "text": "  fillContextMenu(event: DataCellEvent) {",
+     "cited": false
+    },
+    {
+     "n": 169,
+     "text": "    event.value.actions = this.menuOptions.map((option) => ({",
+     "cited": false
+    },
+    {
+     "n": 170,
+     "text": "      title: option.title,",
+     "cited": false
+    },
+    {
+     "n": 171,
+     "text": "      key: option.key,",
+     "cited": false
+    },
+    {
+     "n": 172,
+     "text": "      subject: this.contextMenuAction$,",
+     "cited": false
+    },
+    {
+     "n": 173,
+     "text": "      model: {",
+     "cited": false
+    },
+    {
+     "n": 174,
+     "text": "        visible: true,",
+     "cited": false
+    },
+    {
+     "n": 175,
+     "text": "        icon: option.icon",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "b12e377ede",
+   "app": "alfresco",
+   "file": "src/lib/components/sidenav/directives/expansion-panel.directive.ts",
+   "line": 50,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 38,
+     "text": "  private readonly store = inject<Store<any>>(Store);",
+     "cited": false
+    },
+    {
+     "n": 39,
+     "text": "  private readonly router = inject(Router);",
+     "cited": false
+    },
+    {
+     "n": 40,
+     "text": "  private readonly expansionPanel = inject(MatExpansionPanel);",
+     "cited": false
+    },
+    {
+     "n": 41,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 42,
+     "text": "  @Input() acaExpansionPanel;",
+     "cited": false
+    },
+    {
+     "n": 43,
+     "text": "  public hasActiveChildren = false;",
+     "cited": false
+    },
+    {
+     "n": 44,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 45,
+     "text": "  @HostListener('click')",
+     "cited": false
+    },
+    {
+     "n": 46,
+     "text": "  onClick() {",
+     "cited": false
+    },
+    {
+     "n": 47,
+     "text": "    if (this.expansionPanel.expanded && !this.hasActiveLinks() && !this.acaExpansionPanel.data?.canBeInactive) {",
+     "cited": false
+    },
+    {
+     "n": 48,
+     "text": "      const firstChild = this.acaExpansionPanel.children[0];",
+     "cited": false
+    },
+    {
+     "n": 49,
+     "text": "      if (firstChild.url) {",
+     "cited": false
+    },
+    {
+     "n": 50,
+     "text": "        this.router.navigate(this.getNavigationCommands(firstChild.url));",
+     "cited": true
+    },
+    {
+     "n": 51,
+     "text": "      } else {",
+     "cited": false
+    },
+    {
+     "n": 52,
+     "text": "        this.store.dispatch({",
+     "cited": false
+    },
+    {
+     "n": 53,
+     "text": "          type: firstChild.action.action,",
+     "cited": false
+    },
+    {
+     "n": 54,
+     "text": "          payload: this.getNavigationCommands(firstChild.action.payload)",
+     "cited": false
+    },
+    {
+     "n": 55,
+     "text": "        });",
+     "cited": false
+    },
+    {
+     "n": 56,
+     "text": "      }",
+     "cited": false
+    },
+    {
+     "n": 57,
+     "text": "    }",
+     "cited": false
+    },
+    {
+     "n": 58,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 59,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 60,
+     "text": "  private readonly destroyRef = inject(DestroyRef);",
+     "cited": false
+    },
+    {
+     "n": 61,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 62,
+     "text": "  hasActiveLinks() {",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "b555094433",
+   "app": "alfresco",
+   "file": "src/lib/components/files/files.component.ts",
+   "line": 184,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 172,
+     "text": "    }",
+     "cited": false
+    },
+    {
+     "n": 173,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 174,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 175,
+     "text": "  ngOnDestroy() {",
+     "cited": false
+    },
+    {
+     "n": 176,
+     "text": "    this.store.dispatch(new SetCurrentFolderAction(null));",
+     "cited": false
+    },
+    {
+     "n": 177,
+     "text": "    super.ngOnDestroy();",
+     "cited": false
+    },
+    {
+     "n": 178,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 179,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 180,
+     "text": "  navigate(nodeId: string = null) {",
+     "cited": false
+    },
+    {
+     "n": 181,
+     "text": "    const currentNodeId = this.route.snapshot.paramMap.get('folderId');",
+     "cited": false
+    },
+    {
+     "n": 182,
+     "text": "    const urlWithoutParams = decodeURIComponent(this.router.url).split('?')[0];",
+     "cited": false
+    },
+    {
+     "n": 183,
+     "text": "    const urlToNavigate: string[] = this.getUrlToNavigate(urlWithoutParams, currentNodeId, nodeId);",
+     "cited": false
+    },
+    {
+     "n": 184,
+     "text": "    void this.router.navigate(urlToNavigate);",
+     "cited": true
+    },
+    {
+     "n": 185,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 186,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 187,
+     "text": "  private getUrlToNavigate(currentURL: string, currentNodeId: string, nextNodeId: string): string[] {",
+     "cited": false
+    },
+    {
+     "n": 188,
+     "text": "    return currentNodeId ? this.getNextNodeUrlToNavigate(currentURL, currentNodeId, nextNodeId) : this.appendNextNodeIdToUrl(currentURL, nextNodeId);",
+     "cited": false
+    },
+    {
+     "n": 189,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 190,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 191,
+     "text": "  private getNextNodeUrlToNavigate(currentURL: string, currentNodeId: string, nextNodeId: string): string[] {",
+     "cited": false
+    },
+    {
+     "n": 192,
+     "text": "    const urlToNavigate: string[] =",
+     "cited": false
+    },
+    {
+     "n": 193,
+     "text": "      nextNodeId && !this.isRootNode(nextNodeId)",
+     "cited": false
+    },
+    {
+     "n": 194,
+     "text": "        ? this.replaceCurrentNodeIdWithNextNodeId(currentURL, currentNodeId, nextNodeId)",
+     "cited": false
+    },
+    {
+     "n": 195,
+     "text": "        : this.removeNodeIdFromUrl(currentURL, currentNodeId);",
+     "cited": false
+    },
+    {
+     "n": 196,
+     "text": "    urlToNavigate.shift();",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "b9a7731b2b",
+   "app": "alfresco",
+   "file": "src/lib/components/search/search-navigation.service.ts",
+   "line": 63,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 51,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 52,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 53,
+     "text": "  navigateBack(): void {",
+     "cited": false
+    },
+    {
+     "n": 54,
+     "text": "    if (this.previousRoute) {",
+     "cited": false
+    },
+    {
+     "n": 55,
+     "text": "      this.router.navigateByUrl(this.previousRoute);",
+     "cited": false
+    },
+    {
+     "n": 56,
+     "text": "    } else {",
+     "cited": false
+    },
+    {
+     "n": 57,
+     "text": "      this.router.navigate(['/personal-files']);",
+     "cited": false
+    },
+    {
+     "n": 58,
+     "text": "    }",
+     "cited": false
+    },
+    {
+     "n": 59,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 60,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 61,
+     "text": "  navigateToSearch(): void {",
+     "cited": false
+    },
+    {
+     "n": 62,
+     "text": "    this.saveRoute(this.router.url);",
+     "cited": false
+    },
+    {
+     "n": 63,
+     "text": "    this.router.navigate(['/search']);",
+     "cited": true
+    },
+    {
+     "n": 64,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 65,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 66,
+     "text": "  getUrlSearchTerm(): string {",
+     "cited": false
+    },
+    {
+     "n": 67,
+     "text": "    if (!this.onSearchResults && !this.onLibrariesSearchResults) {",
+     "cited": false
+    },
+    {
+     "n": 68,
+     "text": "      return '';",
+     "cited": false
+    },
+    {
+     "n": 69,
+     "text": "    }",
+     "cited": false
+    },
+    {
+     "n": 70,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 71,
+     "text": "    const urlTree: UrlTree = this.router.parseUrl(this.router.url);",
+     "cited": false
+    },
+    {
+     "n": 72,
+     "text": "    const urlSegmentGroup: UrlSegmentGroup = urlTree.root.children[PRIMARY_OUTLET];",
+     "cited": false
+    },
+    {
+     "n": 73,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 74,
+     "text": "    if (urlSegmentGroup) {",
+     "cited": false
+    },
+    {
+     "n": 75,
+     "text": "      const urlSegments: UrlSegment[] = urlSegmentGroup.segments;",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "c0e308f321",
+   "app": "alfresco",
+   "file": "src/lib/components/common/user-info/user-info.component.html",
+   "line": 1,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 1,
+     "text": "<button mat-menu-item class=\"aca-user-info\" [routerLink]=\"['/profile']\" title=\"{{ 'APP.TOOLTIPS.MY_PROFILE' | translate }}\">",
+     "cited": true
+    },
+    {
+     "n": 2,
+     "text": "  <ng-container *ngIf=\"user$ | async as user\">",
+     "cited": false
+    },
+    {
+     "n": 3,
+     "text": "    <div class=\"aca-user-info-content\">",
+     "cited": false
+    },
+    {
+     "n": 4,
+     "text": "      <button class=\"aca-user-info-button\">",
+     "cited": false
+    },
+    {
+     "n": 5,
+     "text": "        <div>{{ user.initials || 'U' }}</div>",
+     "cited": false
+    },
+    {
+     "n": 6,
+     "text": "      </button>",
+     "cited": false
+    },
+    {
+     "n": 7,
+     "text": "      <div class=\"aca-user-info-details\">",
+     "cited": false
+    },
+    {
+     "n": 8,
+     "text": "        <div>{{ user.userName }}</div>",
+     "cited": false
+    },
+    {
+     "n": 9,
+     "text": "        <div>{{ user.email }}</div>",
+     "cited": false
+    },
+    {
+     "n": 10,
+     "text": "      </div>",
+     "cited": false
+    },
+    {
+     "n": 11,
+     "text": "    </div>",
+     "cited": false
+    },
+    {
+     "n": 12,
+     "text": "  </ng-container>",
+     "cited": false
+    },
+    {
+     "n": 13,
+     "text": "</button>",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "d53486e579",
+   "app": "alfresco",
+   "file": "src/lib/components/details/details.component.ts",
+   "line": 147,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 135,
+     "text": "    this.previousRoute = route;",
+     "cited": false
+    },
+    {
+     "n": 136,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 137,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 138,
+     "text": "  goBack() {",
+     "cited": false
+    },
+    {
+     "n": 139,
+     "text": "    this.router.events",
+     "cited": false
+    },
+    {
+     "n": 140,
+     "text": "      .pipe(first((event) => event instanceof NavigationEnd))",
+     "cited": false
+    },
+    {
+     "n": 141,
+     "text": "      .subscribe(() => this.store.dispatch(new SetInfoDrawerStateAction(true)));",
+     "cited": false
+    },
+    {
+     "n": 142,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 143,
+     "text": "    if (this.previousRoute) {",
+     "cited": false
+    },
+    {
+     "n": 144,
+     "text": "      if (!this.previousRoute.includes('viewer:') && this.node) {",
+     "cited": false
+    },
+    {
+     "n": 145,
+     "text": "        this.appHookService.nodeToSelect$.next({ entry: this.node });",
+     "cited": false
+    },
+    {
+     "n": 146,
+     "text": "      }",
+     "cited": false
+    },
+    {
+     "n": 147,
+     "text": "      this.router.navigateByUrl(this.previousRoute);",
+     "cited": true
+    },
+    {
+     "n": 148,
+     "text": "    } else {",
+     "cited": false
+    },
+    {
+     "n": 149,
+     "text": "      this.store.dispatch(new NavigateToPreviousPage());",
+     "cited": false
+    },
+    {
+     "n": 150,
+     "text": "    }",
+     "cited": false
+    },
+    {
+     "n": 151,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 152,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 153,
+     "text": "  onBreadcrumbNavigate(path: PathElement) {",
+     "cited": false
+    },
+    {
+     "n": 154,
+     "text": "    this.store.dispatch(new NavigateToFolder({ entry: path } as NodeEntry));",
+     "cited": false
+    },
+    {
+     "n": 155,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 156,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 157,
+     "text": "  ngOnDestroy(): void {",
+     "cited": false
+    },
+    {
+     "n": 158,
+     "text": "    this.store.dispatch(new SetSelectedNodesAction([]));",
+     "cited": false
+    },
+    {
+     "n": 159,
+     "text": "    super.ngOnDestroy();",
+     "cited": false
+    }
+   ]
+  },
+  {
+   "id": "ef4f54f1cc",
+   "app": "alfresco",
+   "file": "src/lib/components/search/search-navigation.service.ts",
+   "line": 57,
+   "claim": "Which screens can the highlighted navigation fire from?",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "lines": [
+    {
+     "n": 45,
+     "text": "  get onSearchResults(): boolean {",
+     "cited": false
+    },
+    {
+     "n": 46,
+     "text": "    return !this.onLibrariesSearchResults && this.router?.url.indexOf('/search') === 0;",
+     "cited": false
+    },
+    {
+     "n": 47,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 48,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 49,
+     "text": "  saveRoute(route: string): void {",
+     "cited": false
+    },
+    {
+     "n": 50,
+     "text": "    this._previousRoute = route;",
+     "cited": false
+    },
+    {
+     "n": 51,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 52,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 53,
+     "text": "  navigateBack(): void {",
+     "cited": false
+    },
+    {
+     "n": 54,
+     "text": "    if (this.previousRoute) {",
+     "cited": false
+    },
+    {
+     "n": 55,
+     "text": "      this.router.navigateByUrl(this.previousRoute);",
+     "cited": false
+    },
+    {
+     "n": 56,
+     "text": "    } else {",
+     "cited": false
+    },
+    {
+     "n": 57,
+     "text": "      this.router.navigate(['/personal-files']);",
+     "cited": true
+    },
+    {
+     "n": 58,
+     "text": "    }",
+     "cited": false
+    },
+    {
+     "n": 59,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 60,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 61,
+     "text": "  navigateToSearch(): void {",
+     "cited": false
+    },
+    {
+     "n": 62,
+     "text": "    this.saveRoute(this.router.url);",
+     "cited": false
+    },
+    {
+     "n": 63,
+     "text": "    this.router.navigate(['/search']);",
+     "cited": false
+    },
+    {
+     "n": 64,
+     "text": "  }",
+     "cited": false
+    },
+    {
+     "n": 65,
+     "text": "",
+     "cited": false
+    },
+    {
+     "n": 66,
+     "text": "  getUrlSearchTerm(): string {",
+     "cited": false
+    },
+    {
+     "n": 67,
+     "text": "    if (!this.onSearchResults && !this.onLibrariesSearchResults) {",
+     "cited": false
+    },
+    {
+     "n": 68,
+     "text": "      return '';",
+     "cited": false
+    },
+    {
+     "n": 69,
+     "text": "    }",
+     "cited": false
+    }
+   ]
+  }
+ ]
+}

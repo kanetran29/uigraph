@@ -179,3 +179,35 @@ for the decoys. Per kind: items, agree, disagree, undecided, seen, seen and agre
 `\AuthorNoToken<Real|Decoy><Items|Agree|Disagree|Undecided|Seen|SeenAgree>` and
 `\AuthorNoTokenItems`; disagreements in `notoken-comparison.json`. It refuses while any item is
 unanswered.
+
+## Sheet D: alfresco structural reference (`alfresco-sheet.json`, 16 items)
+
+Built by `make-alfresco-sheet.mjs` from `route-oracle/ground-truth/alfresco.json`. Source: the
+corpus checkout of alfresco at b88d47f, `projects/aca-content`.
+
+Items: the 16 sites the reference lists with a screen set (\GTAlfSites; 5 of them placed on
+every screen, 11 on a list). The 17 sites it left undetermined and the 5 it excluded are not on
+the sheet.
+
+Design and why no decoys. The question is each site's screen set, not a yes/no verdict, so the
+selection of sites gives nothing away, provided the candidates do not. A candidate list made of the
+reference set and the screens the other levels place the site on would nearly equal the reference
+set, since the levels place only one site each (at full and at class) on a screen the reference
+lacks (\GTAlfFullExcessSites, \GTAlfClassExcessSites); ticking every candidate would reproduce it
+for the other sites. Every item instead offers all 26 screens of the application (the screens of the independent
+route parser, which the reference uses), in route order, a box each, so the list is the same for
+every site and says nothing of the reference set. The sheet intro states rules R1 to R3 of
+`ALFRESCO-PROTOCOL.txt`; it leaves out the reference's own notes on which components are shell
+content, which are part of its reading. The reference's target and reason per site are not shown.
+
+Questions: (1) the screens the site can fire from, a box per screen (none ticked is an answer);
+(2) does the source settle the ticked set? sure / unsure. `serve.mjs` gained the box question
+(`"multi": true`, recorded as a list) for this sheet; sheets without it render as before.
+
+Scoring (`score-alfresco.mjs`, test `score-alfresco.test.mjs`). Per (site, screen) pair against
+the reference (ALL is the 26 screens, 174 pairs in all): in both, only in the reference (the
+reader's set is smaller), only ticked by the reader (larger); per site, identical sets and sites
+marked unsure. All sites and the 11 non-shell sites (44 pairs) are counted apart. Macros
+`\AuthorAlf[NonShell]<Sites|RefPairs|Agree|RefOnly|ReaderOnly|Exact|Unsure>`; differing sites
+with the reasons in `alfresco-comparison.json`. It refuses while any item lacks the sure/unsure
+answer. The reference is not edited in response.

@@ -4,7 +4,8 @@
  * once to the verdicts file with the time it was given, so the record shows when each item was read.
  * The sheet supplies its own questions ({"questions": [{key, text, options}]}); a question's text may
  * name an item field as {field}. Sheets without questions get the must-tier pair. An optional
- * sheet-level "intro" states the reading rule above the items.
+ * sheet-level "intro" states the reading rule above the items. A question with "multi": true is
+ * answered by ticking any number of its options (recorded as a list; none ticked is an answer).
  *
  * Usage: node serve.mjs --sheet must-sheet.json --verdicts must-verdicts.json [--port 4610]
  */
@@ -40,6 +41,7 @@ const fill = (text, it) => esc(text).replace(/\{(\w+)\}/g, (_, k) => `<code>${es
 function card(it, i, saved, questions) {
   const v = saved[it.id] ?? {}
   const radios = (q) => q.options.map((o) => `<label><input type="radio" name="${q.key}-${it.id}" value="${esc(o)}" ${v[q.key] === o ? 'checked' : ''}> ${esc(o)}</label>`).join(' ')
+  const boxes = (q) => `<span class="multi">${q.options.map((o) => `<label><input type="checkbox" name="${q.key}-${it.id}" value="${esc(o)}" ${(v[q.key] ?? []).includes(o) ? 'checked' : ''}> ${esc(o)}</label>`).join('')}</span>`
   const title = it.title ? esc(it.title) : `${it.app} · <code>${esc(it.file)}:${it.line}</code>`
   const sources = it.sources ? `<br>Source screens (${it.sources.length}): ${it.sources.length > 6 ? `${it.sources.slice(0, 6).map(esc).join(', ')} and ${it.sources.length - 6} more` : it.sources.map(esc).join(', ')}` : ''
   const claim = it.claim ? fill(it.claim, it) : `Claim: on each source screen below, clicking the highlighted construct navigates to <code>${esc(it.target)}</code>.`
@@ -50,7 +52,7 @@ function card(it, i, saved, questions) {
 <h3>${i + 1}. ${title} <span class="ok">${v.at ? 'saved' : ''}</span></h3>
 <p>${claim}${sources}</p>${context ? `<ul>${context}</ul>` : ''}
 ${code}
-${questions.map((q, k) => `<p class="q">${k + 1}. ${fill(q.text, it)} ${radios(q)}</p>`).join('\n')}
+${questions.map((q, k) => `<p class="q">${k + 1}. ${fill(q.text, it)} ${q.multi ? boxes(q) : radios(q)}</p>`).join('\n')}
 <textarea placeholder="Reason, one line: what you read to decide (file, guard, condition)">${esc(v.reason ?? v.note ?? '')}</textarea>
 </section>`
 }
@@ -65,16 +67,19 @@ body{font:15px/1.5 system-ui,sans-serif;max-width:980px;margin:0 auto;padding:16
 pre{background:#f4f3ef;padding:8px;overflow-x:auto;font-size:12.5px;line-height:1.45;margin-top:4px}
 .n{display:inline-block;width:3.2em;color:#999;user-select:none}.cited{background:#fde7a6}.lbl{font-size:12.5px;color:#666}
 .ok{color:#2e7d32;font-size:13px;font-weight:400}.q label{margin-left:10px}textarea{width:100%;height:38px}
+.multi{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));margin-top:4px}.q .multi label{margin-left:0}
 #bar{position:sticky;top:0;background:#fafaf8;padding:6px 0;border-bottom:1px solid #ddd}
 </style></head><body>
 <div id="bar"><b>${esc(title ?? 'Blind reading')}: ${items.length} items</b> · complete <span id="done">0</span> / ${items.length}. Decide from the source (open the files in your editor if the excerpt is not enough) before looking at any earlier reading, and write one line on what you read. Answers save as you go.</div>
 ${intro ? `<p>${esc(intro)}</p>` : ''}
 ${items.map((it, i) => card(it, i, saved, questions)).join('\n')}
 <script>
-const KEYS=${JSON.stringify(questions.map((q) => q.key))}
+const KEYS=${JSON.stringify(questions.filter((q) => !q.multi).map((q) => q.key))}
+const MULTI=${JSON.stringify(questions.filter((q) => q.multi).map((q) => q.key))}
 const count=()=>{document.getElementById('done').textContent=[...document.querySelectorAll('.item')].filter(s=>KEYS.every(k=>s.querySelector('input[name^="'+k+'-"]:checked'))&&s.querySelector('textarea').value.trim()).length}
 async function save(sec){const id=sec.dataset.id;const body={id,reason:sec.querySelector('textarea').value}
 for(const k of KEYS)body[k]=sec.querySelector('input[name="'+k+'-'+id+'"]:checked')?.value??null
+for(const k of MULTI)body[k]=[...sec.querySelectorAll('input[name="'+k+'-'+id+'"]:checked')].map(x=>x.value)
 const r=await fetch('/save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
 sec.querySelector('.ok').textContent=r.ok?'saved':'NOT SAVED';count()}
 document.querySelectorAll('.item').forEach(sec=>{sec.addEventListener('change',()=>save(sec))});count()
@@ -87,7 +92,7 @@ function record(body) {
   if (!items.some((it) => it.id === body.id)) return false
   const v = loadVerdicts()
   const entry = { reason: body.reason || '', at: new Date().toISOString() }
-  for (const q of questions) entry[q.key] = body[q.key] ?? null
+  for (const q of questions) entry[q.key] = q.multi ? [].concat(body[q.key] ?? []).filter((o) => q.options.includes(o)) : body[q.key] ?? null
   v.verdicts[body.id] = entry
   writeFileSync(VERDICTS, JSON.stringify(v, null, 1) + '\n')
   return true
