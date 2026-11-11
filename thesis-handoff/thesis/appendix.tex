@@ -368,3 +368,40 @@ candidates are joined.
 \end{xltabular}
 \par\smallskip{\footnotesize\noindent\emph{Note.} ``May'' is the tier without a soundness claim.}
 \endgroup
+
+\clearpage
+\section{Dead links found from the source}
+\label{sec:deadlinks}
+
+A link to an unmounted target is a dead link. Static candidates are checked against the recorded
+runtime route configuration before reporting. None was navigated to in a running application;
+the list therefore establishes neither runtime occurrence nor confirmed defects.
+
+{\sloppy The clearest case is mifos, where a transactions tab links to \path{/journal-entry/}\allowbreak\path{view/:id} although the application declares that screen at
+\path{/accounting/}\allowbreak\path{journal-entry/}\allowbreak\path{view/:id}. The link omits the parent
+prefix, so mifos's catch-all route renders the not-found screen.\par}
+
+The list is not one defect class, and its groups differ in the strength of their evidence.
+
+\begin{itemize}
+\item \RoundTwoDeadLinkAbsolute{} of the candidates are an absolute link written against a path the
+application does not mount, usually the name the server uses rather than the one the router does; whether users encounter
+them is untested.
+\item \RoundTwoDeadLinkRelative{} come from a \emph{relative} \texttt{routerLink}, such as
+\texttt{[routerLink]="'edit'"}. Their target
+depends on the route the link resolves against, that of the component holding it
+(Section~\ref{sec:anchored}). The extractor's resolution of that base must therefore be verified
+before such a candidate can be attributed to an application defect.
+\item \RoundTwoDeadLinkBaseUnknown{} cannot be classified because the result files preserve
+insufficient construct text. They are counted separately.
+\end{itemize}
+
+The last two groups provide weaker evidence. Counting source locations rather than targets gives
+\RoundTwoDeadLinkAbsoluteLocations{}, \RoundTwoDeadLinkRelativeLocations{} and
+\RoundTwoDeadLinkBaseUnknownLocations{} respectively. One shared-template relative link resolves
+against three owning screens, explaining the difference.
+
+A further \RoundTwoOutsideDirSites{} sites in \RoundTwoOutsideDirWhere{}, across
+\RoundTwoOutsideDirApps{} repositories, fall outside the measured application directories and are
+excluded from the census. Most belong to sibling frontends whose routers declare addresses that
+would otherwise be labelled dead.
