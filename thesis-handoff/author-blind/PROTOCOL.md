@@ -143,3 +143,39 @@ AI verdict; disagrees when both are real or spurious and differ; undecided when 
 (one mifos reading is unclear). Per group (mifos, Rima et al.'s subjects), in all and split by AI
 verdict: macros `\AuthorHH<Mifos|Rima>[Real|Spurious]<Items|Agree|Disagree|Undecided>` and
 `\AuthorHHItems`; disagreements in `h2h-comparison.json`. It refuses while any item is unanswered.
+
+## Sheet C: cited sites without a navigation token (`notoken-sheet.json`, 25 items)
+
+Built by `make-notoken-sheet.mjs` from `rima/head2head/results-v3/score.json`, with the token rule
+of `rima/head2head/check-sites.mjs` (a link, router call, event binding, redirect, dispatch, emit
+or location within two lines of the cited line). The builder stops unless it finds as many real
+pairs without a token as `\HHSitesNoToken` in `thesis/generated-h2h-sites.tex`.
+
+Items: the 19 pairs judged real whose cited site has no token (\HHSitesNoToken), and 6 decoys.
+Several items share a cited line with different start screens (one configuration entry on
+alfresco is cited for seven pairs); each pair is its own item.
+
+Decoys and why. Every one of the 19 was judged real, and every one lacks a token, so without
+decoys the sheet would give the verdict, and decoys with a token would be told apart by the look of
+the line. The decoys are all the head-to-head pairs not judged real whose cited line exists and has
+no token either (6); the cited line is the one the AI reading gave for its verdict. Nine pairs
+not judged real cite no line (8) or a file outside the checkout (1); they cannot be shown and are
+left out.
+
+Seen before: 4 of the 19 and 1 decoy are among the 41 tier 1 pairs the author re-read with the
+verdict visible; the scorer counts them (`Seen`, `SeenAgree`) so the thesis can report the rest apart.
+Sheet C shows the line an AI reading cited, which is part of that reading; it is the claim under
+test (Table 4.5: the token check does not test that the construct leads to the target or renders
+on the start screen). Read it after sheets A and B.
+
+Shown per item: the pair, the application directory and the source around the cited line.
+
+Questions: (1) does triggering what the highlighted line belongs to land on t? (2) is that
+trigger shown to a user who stays on s? yes / no / unsure each. The reader's verdict is real when
+both are yes, spurious when either is no, undecided otherwise.
+
+Scoring (`score-notoken.mjs`, test `score-notoken.test.mjs`). Expected: real for the 19, spurious
+for the decoys. Per kind: items, agree, disagree, undecided, seen, seen and agree. Macros
+`\AuthorNoToken<Real|Decoy><Items|Agree|Disagree|Undecided|Seen|SeenAgree>` and
+`\AuthorNoTokenItems`; disagreements in `notoken-comparison.json`. It refuses while any item is
+unanswered.

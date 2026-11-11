@@ -1,0 +1,3522 @@
+{
+ "built": "make-notoken-sheet.mjs",
+ "title": "Cited lines",
+ "intro": "Each item names a screen pair and highlights one source line. Decide from the source whether the construct the line belongs to (a link, a handler, a configuration entry, a service call, a guard) is a trigger that lands on the target, and whether that trigger is shown while the user stays on the start screen (rendered there, not only during a transition away). A route parameter may take any value; a redirect counts. Open the files in your editor when the excerpt is not enough.",
+ "questions": [
+  {
+   "key": "target",
+   "text": "Does triggering what the highlighted line belongs to land on {to}?",
+   "options": [
+    "yes",
+    "no",
+    "unsure"
+   ]
+  },
+  {
+   "key": "shown",
+   "text": "Is that trigger shown to a user who stays on {from}?",
+   "options": [
+    "yes",
+    "no",
+    "unsure"
+   ]
+  }
+ ],
+ "items": [
+  {
+   "id": "015d006abd",
+   "app": "alfresco",
+   "from": "/view",
+   "to": "/search",
+   "file": "src/lib/components/search/search-save/sidenav/save-search-sidenav.component.ts",
+   "line": 80,
+   "title": "alfresco · /view → /search",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "blocks": [
+    {
+     "label": "src/lib/components/search/search-save/sidenav/save-search-sidenav.component.ts:80",
+     "lines": [
+      {
+       "n": 68,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 69,
+       "text": "  private createNavBarLinkRef(children: SavedSearch[]): NavBarLinkRef {",
+       "cited": false
+      },
+      {
+       "n": 70,
+       "text": "    const mappedChildren = children",
+       "cited": false
+      },
+      {
+       "n": 71,
+       "text": "      .map((child) => ({",
+       "cited": false
+      },
+      {
+       "n": 72,
+       "text": "        id: 'search' + child.name,",
+       "cited": false
+      },
+      {
+       "n": 73,
+       "text": "        icon: '',",
+       "cited": false
+      },
+      {
+       "n": 74,
+       "text": "        title: child.name,",
+       "cited": false
+      },
+      {
+       "n": 75,
+       "text": "        description: child.name,",
+       "cited": false
+      },
+      {
+       "n": 76,
+       "text": "        route: `search?q=${child.encodedUrl}`,",
+       "cited": false
+      },
+      {
+       "n": 77,
+       "text": "        url: `search?q=${child.encodedUrl}`",
+       "cited": false
+      },
+      {
+       "n": 78,
+       "text": "      }))",
+       "cited": false
+      },
+      {
+       "n": 79,
+       "text": "      .slice(0, 5);",
+       "cited": false
+      },
+      {
+       "n": 80,
+       "text": "    const title = this.translationService.instant('APP.BROWSE.SEARCH.SAVE_SEARCH.NAVBAR.TITLE', { number: children.length });",
+       "cited": true
+      },
+      {
+       "n": 81,
+       "text": "    mappedChildren.push({",
+       "cited": false
+      },
+      {
+       "n": 82,
+       "text": "      id: this.manageSearchesId,",
+       "cited": false
+      },
+      {
+       "n": 83,
+       "text": "      icon: '',",
+       "cited": false
+      },
+      {
+       "n": 84,
+       "text": "      title: 'APP.BROWSE.SEARCH.SAVE_SEARCH.NAVBAR.MANAGE_BUTTON',",
+       "cited": false
+      },
+      {
+       "n": 85,
+       "text": "      description: 'APP.BROWSE.SEARCH.SAVE_SEARCH.NAVBAR.MANAGE_BUTTON',",
+       "cited": false
+      },
+      {
+       "n": 86,
+       "text": "      route: 'saved-searches',",
+       "cited": false
+      },
+      {
+       "n": 87,
+       "text": "      url: 'saved-searches'",
+       "cited": false
+      },
+      {
+       "n": 88,
+       "text": "    });",
+       "cited": false
+      },
+      {
+       "n": 89,
+       "text": "    return {",
+       "cited": false
+      },
+      {
+       "n": 90,
+       "text": "      icon: '',",
+       "cited": false
+      },
+      {
+       "n": 91,
+       "text": "      title,",
+       "cited": false
+      },
+      {
+       "n": 92,
+       "text": "      children: mappedChildren,",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "128eedddd0",
+   "app": "alfresco",
+   "from": "/personal-files",
+   "to": "/search",
+   "file": "assets/app.extensions.json",
+   "line": 381,
+   "title": "alfresco · /personal-files → /search",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "blocks": [
+    {
+     "label": "assets/app.extensions.json:381",
+     "lines": [
+      {
+       "n": 369,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 370,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 371,
+       "text": "      {",
+       "cited": false
+      },
+      {
+       "n": 372,
+       "text": "        \"id\": \"app.toolbar.search\",",
+       "cited": false
+      },
+      {
+       "n": 373,
+       "text": "        \"order\": 90,",
+       "cited": false
+      },
+      {
+       "n": 374,
+       "text": "        \"title\": \"SEARCH.BUTTON.TOOLTIP\",",
+       "cited": false
+      },
+      {
+       "n": 375,
+       "text": "        \"icon\": \"search\",",
+       "cited": false
+      },
+      {
+       "n": 376,
+       "text": "        \"type\": \"button\",",
+       "cited": false
+      },
+      {
+       "n": 377,
+       "text": "        \"data\": {",
+       "cited": false
+      },
+      {
+       "n": 378,
+       "text": "          \"buttonType\": \"icon-button\"",
+       "cited": false
+      },
+      {
+       "n": 379,
+       "text": "        },",
+       "cited": false
+      },
+      {
+       "n": 380,
+       "text": "        \"actions\": {",
+       "cited": false
+      },
+      {
+       "n": 381,
+       "text": "          \"click\": \"SEARCH\"",
+       "cited": true
+      },
+      {
+       "n": 382,
+       "text": "        },",
+       "cited": false
+      },
+      {
+       "n": 383,
+       "text": "        \"rules\": {",
+       "cited": false
+      },
+      {
+       "n": 384,
+       "text": "          \"visible\": [",
+       "cited": false
+      },
+      {
+       "n": 385,
+       "text": "            \"!app.navigation.isSearchResults\"",
+       "cited": false
+      },
+      {
+       "n": 386,
+       "text": "          ]",
+       "cited": false
+      },
+      {
+       "n": 387,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 388,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 389,
+       "text": "      {",
+       "cited": false
+      },
+      {
+       "n": 390,
+       "text": "        \"id\": \"app.toolbar.share\",",
+       "cited": false
+      },
+      {
+       "n": 391,
+       "text": "        \"type\": \"custom\",",
+       "cited": false
+      },
+      {
+       "n": 392,
+       "text": "        \"order\": 100,",
+       "cited": false
+      },
+      {
+       "n": 393,
+       "text": "        \"data\": {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "172fcb6681",
+   "app": "alfresco",
+   "from": "/favorite/libraries/:folderId",
+   "to": "/search",
+   "file": "assets/app.extensions.json",
+   "line": 381,
+   "title": "alfresco · /favorite/libraries/:folderId → /search",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "blocks": [
+    {
+     "label": "assets/app.extensions.json:381",
+     "lines": [
+      {
+       "n": 369,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 370,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 371,
+       "text": "      {",
+       "cited": false
+      },
+      {
+       "n": 372,
+       "text": "        \"id\": \"app.toolbar.search\",",
+       "cited": false
+      },
+      {
+       "n": 373,
+       "text": "        \"order\": 90,",
+       "cited": false
+      },
+      {
+       "n": 374,
+       "text": "        \"title\": \"SEARCH.BUTTON.TOOLTIP\",",
+       "cited": false
+      },
+      {
+       "n": 375,
+       "text": "        \"icon\": \"search\",",
+       "cited": false
+      },
+      {
+       "n": 376,
+       "text": "        \"type\": \"button\",",
+       "cited": false
+      },
+      {
+       "n": 377,
+       "text": "        \"data\": {",
+       "cited": false
+      },
+      {
+       "n": 378,
+       "text": "          \"buttonType\": \"icon-button\"",
+       "cited": false
+      },
+      {
+       "n": 379,
+       "text": "        },",
+       "cited": false
+      },
+      {
+       "n": 380,
+       "text": "        \"actions\": {",
+       "cited": false
+      },
+      {
+       "n": 381,
+       "text": "          \"click\": \"SEARCH\"",
+       "cited": true
+      },
+      {
+       "n": 382,
+       "text": "        },",
+       "cited": false
+      },
+      {
+       "n": 383,
+       "text": "        \"rules\": {",
+       "cited": false
+      },
+      {
+       "n": 384,
+       "text": "          \"visible\": [",
+       "cited": false
+      },
+      {
+       "n": 385,
+       "text": "            \"!app.navigation.isSearchResults\"",
+       "cited": false
+      },
+      {
+       "n": 386,
+       "text": "          ]",
+       "cited": false
+      },
+      {
+       "n": 387,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 388,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 389,
+       "text": "      {",
+       "cited": false
+      },
+      {
+       "n": 390,
+       "text": "        \"id\": \"app.toolbar.share\",",
+       "cited": false
+      },
+      {
+       "n": 391,
+       "text": "        \"type\": \"custom\",",
+       "cited": false
+      },
+      {
+       "n": 392,
+       "text": "        \"order\": 100,",
+       "cited": false
+      },
+      {
+       "n": 393,
+       "text": "        \"data\": {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "1bc7df16cc",
+   "app": "spring-petclinic-angular",
+   "from": "/pets",
+   "to": "/visits/:id/edit",
+   "file": "src/app/pets/pet-list/pet-list.component.ts",
+   "line": 43,
+   "title": "spring-petclinic-angular · /pets → /visits/:id/edit",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/pets/pet-list/pet-list.component.ts:43",
+     "lines": [
+      {
+       "n": 31,
+       "text": "@Component({",
+       "cited": false
+      },
+      {
+       "n": 32,
+       "text": "  selector: 'app-pet-list',",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "  templateUrl: './pet-list.component.html',",
+       "cited": false
+      },
+      {
+       "n": 34,
+       "text": "  styleUrls: ['./pet-list.component.css']",
+       "cited": false
+      },
+      {
+       "n": 35,
+       "text": "})",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "export class PetListComponent implements OnInit {",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "  errorMessage: string;",
+       "cited": false
+      },
+      {
+       "n": 38,
+       "text": "  @Input() pet: Pet;",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "  responseStatus: number;",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "  deleteSuccess = false;",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "  constructor(private router: Router, private petService: PetService) {",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "    this.pet = {} as Pet;",
+       "cited": true
+      },
+      {
+       "n": 44,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "  ngOnInit() {",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "  log(value: string): void {",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "    logToServer(value);",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "  editPet(pet: Pet) {",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "    this.router.navigate(['/pets', pet.id, 'edit']);",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "  }",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "2dae97b1dc",
+   "app": "ghostfolio",
+   "from": "/portfolio/activities/:activityId/update",
+   "to": "/accounts/transfer-cash-balance",
+   "file": "../../libs/ui/src/lib/assistant/assistant.component.ts",
+   "line": 705,
+   "title": "ghostfolio · /portfolio/activities/:activityId/update → /accounts/transfer-cash-balance",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/ghostfolio/apps/client"
+   ],
+   "blocks": [
+    {
+     "label": "../../libs/ui/src/lib/assistant/assistant.component.ts:705",
+     "lines": [
+      {
+       "n": 693,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 694,
+       "text": "  private searchQuickLinks(aSearchTerm: string): SearchResultItem[] {",
+       "cited": false
+      },
+      {
+       "n": 695,
+       "text": "    const searchTerm = aSearchTerm.toLowerCase();",
+       "cited": false
+      },
+      {
+       "n": 696,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 697,
+       "text": "    const isIncludedInAssistant = ({ excludeFromAssistant }: InternalRoute) => {",
+       "cited": false
+      },
+      {
+       "n": 698,
+       "text": "      if (isFunction(excludeFromAssistant)) {",
+       "cited": false
+      },
+      {
+       "n": 699,
+       "text": "        return excludeFromAssistant(this.user);",
+       "cited": false
+      },
+      {
+       "n": 700,
+       "text": "      }",
+       "cited": false
+      },
+      {
+       "n": 701,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 702,
+       "text": "      return !excludeFromAssistant;",
+       "cited": false
+      },
+      {
+       "n": 703,
+       "text": "    };",
+       "cited": false
+      },
+      {
+       "n": 704,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 705,
+       "text": "    const allRoutes = Object.values<InternalRoute>(internalRoutes)",
+       "cited": true
+      },
+      {
+       "n": 706,
+       "text": "      .filter(isIncludedInAssistant)",
+       "cited": false
+      },
+      {
+       "n": 707,
+       "text": "      .reduce<InternalRoute[]>((acc, route) => {",
+       "cited": false
+      },
+      {
+       "n": 708,
+       "text": "        acc.push(route);",
+       "cited": false
+      },
+      {
+       "n": 709,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 710,
+       "text": "        if (route.subRoutes) {",
+       "cited": false
+      },
+      {
+       "n": 711,
+       "text": "          acc.push(",
+       "cited": false
+      },
+      {
+       "n": 712,
+       "text": "            ...Object.values(route.subRoutes).filter(isIncludedInAssistant)",
+       "cited": false
+      },
+      {
+       "n": 713,
+       "text": "          );",
+       "cited": false
+      },
+      {
+       "n": 714,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 715,
+       "text": "        return acc;",
+       "cited": false
+      },
+      {
+       "n": 716,
+       "text": "      }, [])",
+       "cited": false
+      },
+      {
+       "n": 717,
+       "text": "      .filter((route): route is InternalRoute & { routerLink: string[] } => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "325a915d43",
+   "app": "ghostfolio",
+   "from": "/portfolio/activities/:activityId/clone",
+   "to": "/internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+   "file": "src/app/pages/portfolio/activities/activities-page.routes.ts",
+   "line": 37,
+   "title": "ghostfolio · /portfolio/activities/:activityId/clone → /internalRoutes.portfolio.path/internalRoutes.portfolio.subRoutes.activities.path/:activityId",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/ghostfolio/apps/client"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/pages/portfolio/activities/activities-page.routes.ts:37",
+     "lines": [
+      {
+       "n": 25,
+       "text": "            component: GfActivityDialogHostComponent,",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "            data: { mode: 'clone' },",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "            path: clone.path,",
+       "cited": false
+      },
+      {
+       "n": 28,
+       "text": "            title: clone.title",
+       "cited": false
+      },
+      {
+       "n": 29,
+       "text": "          },",
+       "cited": false
+      },
+      {
+       "n": 30,
+       "text": "          {",
+       "cited": false
+      },
+      {
+       "n": 31,
+       "text": "            component: GfActivityDialogHostComponent,",
+       "cited": false
+      },
+      {
+       "n": 32,
+       "text": "            data: { mode: 'update' },",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "            path: update.path,",
+       "cited": false
+      },
+      {
+       "n": 34,
+       "text": "            title: update.title",
+       "cited": false
+      },
+      {
+       "n": 35,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "        ],",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "        path: ':activityId'",
+       "cited": true
+      },
+      {
+       "n": 38,
+       "text": "      }",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "    ],",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "    component: GfActivitiesPageComponent,",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "    path: '',",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "    title: internalRoutes.portfolio.subRoutes.activities.title",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "];",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "3668e0f5e4",
+   "app": "alfresco",
+   "from": "/preview/s/:id",
+   "to": "/profile",
+   "file": "src/lib/aca-content.routes.ts",
+   "line": 49,
+   "title": "alfresco · /preview/s/:id → /profile",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "blocks": [
+    {
+     "label": "src/lib/aca-content.routes.ts:49",
+     "lines": [
+      {
+       "n": 37,
+       "text": "import { ViewProfileComponent } from './components/view-profile/view-profile.component';",
+       "cited": false
+      },
+      {
+       "n": 38,
+       "text": "import { ViewProfileRuleGuard } from './components/view-profile/view-profile.guard';",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "import { Data, Route, Routes } from '@angular/router';",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "import { SharedLinkViewComponent } from './components/shared-link-view/shared-link-view.component';",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "import { TrashcanComponent } from './components/trashcan/trashcan.component';",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "import { ShellLayoutComponent } from '@alfresco/adf-core/shell';",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "import { SavedSearchesSmartListComponent } from './components/search/search-save/list/smart-list/saved-searches-smart-list.component';",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "import { LibraryListComponent } from './components/library-list/library-list.component';",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "import { RepositoryViewComponent } from './components/repository-view/repository-view.component';",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "export const CONTENT_ROUTES: ExtensionRoute[] = [",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "  {",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "    path: 'preview/s/:id',",
+       "cited": true
+      },
+      {
+       "n": 50,
+       "text": "    children: [",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "      {",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "        path: '',",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "        component: SharedLinkViewComponent,",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "        data: {",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "          title: 'APP.PREVIEW.TITLE'",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "      }",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "    ]",
+       "cited": false
+      },
+      {
+       "n": 59,
+       "text": "  },",
+       "cited": false
+      },
+      {
+       "n": 60,
+       "text": "  {",
+       "cited": false
+      },
+      {
+       "n": 61,
+       "text": "    path: 'view',",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "3776c51a2d",
+   "app": "bitwarden",
+   "from": "/organizations/:organizationId/reporting/reports/exposed-passwords-report",
+   "to": "/organizations/:organizationId/billing/subscription",
+   "file": "src/app/admin-console/organizations/layouts/organization-layout.component.html",
+   "line": 71,
+   "title": "bitwarden · /organizations/:organizationId/reporting/reports/exposed-passwords-report → /organizations/:organizationId/billing/subscription",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/bitwarden/apps/web"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/admin-console/organizations/layouts/organization-layout.component.html:71",
+     "lines": [
+      {
+       "n": 59,
+       "text": "      <bit-nav-item",
+       "cited": false
+      },
+      {
+       "n": 60,
+       "text": "        [text]=\"'reports' | i18n\"",
+       "cited": false
+      },
+      {
+       "n": 61,
+       "text": "        route=\"reporting/reports\"",
+       "cited": false
+      },
+      {
+       "n": 62,
+       "text": "        *ngIf=\"organization.canAccessReports\"",
+       "cited": false
+      },
+      {
+       "n": 63,
+       "text": "      ></bit-nav-item>",
+       "cited": false
+      },
+      {
+       "n": 64,
+       "text": "    </bit-nav-group>",
+       "cited": false
+      },
+      {
+       "n": 65,
+       "text": "    <bit-nav-group",
+       "cited": false
+      },
+      {
+       "n": 66,
+       "text": "      icon=\"bwi-billing\"",
+       "cited": false
+      },
+      {
+       "n": 67,
+       "text": "      [text]=\"'billing' | i18n\"",
+       "cited": false
+      },
+      {
+       "n": 68,
+       "text": "      route=\"billing\"",
+       "cited": false
+      },
+      {
+       "n": 69,
+       "text": "      *ngIf=\"canShowBillingTab(organization)\"",
+       "cited": false
+      },
+      {
+       "n": 70,
+       "text": "    >",
+       "cited": false
+      },
+      {
+       "n": 71,
+       "text": "      <bit-nav-item [text]=\"'subscription' | i18n\" route=\"billing/subscription\"></bit-nav-item>",
+       "cited": true
+      },
+      {
+       "n": 72,
+       "text": "      <ng-container *ngIf=\"(showPaymentAndHistory$ | async) && (organizationIsUnmanaged$ | async)\">",
+       "cited": false
+      },
+      {
+       "n": 73,
+       "text": "        <bit-nav-item",
+       "cited": false
+      },
+      {
+       "n": 74,
+       "text": "          [text]=\"'paymentDetails' | i18n\"",
+       "cited": false
+      },
+      {
+       "n": 75,
+       "text": "          route=\"billing/payment-details\"",
+       "cited": false
+      },
+      {
+       "n": 76,
+       "text": "        ></bit-nav-item>",
+       "cited": false
+      },
+      {
+       "n": 77,
+       "text": "        <bit-nav-item [text]=\"'billingHistory' | i18n\" route=\"billing/history\"></bit-nav-item>",
+       "cited": false
+      },
+      {
+       "n": 78,
+       "text": "      </ng-container>",
+       "cited": false
+      },
+      {
+       "n": 79,
+       "text": "    </bit-nav-group>",
+       "cited": false
+      },
+      {
+       "n": 80,
+       "text": "    <bit-nav-item",
+       "cited": false
+      },
+      {
+       "n": 81,
+       "text": "      icon=\"bwi-msp\"",
+       "cited": false
+      },
+      {
+       "n": 82,
+       "text": "      [text]=\"'integrations' | i18n\"",
+       "cited": false
+      },
+      {
+       "n": 83,
+       "text": "      route=\"integrations\"",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "399be35954",
+   "app": "spring-petclinic-angular",
+   "from": "/pets/:id/visits/add",
+   "to": "/visits/:id/edit",
+   "file": "src/app/visits/visit-add/visit-add.component.html",
+   "line": 91,
+   "title": "spring-petclinic-angular · /pets/:id/visits/add → /visits/:id/edit",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/visits/visit-add/visit-add.component.html:91",
+     "lines": [
+      {
+       "n": 79,
+       "text": "    </form>",
+       "cited": false
+      },
+      {
+       "n": 80,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 81,
+       "text": "    <br/>",
+       "cited": false
+      },
+      {
+       "n": 82,
+       "text": "    <div class=\"col-12 text-left\">",
+       "cited": false
+      },
+      {
+       "n": 83,
+       "text": "      <p>",
+       "cited": false
+      },
+      {
+       "n": 84,
+       "text": "        <b>Previous Visits</b>",
+       "cited": false
+      },
+      {
+       "n": 85,
+       "text": "      </p>",
+       "cited": false
+      },
+      {
+       "n": 86,
+       "text": "    </div>",
+       "cited": false
+      },
+      {
+       "n": 87,
+       "text": "    <br/>",
+       "cited": false
+      },
+      {
+       "n": 88,
+       "text": "    <div class=\"container\">",
+       "cited": false
+      },
+      {
+       "n": 89,
+       "text": "      <div class=\"row\">",
+       "cited": false
+      },
+      {
+       "n": 90,
+       "text": "        <div class=\"col-12 text-center\">",
+       "cited": false
+      },
+      {
+       "n": 91,
+       "text": "          <app-visit-list [visits]=\"currentPet.visits\"></app-visit-list>",
+       "cited": true
+      },
+      {
+       "n": 92,
+       "text": "        </div>",
+       "cited": false
+      },
+      {
+       "n": 93,
+       "text": "      </div>",
+       "cited": false
+      },
+      {
+       "n": 94,
+       "text": "    </div>",
+       "cited": false
+      },
+      {
+       "n": 95,
+       "text": "  </div>",
+       "cited": false
+      },
+      {
+       "n": 96,
+       "text": "</div>",
+       "cited": false
+      },
+      {
+       "n": 97,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "5d3d3f10cb",
+   "app": "alfresco",
+   "from": "/repository",
+   "to": "/search",
+   "file": "assets/app.extensions.json",
+   "line": 381,
+   "title": "alfresco · /repository → /search",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "blocks": [
+    {
+     "label": "assets/app.extensions.json:381",
+     "lines": [
+      {
+       "n": 369,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 370,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 371,
+       "text": "      {",
+       "cited": false
+      },
+      {
+       "n": 372,
+       "text": "        \"id\": \"app.toolbar.search\",",
+       "cited": false
+      },
+      {
+       "n": 373,
+       "text": "        \"order\": 90,",
+       "cited": false
+      },
+      {
+       "n": 374,
+       "text": "        \"title\": \"SEARCH.BUTTON.TOOLTIP\",",
+       "cited": false
+      },
+      {
+       "n": 375,
+       "text": "        \"icon\": \"search\",",
+       "cited": false
+      },
+      {
+       "n": 376,
+       "text": "        \"type\": \"button\",",
+       "cited": false
+      },
+      {
+       "n": 377,
+       "text": "        \"data\": {",
+       "cited": false
+      },
+      {
+       "n": 378,
+       "text": "          \"buttonType\": \"icon-button\"",
+       "cited": false
+      },
+      {
+       "n": 379,
+       "text": "        },",
+       "cited": false
+      },
+      {
+       "n": 380,
+       "text": "        \"actions\": {",
+       "cited": false
+      },
+      {
+       "n": 381,
+       "text": "          \"click\": \"SEARCH\"",
+       "cited": true
+      },
+      {
+       "n": 382,
+       "text": "        },",
+       "cited": false
+      },
+      {
+       "n": 383,
+       "text": "        \"rules\": {",
+       "cited": false
+      },
+      {
+       "n": 384,
+       "text": "          \"visible\": [",
+       "cited": false
+      },
+      {
+       "n": 385,
+       "text": "            \"!app.navigation.isSearchResults\"",
+       "cited": false
+      },
+      {
+       "n": 386,
+       "text": "          ]",
+       "cited": false
+      },
+      {
+       "n": 387,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 388,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 389,
+       "text": "      {",
+       "cited": false
+      },
+      {
+       "n": 390,
+       "text": "        \"id\": \"app.toolbar.share\",",
+       "cited": false
+      },
+      {
+       "n": 391,
+       "text": "        \"type\": \"custom\",",
+       "cited": false
+      },
+      {
+       "n": 392,
+       "text": "        \"order\": 100,",
+       "cited": false
+      },
+      {
+       "n": 393,
+       "text": "        \"data\": {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "646435a0fe",
+   "app": "spring-petclinic-angular",
+   "from": "/visits/add",
+   "to": "/visits/:id/edit",
+   "file": "src/app/visits/visit-add/visit-add.component.html",
+   "line": 91,
+   "title": "spring-petclinic-angular · /visits/add → /visits/:id/edit",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/visits/visit-add/visit-add.component.html:91",
+     "lines": [
+      {
+       "n": 79,
+       "text": "    </form>",
+       "cited": false
+      },
+      {
+       "n": 80,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 81,
+       "text": "    <br/>",
+       "cited": false
+      },
+      {
+       "n": 82,
+       "text": "    <div class=\"col-12 text-left\">",
+       "cited": false
+      },
+      {
+       "n": 83,
+       "text": "      <p>",
+       "cited": false
+      },
+      {
+       "n": 84,
+       "text": "        <b>Previous Visits</b>",
+       "cited": false
+      },
+      {
+       "n": 85,
+       "text": "      </p>",
+       "cited": false
+      },
+      {
+       "n": 86,
+       "text": "    </div>",
+       "cited": false
+      },
+      {
+       "n": 87,
+       "text": "    <br/>",
+       "cited": false
+      },
+      {
+       "n": 88,
+       "text": "    <div class=\"container\">",
+       "cited": false
+      },
+      {
+       "n": 89,
+       "text": "      <div class=\"row\">",
+       "cited": false
+      },
+      {
+       "n": 90,
+       "text": "        <div class=\"col-12 text-center\">",
+       "cited": false
+      },
+      {
+       "n": 91,
+       "text": "          <app-visit-list [visits]=\"currentPet.visits\"></app-visit-list>",
+       "cited": true
+      },
+      {
+       "n": 92,
+       "text": "        </div>",
+       "cited": false
+      },
+      {
+       "n": 93,
+       "text": "      </div>",
+       "cited": false
+      },
+      {
+       "n": 94,
+       "text": "    </div>",
+       "cited": false
+      },
+      {
+       "n": 95,
+       "text": "  </div>",
+       "cited": false
+      },
+      {
+       "n": 96,
+       "text": "</div>",
+       "cited": false
+      },
+      {
+       "n": 97,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "67818d40cb",
+   "app": "bitwarden",
+   "from": "/confirm-key-connector-domain",
+   "to": "/settings/security/session-timeout",
+   "file": "src/app/key-management/key-connector/confirm-key-connector-domain.component.ts",
+   "line": 18,
+   "title": "bitwarden · /confirm-key-connector-domain → /settings/security/session-timeout",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/bitwarden/apps/web"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/key-management/key-connector/confirm-key-connector-domain.component.ts:18",
+     "lines": [
+      {
+       "n": 6,
+       "text": "// FIXME(https://bitwarden.atlassian.net/browse/CL-764): Migrate to OnPush",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "// eslint-disable-next-line @angular-eslint/prefer-on-push-component-change-detection",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "@Component({",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "  selector: \"app-confirm-key-connector-domain\",",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "  template: ` <confirm-key-connector-domain [onBeforeNavigation]=\"onBeforeNavigation\" /> `,",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "  standalone: true,",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "  imports: [BaseConfirmKeyConnectorDomainComponent],",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "})",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "export class ConfirmKeyConnectorDomainComponent {",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "  constructor(private routerService: RouterService) {}",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "  onBeforeNavigation = async () => {",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "    await this.routerService.getAndClearLoginRedirectUrl();",
+       "cited": true
+      },
+      {
+       "n": 19,
+       "text": "  };",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "70c74d41a1",
+   "app": "bitwarden",
+   "from": "/settings/security/password",
+   "to": "/vault",
+   "file": "src/app/layouts/user-layout.component.html",
+   "line": 48,
+   "title": "bitwarden · /settings/security/password → /vault",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/bitwarden/apps/web"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/layouts/user-layout.component.html:48",
+     "lines": [
+      {
+       "n": 36,
+       "text": "              [text]=\"'emergencyAccess' | i18n\"",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "              route=\"settings/emergency-access\"",
+       "cited": false
+      },
+      {
+       "n": 38,
+       "text": "            ></bit-nav-item>",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "          @if (!singleOrgPolicyApplies()) {",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "            <bit-nav-item [text]=\"'addPlan' | i18n\" route=\"settings/add-plan\"></bit-nav-item>",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "          <billing-free-families-nav-item></billing-free-families-nav-item>",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "          <bit-nav-item [text]=\"'exportNoun' | i18n\" route=\"tools/export\"></bit-nav-item>",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "        </bit-nav-group>",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "      </bit-nav-section>",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "    } @else {",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "      <bit-nav-item icon=\"bwi-vault\" [text]=\"'vaults' | i18n\" route=\"vault\"></bit-nav-item>",
+       "cited": true
+      },
+      {
+       "n": 49,
+       "text": "      @if (sendEnabled$ | async) {",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "        <bit-nav-item icon=\"bwi-send\" [text]=\"'send' | i18n\" route=\"sends\"></bit-nav-item>",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "      }",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "      <bit-nav-group",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "        icon=\"bwi-wrench\"",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "        [text]=\"'tools' | i18n\"",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "        route=\"tools\"",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "        [open]=\"toolsNavGroupOpen()\"",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "        [bitPopoverAnchorFor]=\"importCoachmark.popover()\"",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "        [popoverOpen]=\"importCoachmarkOpen() && !sideNavService.open()\"",
+       "cited": false
+      },
+      {
+       "n": 59,
+       "text": "        [position]=\"coachmarkService.getStepPosition('importData')\"",
+       "cited": false
+      },
+      {
+       "n": 60,
+       "text": "        [closeOnBackdropClick]=\"false\"",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "8534b0c022",
+   "app": "airbus-inventory",
+   "from": "/login",
+   "to": "/getAllProducts",
+   "file": "src/app/login-page/login-page.component.ts",
+   "line": 63,
+   "title": "airbus-inventory · /login → /getAllProducts",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/login-page/login-page.component.ts:63",
+     "lines": [
+      {
+       "n": 51,
+       "text": "    {",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "      this.errMessage=\"Password is required\";",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "    }",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "    else{",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "            if(this.loginForm.valid)",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "            {",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "              this.authenticateService.authenticate(this.loginFormClass).subscribe(data => {",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 59,
+       "text": "                  localStorage.setItem('token',data.token);",
+       "cited": false
+      },
+      {
+       "n": 60,
+       "text": "                  if (localStorage.getItem('token') !== null) {",
+       "cited": false
+      },
+      {
+       "n": 61,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 62,
+       "text": "                   ",
+       "cited": false
+      },
+      {
+       "n": 63,
+       "text": "                    this.routerService.routeToDashboard();",
+       "cited": true
+      },
+      {
+       "n": 64,
+       "text": "                    } ",
+       "cited": false
+      },
+      {
+       "n": 65,
+       "text": "              });",
+       "cited": false
+      },
+      {
+       "n": 66,
+       "text": "            }",
+       "cited": false
+      },
+      {
+       "n": 67,
+       "text": "            else{",
+       "cited": false
+      },
+      {
+       "n": 68,
+       "text": "              this.errMessage=\"UserName should be your Email Id\";",
+       "cited": false
+      },
+      {
+       "n": 69,
+       "text": "            }",
+       "cited": false
+      },
+      {
+       "n": 70,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 71,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 72,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 73,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 74,
+       "text": "}",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "87397c47d3",
+   "app": "alfresco",
+   "from": "/profile",
+   "to": "/search",
+   "file": "src/lib/components/search/search-save/sidenav/save-search-sidenav.component.ts",
+   "line": 76,
+   "title": "alfresco · /profile → /search",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "blocks": [
+    {
+     "label": "src/lib/components/search/search-save/sidenav/save-search-sidenav.component.ts:76",
+     "lines": [
+      {
+       "n": 64,
+       "text": "  onActionClicked(selectedLinkRef: NavBarLinkRef): void {",
+       "cited": false
+      },
+      {
+       "n": 65,
+       "text": "    const selectedSavedSearch = this.savedSearches?.find((savedSearch) => savedSearch.name === selectedLinkRef.title);",
+       "cited": false
+      },
+      {
+       "n": 66,
+       "text": "    this.savedSearchesService.currentContextSavedSearch = selectedSavedSearch;",
+       "cited": false
+      },
+      {
+       "n": 67,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 68,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 69,
+       "text": "  private createNavBarLinkRef(children: SavedSearch[]): NavBarLinkRef {",
+       "cited": false
+      },
+      {
+       "n": 70,
+       "text": "    const mappedChildren = children",
+       "cited": false
+      },
+      {
+       "n": 71,
+       "text": "      .map((child) => ({",
+       "cited": false
+      },
+      {
+       "n": 72,
+       "text": "        id: 'search' + child.name,",
+       "cited": false
+      },
+      {
+       "n": 73,
+       "text": "        icon: '',",
+       "cited": false
+      },
+      {
+       "n": 74,
+       "text": "        title: child.name,",
+       "cited": false
+      },
+      {
+       "n": 75,
+       "text": "        description: child.name,",
+       "cited": false
+      },
+      {
+       "n": 76,
+       "text": "        route: `search?q=${child.encodedUrl}`,",
+       "cited": true
+      },
+      {
+       "n": 77,
+       "text": "        url: `search?q=${child.encodedUrl}`",
+       "cited": false
+      },
+      {
+       "n": 78,
+       "text": "      }))",
+       "cited": false
+      },
+      {
+       "n": 79,
+       "text": "      .slice(0, 5);",
+       "cited": false
+      },
+      {
+       "n": 80,
+       "text": "    const title = this.translationService.instant('APP.BROWSE.SEARCH.SAVE_SEARCH.NAVBAR.TITLE', { number: children.length });",
+       "cited": false
+      },
+      {
+       "n": 81,
+       "text": "    mappedChildren.push({",
+       "cited": false
+      },
+      {
+       "n": 82,
+       "text": "      id: this.manageSearchesId,",
+       "cited": false
+      },
+      {
+       "n": 83,
+       "text": "      icon: '',",
+       "cited": false
+      },
+      {
+       "n": 84,
+       "text": "      title: 'APP.BROWSE.SEARCH.SAVE_SEARCH.NAVBAR.MANAGE_BUTTON',",
+       "cited": false
+      },
+      {
+       "n": 85,
+       "text": "      description: 'APP.BROWSE.SEARCH.SAVE_SEARCH.NAVBAR.MANAGE_BUTTON',",
+       "cited": false
+      },
+      {
+       "n": 86,
+       "text": "      route: 'saved-searches',",
+       "cited": false
+      },
+      {
+       "n": 87,
+       "text": "      url: 'saved-searches'",
+       "cited": false
+      },
+      {
+       "n": 88,
+       "text": "    });",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "952258187e",
+   "app": "alfresco",
+   "from": "/favorite/libraries",
+   "to": "/search",
+   "file": "assets/app.extensions.json",
+   "line": 381,
+   "title": "alfresco · /favorite/libraries → /search",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "blocks": [
+    {
+     "label": "assets/app.extensions.json:381",
+     "lines": [
+      {
+       "n": 369,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 370,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 371,
+       "text": "      {",
+       "cited": false
+      },
+      {
+       "n": 372,
+       "text": "        \"id\": \"app.toolbar.search\",",
+       "cited": false
+      },
+      {
+       "n": 373,
+       "text": "        \"order\": 90,",
+       "cited": false
+      },
+      {
+       "n": 374,
+       "text": "        \"title\": \"SEARCH.BUTTON.TOOLTIP\",",
+       "cited": false
+      },
+      {
+       "n": 375,
+       "text": "        \"icon\": \"search\",",
+       "cited": false
+      },
+      {
+       "n": 376,
+       "text": "        \"type\": \"button\",",
+       "cited": false
+      },
+      {
+       "n": 377,
+       "text": "        \"data\": {",
+       "cited": false
+      },
+      {
+       "n": 378,
+       "text": "          \"buttonType\": \"icon-button\"",
+       "cited": false
+      },
+      {
+       "n": 379,
+       "text": "        },",
+       "cited": false
+      },
+      {
+       "n": 380,
+       "text": "        \"actions\": {",
+       "cited": false
+      },
+      {
+       "n": 381,
+       "text": "          \"click\": \"SEARCH\"",
+       "cited": true
+      },
+      {
+       "n": 382,
+       "text": "        },",
+       "cited": false
+      },
+      {
+       "n": 383,
+       "text": "        \"rules\": {",
+       "cited": false
+      },
+      {
+       "n": 384,
+       "text": "          \"visible\": [",
+       "cited": false
+      },
+      {
+       "n": 385,
+       "text": "            \"!app.navigation.isSearchResults\"",
+       "cited": false
+      },
+      {
+       "n": 386,
+       "text": "          ]",
+       "cited": false
+      },
+      {
+       "n": 387,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 388,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 389,
+       "text": "      {",
+       "cited": false
+      },
+      {
+       "n": 390,
+       "text": "        \"id\": \"app.toolbar.share\",",
+       "cited": false
+      },
+      {
+       "n": 391,
+       "text": "        \"type\": \"custom\",",
+       "cited": false
+      },
+      {
+       "n": 392,
+       "text": "        \"order\": 100,",
+       "cited": false
+      },
+      {
+       "n": 393,
+       "text": "        \"data\": {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "9697af9fca",
+   "app": "k8sdash",
+   "from": "/login",
+   "to": "/search",
+   "file": "src/login/component.ts",
+   "line": 53,
+   "title": "k8sdash · /login → /search",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/k8sdash/modules/web"
+   ],
+   "blocks": [
+    {
+     "label": "src/login/component.ts:53",
+     "lines": [
+      {
+       "n": 41,
+       "text": "  ) {}",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "  ngOnInit(): void {",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "    this.route_.paramMap.pipe(map(() => window.history.state)).subscribe((state: StateError) => {",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "      if (state.error) {",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "        this.errors = [state.error];",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "      }",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "    });",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "  login(): void {",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "    this.authService_.login(this.getLoginSpec_()).subscribe({",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "      next: () => this.ngZone_.run(() => this.historyService_.goToPreviousState('workloads')),",
+       "cited": true
+      },
+      {
+       "n": 54,
+       "text": "      error: (err: HttpErrorResponse) => (this.errors = [AsKdError(err)]),",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "    });",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "  onChange(event: Event): void {",
+       "cited": false
+      },
+      {
+       "n": 59,
+       "text": "    this.token_ = (event.target as HTMLInputElement).value.trim();",
+       "cited": false
+      },
+      {
+       "n": 60,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 61,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 62,
+       "text": "  hasEmptyToken(): boolean {",
+       "cited": false
+      },
+      {
+       "n": 63,
+       "text": "    return !this.token_ || !this.token_.trim();",
+       "cited": false
+      },
+      {
+       "n": 64,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 65,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "9e3205e30b",
+   "app": "alfresco",
+   "from": "/repository/:folderId",
+   "to": "/search",
+   "file": "assets/app.extensions.json",
+   "line": 381,
+   "title": "alfresco · /repository/:folderId → /search",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "blocks": [
+    {
+     "label": "assets/app.extensions.json:381",
+     "lines": [
+      {
+       "n": 369,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 370,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 371,
+       "text": "      {",
+       "cited": false
+      },
+      {
+       "n": 372,
+       "text": "        \"id\": \"app.toolbar.search\",",
+       "cited": false
+      },
+      {
+       "n": 373,
+       "text": "        \"order\": 90,",
+       "cited": false
+      },
+      {
+       "n": 374,
+       "text": "        \"title\": \"SEARCH.BUTTON.TOOLTIP\",",
+       "cited": false
+      },
+      {
+       "n": 375,
+       "text": "        \"icon\": \"search\",",
+       "cited": false
+      },
+      {
+       "n": 376,
+       "text": "        \"type\": \"button\",",
+       "cited": false
+      },
+      {
+       "n": 377,
+       "text": "        \"data\": {",
+       "cited": false
+      },
+      {
+       "n": 378,
+       "text": "          \"buttonType\": \"icon-button\"",
+       "cited": false
+      },
+      {
+       "n": 379,
+       "text": "        },",
+       "cited": false
+      },
+      {
+       "n": 380,
+       "text": "        \"actions\": {",
+       "cited": false
+      },
+      {
+       "n": 381,
+       "text": "          \"click\": \"SEARCH\"",
+       "cited": true
+      },
+      {
+       "n": 382,
+       "text": "        },",
+       "cited": false
+      },
+      {
+       "n": 383,
+       "text": "        \"rules\": {",
+       "cited": false
+      },
+      {
+       "n": 384,
+       "text": "          \"visible\": [",
+       "cited": false
+      },
+      {
+       "n": 385,
+       "text": "            \"!app.navigation.isSearchResults\"",
+       "cited": false
+      },
+      {
+       "n": 386,
+       "text": "          ]",
+       "cited": false
+      },
+      {
+       "n": 387,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 388,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 389,
+       "text": "      {",
+       "cited": false
+      },
+      {
+       "n": 390,
+       "text": "        \"id\": \"app.toolbar.share\",",
+       "cited": false
+      },
+      {
+       "n": 391,
+       "text": "        \"type\": \"custom\",",
+       "cited": false
+      },
+      {
+       "n": 392,
+       "text": "        \"order\": 100,",
+       "cited": false
+      },
+      {
+       "n": 393,
+       "text": "        \"data\": {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "a2cf227581",
+   "app": "bitwarden",
+   "from": "/device-verification",
+   "to": "/remove-password",
+   "file": "../../libs/common/src/key-management/key-connector/services/key-connector.service.ts",
+   "line": 115,
+   "title": "bitwarden · /device-verification → /remove-password",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/bitwarden/apps/web"
+   ],
+   "blocks": [
+    {
+     "label": "../../libs/common/src/key-management/key-connector/services/key-connector.service.ts:115",
+     "lines": [
+      {
+       "n": 103,
+       "text": "        combineLatest([",
+       "cited": false
+      },
+      {
+       "n": 104,
+       "text": "          of(account.id),",
+       "cited": false
+      },
+      {
+       "n": 105,
+       "text": "          this.organizationService",
+       "cited": false
+      },
+      {
+       "n": 106,
+       "text": "            .organizations$(account.id)",
+       "cited": false
+      },
+      {
+       "n": 107,
+       "text": "            .pipe(filter((organizations) => organizations != null)),",
+       "cited": false
+      },
+      {
+       "n": 108,
+       "text": "          this.stateProvider",
+       "cited": false
+      },
+      {
+       "n": 109,
+       "text": "            .getUserState$(USES_KEY_CONNECTOR, account.id)",
+       "cited": false
+      },
+      {
+       "n": 110,
+       "text": "            .pipe(filter((usesKeyConnector) => usesKeyConnector != null)),",
+       "cited": false
+      },
+      {
+       "n": 111,
+       "text": "          tokenService.hasAccessToken$(account.id).pipe(filter((hasToken) => hasToken)),",
+       "cited": false
+      },
+      {
+       "n": 112,
+       "text": "        ]),",
+       "cited": false
+      },
+      {
+       "n": 113,
+       "text": "      ),",
+       "cited": false
+      },
+      {
+       "n": 114,
+       "text": "      switchMap(async ([userId, organizations, usesKeyConnector]) => {",
+       "cited": false
+      },
+      {
+       "n": 115,
+       "text": "        const loggedInUsingSso = await this.tokenService.getIsExternal(userId);",
+       "cited": true
+      },
+      {
+       "n": 116,
+       "text": "        const requiredByOrganization = this.findManagingOrganization(organizations) != null;",
+       "cited": false
+      },
+      {
+       "n": 117,
+       "text": "        const userIsNotUsingKeyConnector = !usesKeyConnector;",
+       "cited": false
+      },
+      {
+       "n": 118,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 119,
+       "text": "        return loggedInUsingSso && requiredByOrganization && userIsNotUsingKeyConnector;",
+       "cited": false
+      },
+      {
+       "n": 120,
+       "text": "      }),",
+       "cited": false
+      },
+      {
+       "n": 121,
+       "text": "    );",
+       "cited": false
+      },
+      {
+       "n": 122,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 123,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 124,
+       "text": "  async setUsesKeyConnector(usesKeyConnector: boolean, userId: UserId) {",
+       "cited": false
+      },
+      {
+       "n": 125,
+       "text": "    await this.stateProvider.getUser(userId, USES_KEY_CONNECTOR).update(() => usesKeyConnector);",
+       "cited": false
+      },
+      {
+       "n": 126,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 127,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "a2dedacf7b",
+   "app": "ghostfolio",
+   "from": "/blog/2024/11/black-weeks-2024",
+   "to": "/accounts/transfer-cash-balance",
+   "file": "../../libs/ui/src/lib/assistant/assistant.component.ts",
+   "line": 705,
+   "title": "ghostfolio · /blog/2024/11/black-weeks-2024 → /accounts/transfer-cash-balance",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/ghostfolio/apps/client"
+   ],
+   "blocks": [
+    {
+     "label": "../../libs/ui/src/lib/assistant/assistant.component.ts:705",
+     "lines": [
+      {
+       "n": 693,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 694,
+       "text": "  private searchQuickLinks(aSearchTerm: string): SearchResultItem[] {",
+       "cited": false
+      },
+      {
+       "n": 695,
+       "text": "    const searchTerm = aSearchTerm.toLowerCase();",
+       "cited": false
+      },
+      {
+       "n": 696,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 697,
+       "text": "    const isIncludedInAssistant = ({ excludeFromAssistant }: InternalRoute) => {",
+       "cited": false
+      },
+      {
+       "n": 698,
+       "text": "      if (isFunction(excludeFromAssistant)) {",
+       "cited": false
+      },
+      {
+       "n": 699,
+       "text": "        return excludeFromAssistant(this.user);",
+       "cited": false
+      },
+      {
+       "n": 700,
+       "text": "      }",
+       "cited": false
+      },
+      {
+       "n": 701,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 702,
+       "text": "      return !excludeFromAssistant;",
+       "cited": false
+      },
+      {
+       "n": 703,
+       "text": "    };",
+       "cited": false
+      },
+      {
+       "n": 704,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 705,
+       "text": "    const allRoutes = Object.values<InternalRoute>(internalRoutes)",
+       "cited": true
+      },
+      {
+       "n": 706,
+       "text": "      .filter(isIncludedInAssistant)",
+       "cited": false
+      },
+      {
+       "n": 707,
+       "text": "      .reduce<InternalRoute[]>((acc, route) => {",
+       "cited": false
+      },
+      {
+       "n": 708,
+       "text": "        acc.push(route);",
+       "cited": false
+      },
+      {
+       "n": 709,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 710,
+       "text": "        if (route.subRoutes) {",
+       "cited": false
+      },
+      {
+       "n": 711,
+       "text": "          acc.push(",
+       "cited": false
+      },
+      {
+       "n": 712,
+       "text": "            ...Object.values(route.subRoutes).filter(isIncludedInAssistant)",
+       "cited": false
+      },
+      {
+       "n": 713,
+       "text": "          );",
+       "cited": false
+      },
+      {
+       "n": 714,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 715,
+       "text": "        return acc;",
+       "cited": false
+      },
+      {
+       "n": 716,
+       "text": "      }, [])",
+       "cited": false
+      },
+      {
+       "n": 717,
+       "text": "      .filter((route): route is InternalRoute & { routerLink: string[] } => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "a766151390",
+   "app": "bitwarden",
+   "from": "/reports/breach-report",
+   "to": "/vault",
+   "file": "src/app/layouts/user-layout.component.html",
+   "line": 48,
+   "title": "bitwarden · /reports/breach-report → /vault",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/bitwarden/apps/web"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/layouts/user-layout.component.html:48",
+     "lines": [
+      {
+       "n": 36,
+       "text": "              [text]=\"'emergencyAccess' | i18n\"",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "              route=\"settings/emergency-access\"",
+       "cited": false
+      },
+      {
+       "n": 38,
+       "text": "            ></bit-nav-item>",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "          @if (!singleOrgPolicyApplies()) {",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "            <bit-nav-item [text]=\"'addPlan' | i18n\" route=\"settings/add-plan\"></bit-nav-item>",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "          <billing-free-families-nav-item></billing-free-families-nav-item>",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "          <bit-nav-item [text]=\"'exportNoun' | i18n\" route=\"tools/export\"></bit-nav-item>",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "        </bit-nav-group>",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "      </bit-nav-section>",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "    } @else {",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "      <bit-nav-item icon=\"bwi-vault\" [text]=\"'vaults' | i18n\" route=\"vault\"></bit-nav-item>",
+       "cited": true
+      },
+      {
+       "n": 49,
+       "text": "      @if (sendEnabled$ | async) {",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "        <bit-nav-item icon=\"bwi-send\" [text]=\"'send' | i18n\" route=\"sends\"></bit-nav-item>",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "      }",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "      <bit-nav-group",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "        icon=\"bwi-wrench\"",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "        [text]=\"'tools' | i18n\"",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "        route=\"tools\"",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "        [open]=\"toolsNavGroupOpen()\"",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "        [bitPopoverAnchorFor]=\"importCoachmark.popover()\"",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "        [popoverOpen]=\"importCoachmarkOpen() && !sideNavService.open()\"",
+       "cited": false
+      },
+      {
+       "n": 59,
+       "text": "        [position]=\"coachmarkService.getStepPosition('importData')\"",
+       "cited": false
+      },
+      {
+       "n": 60,
+       "text": "        [closeOnBackdropClick]=\"false\"",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bd386550a9",
+   "app": "k8sdash",
+   "from": "/login",
+   "to": "/overview",
+   "file": "src/login/component.ts",
+   "line": 53,
+   "title": "k8sdash · /login → /overview",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/k8sdash/modules/web"
+   ],
+   "blocks": [
+    {
+     "label": "src/login/component.ts:53",
+     "lines": [
+      {
+       "n": 41,
+       "text": "  ) {}",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "  ngOnInit(): void {",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "    this.route_.paramMap.pipe(map(() => window.history.state)).subscribe((state: StateError) => {",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "      if (state.error) {",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "        this.errors = [state.error];",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "      }",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "    });",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "  login(): void {",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "    this.authService_.login(this.getLoginSpec_()).subscribe({",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "      next: () => this.ngZone_.run(() => this.historyService_.goToPreviousState('workloads')),",
+       "cited": true
+      },
+      {
+       "n": 54,
+       "text": "      error: (err: HttpErrorResponse) => (this.errors = [AsKdError(err)]),",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "    });",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "  onChange(event: Event): void {",
+       "cited": false
+      },
+      {
+       "n": 59,
+       "text": "    this.token_ = (event.target as HTMLInputElement).value.trim();",
+       "cited": false
+      },
+      {
+       "n": 60,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 61,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 62,
+       "text": "  hasEmptyToken(): boolean {",
+       "cited": false
+      },
+      {
+       "n": 63,
+       "text": "    return !this.token_ || !this.token_.trim();",
+       "cited": false
+      },
+      {
+       "n": 64,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 65,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ccdd4bc116",
+   "app": "alfresco",
+   "from": "/personal-files/details/:nodeId/:activeTab",
+   "to": "/search",
+   "file": "assets/app.extensions.json",
+   "line": 381,
+   "title": "alfresco · /personal-files/details/:nodeId/:activeTab → /search",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "blocks": [
+    {
+     "label": "assets/app.extensions.json:381",
+     "lines": [
+      {
+       "n": 369,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 370,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 371,
+       "text": "      {",
+       "cited": false
+      },
+      {
+       "n": 372,
+       "text": "        \"id\": \"app.toolbar.search\",",
+       "cited": false
+      },
+      {
+       "n": 373,
+       "text": "        \"order\": 90,",
+       "cited": false
+      },
+      {
+       "n": 374,
+       "text": "        \"title\": \"SEARCH.BUTTON.TOOLTIP\",",
+       "cited": false
+      },
+      {
+       "n": 375,
+       "text": "        \"icon\": \"search\",",
+       "cited": false
+      },
+      {
+       "n": 376,
+       "text": "        \"type\": \"button\",",
+       "cited": false
+      },
+      {
+       "n": 377,
+       "text": "        \"data\": {",
+       "cited": false
+      },
+      {
+       "n": 378,
+       "text": "          \"buttonType\": \"icon-button\"",
+       "cited": false
+      },
+      {
+       "n": 379,
+       "text": "        },",
+       "cited": false
+      },
+      {
+       "n": 380,
+       "text": "        \"actions\": {",
+       "cited": false
+      },
+      {
+       "n": 381,
+       "text": "          \"click\": \"SEARCH\"",
+       "cited": true
+      },
+      {
+       "n": 382,
+       "text": "        },",
+       "cited": false
+      },
+      {
+       "n": 383,
+       "text": "        \"rules\": {",
+       "cited": false
+      },
+      {
+       "n": 384,
+       "text": "          \"visible\": [",
+       "cited": false
+      },
+      {
+       "n": 385,
+       "text": "            \"!app.navigation.isSearchResults\"",
+       "cited": false
+      },
+      {
+       "n": 386,
+       "text": "          ]",
+       "cited": false
+      },
+      {
+       "n": 387,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 388,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 389,
+       "text": "      {",
+       "cited": false
+      },
+      {
+       "n": 390,
+       "text": "        \"id\": \"app.toolbar.share\",",
+       "cited": false
+      },
+      {
+       "n": 391,
+       "text": "        \"type\": \"custom\",",
+       "cited": false
+      },
+      {
+       "n": 392,
+       "text": "        \"order\": 100,",
+       "cited": false
+      },
+      {
+       "n": 393,
+       "text": "        \"data\": {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "d494470e52",
+   "app": "ghostfolio",
+   "from": "/home/holdings",
+   "to": "/accounts/transfer-cash-balance",
+   "file": "../../libs/ui/src/lib/assistant/assistant.component.ts",
+   "line": 705,
+   "title": "ghostfolio · /home/holdings → /accounts/transfer-cash-balance",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/ghostfolio/apps/client"
+   ],
+   "blocks": [
+    {
+     "label": "../../libs/ui/src/lib/assistant/assistant.component.ts:705",
+     "lines": [
+      {
+       "n": 693,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 694,
+       "text": "  private searchQuickLinks(aSearchTerm: string): SearchResultItem[] {",
+       "cited": false
+      },
+      {
+       "n": 695,
+       "text": "    const searchTerm = aSearchTerm.toLowerCase();",
+       "cited": false
+      },
+      {
+       "n": 696,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 697,
+       "text": "    const isIncludedInAssistant = ({ excludeFromAssistant }: InternalRoute) => {",
+       "cited": false
+      },
+      {
+       "n": 698,
+       "text": "      if (isFunction(excludeFromAssistant)) {",
+       "cited": false
+      },
+      {
+       "n": 699,
+       "text": "        return excludeFromAssistant(this.user);",
+       "cited": false
+      },
+      {
+       "n": 700,
+       "text": "      }",
+       "cited": false
+      },
+      {
+       "n": 701,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 702,
+       "text": "      return !excludeFromAssistant;",
+       "cited": false
+      },
+      {
+       "n": 703,
+       "text": "    };",
+       "cited": false
+      },
+      {
+       "n": 704,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 705,
+       "text": "    const allRoutes = Object.values<InternalRoute>(internalRoutes)",
+       "cited": true
+      },
+      {
+       "n": 706,
+       "text": "      .filter(isIncludedInAssistant)",
+       "cited": false
+      },
+      {
+       "n": 707,
+       "text": "      .reduce<InternalRoute[]>((acc, route) => {",
+       "cited": false
+      },
+      {
+       "n": 708,
+       "text": "        acc.push(route);",
+       "cited": false
+      },
+      {
+       "n": 709,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 710,
+       "text": "        if (route.subRoutes) {",
+       "cited": false
+      },
+      {
+       "n": 711,
+       "text": "          acc.push(",
+       "cited": false
+      },
+      {
+       "n": 712,
+       "text": "            ...Object.values(route.subRoutes).filter(isIncludedInAssistant)",
+       "cited": false
+      },
+      {
+       "n": 713,
+       "text": "          );",
+       "cited": false
+      },
+      {
+       "n": 714,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 715,
+       "text": "        return acc;",
+       "cited": false
+      },
+      {
+       "n": 716,
+       "text": "      }, [])",
+       "cited": false
+      },
+      {
+       "n": 717,
+       "text": "      .filter((route): route is InternalRoute & { routerLink: string[] } => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "de3c40ca6c",
+   "app": "alfresco",
+   "from": "/libraries",
+   "to": "/search",
+   "file": "assets/app.extensions.json",
+   "line": 381,
+   "title": "alfresco · /libraries → /search",
+   "claim": "Claim: the highlighted line belongs to a trigger that is shown on {from} and lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/alfresco/projects/aca-content"
+   ],
+   "blocks": [
+    {
+     "label": "assets/app.extensions.json:381",
+     "lines": [
+      {
+       "n": 369,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 370,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 371,
+       "text": "      {",
+       "cited": false
+      },
+      {
+       "n": 372,
+       "text": "        \"id\": \"app.toolbar.search\",",
+       "cited": false
+      },
+      {
+       "n": 373,
+       "text": "        \"order\": 90,",
+       "cited": false
+      },
+      {
+       "n": 374,
+       "text": "        \"title\": \"SEARCH.BUTTON.TOOLTIP\",",
+       "cited": false
+      },
+      {
+       "n": 375,
+       "text": "        \"icon\": \"search\",",
+       "cited": false
+      },
+      {
+       "n": 376,
+       "text": "        \"type\": \"button\",",
+       "cited": false
+      },
+      {
+       "n": 377,
+       "text": "        \"data\": {",
+       "cited": false
+      },
+      {
+       "n": 378,
+       "text": "          \"buttonType\": \"icon-button\"",
+       "cited": false
+      },
+      {
+       "n": 379,
+       "text": "        },",
+       "cited": false
+      },
+      {
+       "n": 380,
+       "text": "        \"actions\": {",
+       "cited": false
+      },
+      {
+       "n": 381,
+       "text": "          \"click\": \"SEARCH\"",
+       "cited": true
+      },
+      {
+       "n": 382,
+       "text": "        },",
+       "cited": false
+      },
+      {
+       "n": 383,
+       "text": "        \"rules\": {",
+       "cited": false
+      },
+      {
+       "n": 384,
+       "text": "          \"visible\": [",
+       "cited": false
+      },
+      {
+       "n": 385,
+       "text": "            \"!app.navigation.isSearchResults\"",
+       "cited": false
+      },
+      {
+       "n": 386,
+       "text": "          ]",
+       "cited": false
+      },
+      {
+       "n": 387,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 388,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 389,
+       "text": "      {",
+       "cited": false
+      },
+      {
+       "n": 390,
+       "text": "        \"id\": \"app.toolbar.share\",",
+       "cited": false
+      },
+      {
+       "n": 391,
+       "text": "        \"type\": \"custom\",",
+       "cited": false
+      },
+      {
+       "n": 392,
+       "text": "        \"order\": 100,",
+       "cited": false
+      },
+      {
+       "n": 393,
+       "text": "        \"data\": {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
