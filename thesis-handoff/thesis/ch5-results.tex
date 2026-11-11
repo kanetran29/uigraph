@@ -18,6 +18,13 @@ support in view, so results are likely optimistic for Angular applications gener
 \subsection{The two levels of loss (RQ1)}
 \label{sec:res-baseline}
 
+Every screen the independent route parser declares has a node on all six applications; against the
+addresses the running framework mounts, the graph has \ProbeNodes{}/\ProbeScreens{}, the missing leaf
+screens almost all behind one construct in ghostfolio. The witness check finds
+\MustWitnessViolations{} failures among the \MustWitnessEdges{} must edges of the attributed tier,
+\MustWitnessUnread{} of which it cannot read. With attribution, \CensusMustSites{} constructs earn must, and \CensusMustKdash{} of the \CensusMust{} must edges come from one
+toolbar in k8s dashboard.
+
 RQ1 measures declared screens represented as nodes and navigation constructs yielding deterministic
 transitions (Section~\ref{sec:metrics}). Nodes are a precondition for transitions, but the first
 ratio does not numerically bound the second, because the first counts screens and the second counts constructs.
@@ -39,7 +46,7 @@ whether they vary at run time.
 
 Mifos, the largest application, holds \MayOnlyConstructsMifos{} of these \MayOnlyConstructs{}
 locations. It also holds most of the corpus's constructs and edges
-(Sections~\ref{sec:res-accounting} and~\ref{sec:res-soundness}), so it dominates the corpus-wide
+(cf.~Section~\ref{sec:res-accounting} and the whole graph below), so it dominates the corpus-wide
 counts of constructs and edges and the shares pooled from them.
 
 \begin{table}[t]\footnotesize
@@ -63,13 +70,36 @@ The two readers still disagree about a handful of addresses. Two qualifications 
 
 \begin{itemize}
 \item The denominator is the screens a \emph{static reader} can enumerate. Against the addresses
-the running framework mounts, the same node set is \ProbeNodes{}/\ProbeScreens{}
-(see the runtime route oracle below). Almost all of the difference is one construct in one application
+the running framework mounts, the same node set is \ProbeNodes{}/\ProbeScreens{}. Almost all of the difference is one construct in one application
 that the extractor declares unread.
 \item The two static readers were partly corrected against each other, so their agreement is weaker evidence. The runtime route oracle is the external
-check, and it finds no node at an address where the framework mounts nothing
-(cf.~Section~\ref{sec:res-unmounted}).
+check, and it finds no node at an address where the framework mounts nothing.
 \end{itemize}
+
+\paragraph{The node set.} The number of screens the compared graph declares at unmounted
+addresses is \ProbeInvented{}. Every claimed address appears in the framework configuration. That
+match is external evidence for the six applications, because static readers can agree on an
+incorrect prefix. Node validity is a precondition of the must-tier property rather than part of it. The address-based census excludes named
+outlets and \texttt{UrlMatcher} entries (\ProbeUnaddressableScreens{} route entries) from both columns.
+
+\paragraph{The runtime route oracle.}\label{sec:res-probe} The oracle loads each application,
+built in its development configuration, in a headless browser. It reads the live router's route
+configuration after expanding every lazily loaded subtree. An address counts as mounted when the
+configuration places a component there on the primary outlet. The oracle parses no route file. Of the
+\ProbeScreens{} mounted addresses, the graph represents \ProbeNodes{}/\ProbeScreens{}. The
+\ProbeMissed{} missing addresses are leaf screens. Besides them, the mounted addresses without a
+node include prefixes, which are not missing screens: \ProbeMissedPrefixRedirect{} with a redirect
+into the subtree below and \ProbeMissedPrefixUnanswered{} with a layout alone,
+\ProbeMissedPrefixOnly{} in all.
+
+The applications were probed once, on 29--30 October, against an earlier graph already corrected
+using oracle findings. Against the final graph, the archived configuration gives identical counts
+and address sets on \ProbeFinalSame{} of the \ProbeFinalApps{} applications. The final counts are
+\ProbeFinalNodes{} for nodes, \ProbeFinalInvented{} for unmounted addresses and
+\ProbeFinalMissed{} for missing leaf screens. Navigation checks agree with the oracle on
+\ProbeAnswerAgreed{}/\ProbeAnswerChecked{} addresses, and the \ProbeMissed{} missing addresses were
+not checked individually.
+
 
 This completeness concerns only resolvable screens. Blind-spot counts identify but do not bound
 omissions: one unresolved route entry can conceal many screens.
@@ -133,32 +163,13 @@ Among \RoundTwoJudged{} judged citations, \RoundTwoJudgedClean{}
 are clean; no remaining citation belongs to a must edge. Must-tier consistency does not describe
 the whole graph.
 
-\paragraph{The node set.} The number of screens the compared graph declares at unmounted
-addresses is \ProbeInvented{}. Every claimed address appears in the framework configuration. That
-match is external evidence for the six applications, because static readers can agree on an
-incorrect prefix. Node validity is a precondition of the must-tier property rather than part of it. The address-based census excludes named
-outlets and \texttt{UrlMatcher} entries (\ProbeUnaddressableScreens{} route entries) from both columns.
-
-\paragraph{The runtime route oracle.}\label{sec:res-probe} The oracle loads each application,
-built in its development configuration, in a headless browser. It reads the live router's route
-configuration after expanding every lazily loaded subtree. An address counts as mounted when the
-configuration places a component there on the primary outlet. The oracle parses no route file. Of the
-\ProbeScreens{} mounted addresses, the graph represents \ProbeNodes{}/\ProbeScreens{}. The
-\ProbeMissed{} missing addresses are leaf screens. Besides them, the mounted addresses without a
-node include prefixes, which are not missing screens: \ProbeMissedPrefixRedirect{} with a redirect
-into the subtree below and \ProbeMissedPrefixUnanswered{} with a layout alone,
-\ProbeMissedPrefixOnly{} in all.
-
-The applications were probed once, on 29--30 October, against an earlier graph already corrected
-using oracle findings. Against the final graph, the archived configuration gives identical counts
-and address sets on \ProbeFinalSame{} of the \ProbeFinalApps{} applications. The final counts are
-\ProbeFinalNodes{} for nodes, \ProbeFinalInvented{} for unmounted addresses and
-\ProbeFinalMissed{} for missing leaf screens. Navigation checks agree with the oracle on
-\ProbeAnswerAgreed{}/\ProbeAnswerChecked{} addresses, and the \ProbeMissed{} missing addresses were
-not checked individually.
-
 \subsection{Where static extraction fails, and why (RQ2)}
 \label{sec:res-defects}
+
+Under the precedence of the loss rules, attribution is the largest loss category in every
+application: the two attribution categories contain
+\AttrLost{} of \RoundTwoInScopeAll{} constructs. The lazy-boundary, constant-path and unlinked-component
+classes have no instances on the final version.
 
 Table~\ref{tab:defects} separates evidence from named evaluation methods and other observations.
 The guard class has no named method. Attribution, addressed by Chapter~\ref{ch:analysis}, relies
@@ -226,6 +237,9 @@ and then compares the analysis with earlier work.
 
 \subsubsection{What attribution recovers}
 \label{sec:res-recovers}
+
+Attribution recovers \AttrRecovered{}/\AttrLost{} assigned constructs, \AttrRecoveredMust{} at must and
+\AttrRecoveredMay{} at may.
 
 Table~\ref{tab:before-after} compares identical inputs with and without attribution, construct by
 construct. A baseline attribution loss is \emph{recovered} if a
@@ -368,7 +382,7 @@ level would credit direct ownership with sites that only the stand-ins place.
 \end{table}
 
 Containment adds the most sites. The pre-existing shell rule adds the most (site, screen) pairs and
-reference recall. Outlet descent mostly widens scopes; counts alone cannot validate this width, which the next subsection evaluates. Full adds the member-level service call graph, fallback join
+reference recall. Outlet descent mostly widens scopes; counts alone cannot validate this width. Full adds the member-level service call graph, fallback join
 and guard/effect stand-ins, which only full and its class variant include. Relative to the class
 rule it replaced, the call graph adds \AblationCallGraphNetSites{} sites
 (\AblationCallGraphNetShare{} of all sites the \emph{full} level places) and \AblationCallGraphNetPairs{} pairs.
@@ -383,6 +397,11 @@ guards or effects rather than components.
 
 \subsubsection{Checks of the computed scopes}
 \label{sec:res-checks}
+
+In the one direction the rendered interface can test, on \ScopeJudged{}/\ScopeScreens{} judged screens,
+the computed scopes predict \ScopeConfirmed{} of the \ScopePairs{} rendered (screen, target) pairs
+(\ScopeConfirmedShare{}). With the extractor frozen before the suite logs were read, the graph held
+\EtoEMifosHitUnfixed{}/\EtoEMifosPairs{} of mifos's suite pairs.
 
 \paragraph{Checking the scopes against the running interface.}
 \label{sec:res-scope}
@@ -491,8 +510,8 @@ levels, but is less precise than both those levels and the class join.
   under a protocol committed before scoring (\path{ground-truth/ALFRESCO-PROTOCOL.txt}).
   \GTAlfUndetermined{} undetermined sites are not scored. Afterwards, a second assistant run read the four lines
   that the scorer reported as placed but unlisted, using only line numbers and no graph placements
-  (Table~\ref{tab:ai-readings}). None was a navigation site. They were added as excluded, a protocol deviation: only adding missed
-  sites was permitted. The addition changes no figure because unlisted lines are not scored.
+  (Table~\ref{tab:ai-readings}). None was a navigation site. They were added to the reference as excluded; no figure changes
+  because unlisted lines are not scored (cf.~Appendix~\ref{app:deviations}).
 \item \emph{A configuration-driven site accounts for all full-level excess on alfresco.}
   The number of sites with full-level excess is \GTAlfFullExcessSites{}:
   \texttt{navigateToSearch} produces all \GTAlfFullExcess{} excess pairs. Its only caller is an
@@ -582,12 +601,16 @@ misses would mostly be a scope too narrow or a site not read, are not scored.
 \subsubsection{Comparison with earlier work}
 \label{sec:res-compare}
 
+On Rima et al.'s seven subjects, the out-of-sample comparison, the full level holds \RimaHitFull{}
+of the \RimaPairs{} reference pairs and the \emph{outlet} level \RimaHitOutlet{}; against their tool,
+this extractor's relative recall there is \HHRimaOursRecall{} and theirs \HHRimaTheirsRecall{}.
+
 \paragraph{Comparison with earlier mechanisms.}
 \label{sec:res-earlier}
 
 Table~\ref{tab:earlier} compares no attribution, earlier work's mechanism (\emph{rooted}) and full
 analysis. Rooted reimplements the mechanism using this extractor's nodes
-(Section~\ref{sec:res-ablation}). Only Rima et al.'s subjects, compared below, are out-of-sample.
+(Section~\ref{sec:res-ablation}). Only Rima et al.'s subjects are out-of-sample.
 
 \begin{table}[t]\footnotesize
 \caption{The graph without attribution, with the mechanism of earlier work (\emph{rooted}), and with the full analysis.}
@@ -639,7 +662,7 @@ times narrower than universal attribution (Section~\ref{sec:res-width}). Width a
 establish over-attribution. Full produces no excess reference pair on \GTApp{}. On alfresco it
 produces \GTAlfFullExcess{} excess pairs, all at the configuration-driven site of
 Section~\ref{sec:res-groundtruth}, and it places an undetermined site at $\top$. Both references
-cover two applications and share the limit stated in Section~\ref{sec:res-groundtruth}.
+cover two applications and share the limit stated there.
 Over-attribution can pass witness checks, and the suites test omissions alone.
 
 \paragraph{On the applications of Rima et al.}
@@ -723,9 +746,8 @@ The
 run logs of the head-to-head comparison record Claude Sonnet 5.5 as the reader and Claude Opus 5.5
 as the stronger model. The archived records of the other readings do not name the model, so for
 them the model rests on my own record. Table~\ref{tab:ai-readings} states how the
-assessments were checked. Adversarial review found that one response wrongly classified a shell bar
-as rendered on sign-in and password-reset screens, where a guard hides it, and I corrected the affected
-assessments against the source.
+assessments were checked. A correction to the assessments after adversarial review is recorded in
+Appendix~\ref{app:deviations}.
 
 The comparison prompted four repairs (Table~\ref{tab:repairs}), after which the post-hoc
 re-extraction holds \RimaRepHitFull{}/\RimaPairs{} reference pairs and \RimaRepExtra{} additional
@@ -824,13 +846,14 @@ Assessment of \HHRead{} pairs follows the first comparison's rules and was check
 Table~\ref{tab:ai-readings} states. My re-read took up to three assessments per stratum of the
 five-application figures and agreed with \HHAuthorAgree{} of \HHAuthorJudged{} (Wilson 95\,\%
 interval \HHAuthorAgreeRange{}). The model verdict was visible, so this measures agreement rather
-than correctness. An initial pass incorrectly paired start routes of non-navigating workflows.
-It was withdrawn; valid remaining assessments were reused and new sample pairs assessed.
-Mifos estimates reuse those samples after excluding cross-mount moves. Preregistration deviations
-are recorded with the results.
+than correctness. The withdrawn first pass is described in
+Appendix~\ref{app:deviations}; every deviation is listed with the results
+(\path{rima/head2head/DEVIATIONS.txt}).
 
 \subsection{Change sensitivity (RQ4)}
 \label{sec:res-mutation}
+
+The graph responded to \MutDetected{} of \MutScored{} scored mutants.
 
 Mutation testing re-extracts each application per mutant, so it covers three of six applications:
 realworld and alfresco, used in earlier mutation runs, and guard-heavy bitwarden. Results use the
@@ -885,6 +908,10 @@ In this sample the graph responded to every scored change (\MutDetected{}/\MutSc
 
 \subsection{What the losses were (RQ5)}
 \label{sec:res-round2}
+
+The cause trace assigns every repaired class to the tool, and two causes lie beyond any reader of a
+route table. \AttrRemainingUnexplained{} of the \AttrRemaining{} constructs still lost to attribution have no
+reason found.
 
 RQ5 traces the defect classes of Section~\ref{sec:res-defects} to causes in the final version,
 using the three outcomes defined in Section~\ref{sec:metrics}.
