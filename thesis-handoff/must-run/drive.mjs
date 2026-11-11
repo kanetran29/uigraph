@@ -154,6 +154,7 @@ async function runLogin(page, login, base, hash) {
  */
 async function checkEdge(page, edge, opts) {
   const result = (outcome, landed = null, detail = null) => ({ ...edge, outcome, landed, detail });
+  if (!edge.fromUrl) return result('unreached', null, 'no concrete value for the parameters of the source screen');
   const t0 = Date.now();
   try {
     await page.goto(appUrl(opts.base, opts.hash, edge.fromUrl), { waitUntil: 'domcontentloaded', timeout: 60000 });

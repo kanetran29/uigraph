@@ -1,0 +1,12 @@
+Deviations from PREREGISTRATION.txt (must-tier runtime check)
+
+1. mifos, 11 Nov 2026: the e2e compose file also starts a web-app container built from the
+   source; it was stopped and the instrumented dev server (npm run start:local, proxy to the
+   pinned Fineract) served the application instead, so the marked templates were the ones run.
+2. mifos: the login steps were adjusted twice before the first edge ran (the submit control is
+   the custom element .login-submit-button); no edge outcome was recorded before the login
+   worked, and the credentials are the seed super-user named in the repository's Playwright
+   config (playwright/config/roles.ts).
+3. drive.mjs (drafted by an assistant from a written specification) was given one guard before
+   the first run: an edge whose source screen has no concrete URL is recorded as unreached
+   instead of crashing the driver. mifos's /organization/exchange-rates/:id had no value.
