@@ -43,6 +43,9 @@ corrections (`rima/corrections.json`); it does not say whether he read tiers 2 t
 first answer on sheet A or B the author adds one line here saying whether he did. The thesis text
 (Section 5, first comparison) also describes the five misses and the causes of the spurious pairs.
 
+Author's statement, 11 Nov 2026, before any answer on sheet A or B: I never read tiers 2 to 4 of
+`rima/STUDENT-READING.md`.
+
 Shared code: `sheet-lib.mjs` (ids, excerpts, the application directories of
 `rima/head2head/apps.txt`, the reading rule shown at the top of sheets A and B). Every sheet orders
 its items by id, a hash of the item.
