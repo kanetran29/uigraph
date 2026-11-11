@@ -33,9 +33,9 @@ $(s, \sigma, g, s')$. The paragraph on witnesses below says how constructs are t
 \end{definition}
 
 \textbf{Nodes outside the model.} The extractor emits two nonscreen node kinds outside the
-edge relation. An \emph{unplaced origin} represents a component and navigation sites that
+edge relation. An \emph{unplaced origin} represents a component and navigation constructs that
 could not be assigned to a screen. A \emph{dynamic target} represents an unresolved
-destination. These preserve unplaced sites, which the loss counts need, and unresolved destinations that may
+destination. These preserve unplaced constructs, which the loss counts need, and unresolved destinations that may
 still occur at run time. An edge from an unplaced origin is labelled \emph{may}, or \emph{unknown}
 if it reaches a dynamic target, and counts in its tier although, with a nonscreen source, it lies outside $E$. An edge to a dynamic target likewise lies outside $E$, since its target is no screen; it records outgoing navigation without identifying the destination
 screen. Claim~\ref{claim:must} and must conversion (RQ1) concern only edges between screens.
@@ -46,12 +46,12 @@ edge whose modality could not be determined, including unresolved destinations. 
 extractor uses it for exactly the edges to a dynamic target, the \texttt{u\_}\,sink that records
 events with unresolved targets. Unknown edges lie outside $E$, because their target is not a screen; they count towards totals
 but towards no rate. The model also assigns \emph{unknown} to navigation inside signal effects
-(Section~\ref{sec:boundary}), but this version emits none.
+(Section~\ref{sec:boundary}), but the extractor emits none.
 
 The artefact also records numeric \emph{confidence}: $1$ for must, at most $0.6$ for may,
 and $0$ for dynamic targets. This numeric confidence is outside the model, and all figures use modalities.
 
-The tool stores guards as source text and does not evaluate them, which avoids representing application state.
+The extractor stores guards as source text and does not evaluate them, which avoids representing application state.
 
 \textbf{Screens and routes.} Not every configured route contributes a screen to $S$. Write $\mathit{Routes}$ for the routes the application
 declares and $\mathit{component}(r)$ for the component that route $r$ renders. Then
@@ -81,12 +81,12 @@ screens, which requires the attribution of Section~\ref{sec:attribution}.
 \textbf{Witnesses.} Each static or runtime edge has a witness: its generating construct's file
 and line, or an observation identifier. When constructs produce the same edge, one becomes
 the primary witness and the others are recorded as merged witnesses.
-The base graph requires witnesses, and manual edges stay in a separate overlay. The first
+The base graph, the edges the extractor emits, requires witnesses; edges added by hand, the manual edges, stay in a separate overlay. The first
 evaluation method checks this mechanically (cf.~Section~\ref{sec:protocol}).
 
 \textbf{The soundness claim.} The thesis takes the soundiness position of
 Section~\ref{sec:soundiness} and states its claim relative to four assumptions. For each
-assumption the list gives a class of counterexample, a kind of program or execution on which the assumption
+assumption the list gives a counterexample, a kind of program or execution on which the assumption
 fails and the claim can fail with it.
 \begin{description}
 \item[A1. Routes and route order.] The routes are those the application declares, and a
@@ -98,7 +98,7 @@ among the declared approximations.
 the fallback of the nesting relation when no import resolves the selector
 (Sections~\ref{sec:inputs} and~\ref{sec:implementation}). A join that places a component on a
 screen that never renders it is a counterexample.
-\item[A3. Calls.] In handling the event of a must edge, no call that the reader cannot resolve to a body in the application starts a
+\item[A3. Calls.] In handling the event of a must edge, no call that the extractor cannot resolve to a body in the application starts a
 navigation, and no work that the handler schedules for later starts one. A library call that
 navigates is a counterexample, and so is a callback that the handler schedules and that
 navigates.
@@ -127,7 +127,7 @@ to A1 to A4, on the navigations that occur whenever their triggering code runs.
 
 \textbf{What the evaluation tests.} The evaluation tests only a necessary condition of
 Claim~\ref{claim:must}. The witness check
-inspects every cited source location for agreement with the
+inspects every cited site for agreement with the
 edge's destination. If the construct supporting a must label names another destination,
 the claim fails there. Agreement does not establish the claim. Other cited constructs
 support may edges only and are not judged against it.
@@ -181,8 +181,8 @@ route its address is matched through. They are also the \texttt{canActivate}, \t
 resolvers of every route it enters (\texttt{canLoad} is taken as run every time). Next come the
 \texttt{canActivateChild} of every route above those. Last come the \texttt{canDeactivate} of every
 route it leaves. A route the source and the target share is re-run only if its parameters can
-change or its \texttt{runGuardsAndResolvers} policy directs. A shell or anchor edge is judged per
-screen and drawn per screen where the screens disagree.
+change or its \texttt{runGuardsAndResolvers} policy directs. The modality of a shell or anchor edge is judged separately for each screen. The edge is drawn
+separately for each screen on which those judgements differ.
 
 A handler is a member that the framework calls itself: a lifecycle hook, or a member that
 \texttt{@HostListener} registers. A handler is also a member that the template binds to an event as a bare call outside
@@ -205,12 +205,12 @@ mutation sweep deletes each rule in turn and requires a test failure
 (Table~\ref{tab:repairs}). The tests share the extractor's interpretation, and no second
 classifier derives it independently. The declared artificial intelligence (AI) assistant checked final must-tier
 constructs against source with the extractor's decisions visible. This tests whether the
-decisions are defensible, but not whether an independent reading reproduces them. An earlier review of a development tier found condition-rule
+decisions are defensible, but not whether an independent reading reproduces them. An earlier review of a development version found condition-rule
 defects that the witness check missed (Appendix~\ref{app:corrections}). That check establishes only source-site existence and target agreement. The stronger claim rests on the demotion rules
 and remains independently unverified.
 
 \textbf{Scope of the claim.} This thesis claims soundness for the must tier alone. A may witness establishes that a call site exists, not that its
-transition ever occurs. Target agreement at the witness location is meaningful for must
+transition ever occurs. Target agreement at the witness site is meaningful for must
 edges and literal-target may edges, but not for over-approximated edges, where applying it produces spurious failures (Table~\ref{tab:repairs}). No soundness property is claimed for may or unknown.
 
 \textbf{The may tier as a design intent.} Following modal transition systems
@@ -226,7 +226,7 @@ defect. No completeness theorem is claimed.
 \label{sec:attribution}
 
 Scope attribution uses five \emph{input relations}. The evaluated analysis implements three
-of them, the call graph without per-injector bindings:
+of them (the third, the call graph, without per-injector bindings):
 \begin{itemize}
 \item component nesting ($N$): which component's template instantiates which;
 \item router outlets: which components lie on the path from the root to an outlet, and below a
@@ -244,7 +244,7 @@ Section~\ref{sec:scope} hold for the fixpoint alone.
 Guards returning \texttt{UrlTree}, the injector hierarchy, and navigation inside signal effects
 and observable subscriptions (labelled \emph{unknown}, Section~\ref{sec:boundary}) are features
 that the extractor approximates or omits; the parts of Algorithm~\ref{alg:attribution} marked
-\emph{model only} are listed in Section~\ref{sec:inputs}. A site assigned no scope by implemented relations contributes
+\emph{model only} are listed in Section~\ref{sec:inputs}. A construct assigned no scope by the implemented relations contributes
 no edge and counts as lost to service attribution.
 
 \subsubsection{The defect being addressed}
@@ -295,7 +295,7 @@ scope.
 and no screen can reach it, so contributing no edge is the correct answer.
 \item A site is \emph{unresolved} when $\mathit{scope}(x) = \varnothing$ because no rule of the
 analysis reaches it (a navigation in a service nothing is known to inject, or behind a construct
-the reader could not follow). The true scope is unknown.
+the extractor could not follow). The true scope is unknown.
 \end{itemize}
 Both yield $\bot$, which cannot distinguish them: an empty computed scope means only that the
 analysis has assigned no source screen to the site, not that the site is unreachable. The extractor
@@ -402,7 +402,7 @@ Its result is not the least solution of this system or of any restriction of it.
 Five parts of Algorithm~\ref{alg:attribution} are marked \emph{model only}: they belong to the
 analysis, but the prototype evaluated in this thesis does not implement them. Two are seed scopes:
 leave guards, which run as the user leaves a route, and HTTP interceptors, which are registered for
-the whole application. The other two are the input relations dispatch ($D$) and entry guards ($T$,
+the whole application. Two more are the input relations dispatch ($D$) and entry guards ($T$,
 Section~\ref{sec:extensions}). The prototype replaces both guard rules with one stand-in that gives
 a guard the screen of each route naming it, and gives effects $\top$ in place of $D$. It has no
 interceptor rule: an interceptor is scoped like any other service, through its callers and the
@@ -417,7 +417,7 @@ graph $\mathit{CG}$: the prototype collects bindings application-wide.
 A guard returning \texttt{UrlTree} initiates navigation, typically to login. A
 \texttt{canActivate} or \texttt{canMatch} guard on $r$ redirects from the navigation's source
 screen, not the guarded route. Only \texttt{canDeactivate} redirects from a screen in
-$\mathit{subtree}(r)$ itself. The prototype does not implement this edge class.
+$\mathit{subtree}(r)$ itself. The prototype does not implement this kind of edge.
 
 The model's edge guard conjoins structural conditions from screen to call site with the
 router guards run during navigation (Section~\ref{sec:model}). The measured graph omits
@@ -464,7 +464,7 @@ also renders on descendant screens, where links still resolve against that compo
 Write $\mathit{holder}(s, c)$ for the nearest route at or above screen $s$ whose component is
 $c$. A relative target at a site in component $c$ that fires on $s$ resolves against the path of $\mathit{holder}(s, c)$. If no route on that chain renders $c$, as with template-nested
 components, the full target's base is unresolved and the edge is may
-(Table~\ref{tab:demotion}). A target prefix falls back to $s$'s address; all prefix edges are may.
+(Table~\ref{tab:demotion}). A target prefix, the static leading segments of a target whose later segments are parameters, falls back to $s$'s address, and all prefix edges are may.
 
 \subsubsection{Extensions not evaluated}
 \label{sec:extensions}
@@ -488,7 +488,7 @@ The accompanying extractor was built for this thesis and evaluated at commit \te
 operations; framework adapters map source constructs to that model. The Angular adapter uses
 the TypeScript compiler API to analyse routes, templates and class code. It emits screens and
 edges for \texttt{routerLink} attributes and \texttt{Router.navigate} calls, with the generating
-rule identifier and source location as witnesses.
+rule identifier and source site as witnesses.
 
 The Angular adapter's separate attribution pass is enabled with \texttt{-{}-attribution}.
 Disabling it reproduces the baseline edge set on every corpus application. The pass implements
@@ -508,18 +508,18 @@ Figure~\ref{fig:lattice} distinguishes levels representing earlier work from thi
   \node[lvl, fill=warmlight] (full) at (112mm,0) {full};
   \foreach \x/\y in {own/nest,nest/root,root/out,out/full} \path (\x) -- node{$\subset$} (\y);
   \node[lbl, below=2mm of own] {the routed\\component's own file};
-  \node[lbl, below=2mm of nest] {+ template\\containment};
+  \node[lbl, below=2mm of nest] {+ template\\nesting};
   \node[lbl, below=2mm of root] {+ shell rule\\(Oshima and Kishi)};
   \node[lbl, below=2mm of out] {+ outlet descent\\(Rima et al.)};
   \node[lbl, below=2mm of full, text width=30mm] {+ \mbox{injected-service} join\\by member-level\\call graph (this thesis)};
   \node[lvl, fill=warmlight] (cls) at (112mm,15mm) {class};
   \draw[->] (out.north) |- node[above, pos=0.8]{$\subset$} (cls.west);
   \draw[dashed, muted] (cls) -- (full);
-  \node[lbl, above=1mm of cls, text width=26mm] {beside \emph{full}: service join per class};
+  \node[lbl, above=1mm of cls, text width=26mm] {beside \emph{full}: the class join};
 \end{tikzpicture}
-\caption{Attribution levels: ownership and containment baselines $\subset \dots \subset$ full analysis.}
+\caption{Attribution levels: owned and nesting baselines $\subset \dots \subset$ full analysis.}
 \label{fig:lattice}
-\par\smallskip{\footnotesize\noindent\emph{Note.} Blue: the levels that reimplement the two earlier Angular extractions. White: the ownership and containment baselines, the first being the direct ownership of the Android literature. Orange: what this thesis adds; \emph{class} is the per-class variant of the service join. Both orange levels also carry the fallback join and the stand-ins for guards and effects. The levels nest by construction: each withholds every mechanism above it.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} Blue: the levels that reimplement the two earlier Angular extractions. White: the owned and nesting baselines, the first being the direct ownership of the Android literature. Orange: what this thesis adds; \emph{class} applies the class join, the service join made per class. Both orange levels also carry the fallback join and the stand-ins for guards and effects. The levels nest by construction: each withholds every mechanism above it.}
 \end{figure}
 
 \textbf{Component nesting.} The pass analyses each component's selectors and template, excluding test hosts and stories. It adds $A \to B$ when $A$'s template contains an element
@@ -569,7 +569,7 @@ The seeded call-graph iteration reaches its constraints' least solution. Service
 then receive two fallbacks:
 \begin{itemize}
 \item a member no caller reaches falls back to the join over every component that injects its
-class, the per-class approximation that the \emph{class} level of Figure~\ref{fig:lattice} applies to every service;
+class, the class join, which the \emph{class} level of Figure~\ref{fig:lattice} applies to every service;
 \item a member reached by the iteration receives additional screens from callers not represented
 in the graph: that caller's class join is added, or this class's own join if the caller is unplaced.
 \end{itemize}
@@ -605,5 +605,5 @@ each case above.
 The graph model uses three modality labels. Its must-tier soundness claim rests on four
 assumptions about routes and route order, selectors, unresolved calls and the execution model.
 The evaluation tests a necessary condition of the claim. The model of scope attribution computes screen sets as a least fixpoint over five relations.
-The prototype implements three (the call graph without per-injector bindings), substitutes stand-ins for dispatch and guards, and adds
+The prototype implements three (the third, the call graph, without per-injector bindings), substitutes stand-ins for dispatch and guards, and adds
 fallbacks outside the model.

@@ -127,7 +127,9 @@ handles destinations that are nonliteral expressions, so no treatment is assumed
 identified by routed-component names instead of addresses. Guards, lazy loading and named outlets
 are not modelled. Navigation reached through a method call or dispatch is outside the
 attribution mechanism. Without modalities, always-available and guarded transitions have
-identical representations. The evaluation uses four constructed applications and two published
+identical representations.
+
+The evaluation uses four constructed applications and two published
 applications of 1824 and 6893 lines, with six and twenty-three pages. It reports whether the
 intended models were produced and hand-injected transition faults were detected in constructed
 variants of the first sample. Losses on applications the extractor cannot fully analyse are
@@ -136,15 +138,17 @@ not measured, and measuring them is the subject of this thesis.
 Two recent works statically analyse client-side router configuration for other purposes.
 Rima et al.\ parse Angular sources and templates into a graph of navigation, interaction
 sites and execution conditions, including guards. They compile workflows enumerated from
-the graph into browser tests and use it as a coverage denominator \cite{rima2026e2e}.
+the graph into browser tests and use the workflow set as a coverage denominator
+\cite{rima2026e2e}. They compare their output with a ground truth that a single auditor built
+from the source and checked against their tool's artifacts.
 The chapter defines a workflow as one trigger with its effects, from start routes to a single
-terminal, and takes a workflow's active components to be those activated by the route and its
+terminal, and takes the active components of a route to be those activated by the route and its
 ancestors, closed under composition. The further rules below are not in the chapter; they come
 from the replication package's operational specification
 \path{softscanner-sw/softscanner_fa}/\path{docs/paper/approach.md} and its code. Bootstrap
 components are also active, and handlers are traced into same-class helpers to depth one and into
-the first \texttt{subscribe} callback. The specification excludes router-outlet modelling, provider
-resolution beyond module and root providers, and service calls. The implementation nevertheless
+the first \texttt{subscribe} callback. The specification excludes router-outlet modelling and provider
+resolution beyond module and root providers, and does not follow calls into injected services. The implementation nevertheless
 traces calls into services whose class names match a router or navigation pattern, to depth one. Navigation inside these services is attributed to
 their callers' screens.
 
@@ -153,8 +157,7 @@ navigation calls as edges. They check an access-control policy against screens r
 from an authorised screen. Two of their four subjects are multi-page applications, analysed
 by crawling instead. Their graph is an over-approximation and is not narrowed. The paper does
 not explain source-screen attribution, and guards remain unmodelled runtime conditions
-\cite{zhang2025veriflow}. Rima et al.\ compare their output with a ground truth that a single
-auditor built from the source and checked against their tool's artifacts. Neither work classifies losses by construct
+\cite{zhang2025veriflow}. Neither work classifies losses by construct
 or measures them across a corpus. The problem is therefore neither new nor settled (cf.~Section~\ref{sec:gap}).
 
 \subsection{Static analysis of JavaScript and TypeScript source}
@@ -570,10 +573,10 @@ are files and links are anchors. Client-side routing frameworks have mostly been
 dynamically. This literature search found three static extractions of client-side navigation
 graphs. Two analyse framework-specific source code and one a compiled bundle, each for a
 different consumer. Oshima and Kishi establish the problem addressed here, and
-Section~\ref{sec:dynamic-spa} sets out what their approach leaves out. The other two works use
-their graphs without narrowing them: as a generated test suite's coverage denominator
-\cite{rima2026e2e}, or as an over-approximated reachability relation for access-control checks
-\cite{zhang2025veriflow}.
+Section~\ref{sec:dynamic-spa} sets out what their approach leaves out. Zhang et al.\ use their graph without
+narrowing it, as an over-approximated reachability relation for access-control checks
+\cite{zhang2025veriflow}. Rima et al.\ use the enumerated workflow space as a generated test
+suite's coverage denominator and leave out workflows that they prune \cite{rima2026e2e}.
 Rima et al.'s tool already analyses nested route hierarchies, constrains edges with guards and
 traces router-service calls to a bounded depth. No earlier work found in this review combines
 cross-class and service attribution under provider bindings, which generalises that bounded

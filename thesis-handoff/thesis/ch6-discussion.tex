@@ -10,7 +10,7 @@ Section~\ref{sec:future} sets priorities for future work. The last section summa
 \subsection{Answers to the research questions}
 \label{sec:findings}
 
-The results locate extraction losses at two levels, the nodes and the edges, and each level limits
+The results locate extraction losses on the node side and the edge side, and each side limits
 the other.
 
 \subsubsection{RQ1: deterministic transitions}
@@ -20,7 +20,7 @@ On the six applications, the extractor recovers every screen that a static reade
 but few deterministic transitions: \CensusMustSites{} constructs earn must (\RoundTwoMustConv{} of
 the in-scope constructs), and their edges hold only under the assumptions of Claim~\ref{claim:must}.
 
-\paragraph{The node level.}
+\paragraph{Nodes.}
 Node completeness has two definitions. Against the static readers of the route configuration,
 extraction is complete on all six applications (Table~\ref{tab:coverage}), and the loss
 classification uses this weaker definition. The runtime route oracle finds no node at an unmounted
@@ -35,8 +35,8 @@ The demotion rules explain most of the must tier's small size, since guards, bra
 template conditions account for most demotions (Table~\ref{tab:mayreasons}). Proving that a guard
 always admits could enlarge the tier: ignoring all guards while keeping the other demotions raises
 it from \CensusMust{} to \GuardOnlyMust{} edges in a separate corpus extraction
-(\texttt{route-oracle/guard-only.mjs}). On k8s dashboard, \CensusMustKdash{} of the toolbar edges
-that attribution adds remain at must under these rules (Section~\ref{sec:res-soundness}). The rules
+(\texttt{route-oracle/guard-only.mjs}). On k8s dashboard, the \CensusMustSitesKdash{} toolbar
+constructs that attribution places yield \CensusMustKdash{} of the \CensusMust{} must edges under these rules (Section~\ref{sec:res-soundness}). The rules
 were developed partly in response to red-team panels run with the AI assistant. The witness check
 finds no failure among the must edges, but it cannot read the destinations of about half of that
 application's must edges, all of them toolbar edges.
@@ -56,7 +56,7 @@ failure modes:
 field holding the route;
 \item a fully dynamic target.
 \end{itemize}
-\AttrRemainingUnexplained{} of the \AttrRemaining{} remaining constructs have no diagnosed cause. The node and edge levels depend on each other. Attribution needs destination
+\AttrRemainingUnexplained{} of the \AttrRemaining{} remaining constructs have no diagnosed cause. The node side and the edge side depend on each other. Attribution needs destination
 nodes. Complete nodes, in turn, yield few transitions while sites outside routed components remain
 unattributed. Chapter~\ref{ch:results} therefore reports node coverage beside must conversion.
 
@@ -76,18 +76,22 @@ Scope attribution recovers a per-application median of \AttrRecoveredMedian{} (r
 establishes that the computed scopes are not too large.
 
 Scope attribution is one model whose lower levels reimplement the mechanisms of earlier work: the
-shell rule is the \emph{rooted} level, and the enclosing-route components of Rima et al.'s
-specification are the \emph{outlet} level (Section~\ref{sec:res-ablation}). Most of what
-attribution recovers comes from these levels. The step above \emph{outlet} places navigation that
+shell rule is the \emph{rooted} level, and the outlet descent of Rima et al., which activates the
+components of a route and its ancestors, is the \emph{outlet} level (Section~\ref{sec:res-ablation}).
+By sites, the levels below \emph{full} account for most of what attribution recovers: nesting adds
+\AblationNestingAddedSites{}, rooted \AblationRootedAddedSites{}, outlet \AblationOutletAddedSites{}
+and full \AblationFullAddedSites{} (Table~\ref{tab:ablation}). The step above \emph{outlet} places navigation that
 belongs to no component, in services, guards and effects, which no lower level can place on a
 screen. On alfresco, the one structural reference with enough service navigation to tell, the step
-raises recall and lowers precision below that of the lower levels and of the class join it refines
-(Section~\ref{sec:res-groundtruth}). On the two applications with suites, it adds no transition the
+raises recall and lowers precision below that of the lower levels and of the \emph{class} level
+(Section~\ref{sec:res-groundtruth}). Across the six applications, \emph{full} places
+\AblationFullOnlyPairs{} pairs that the \emph{class} level lacks, and the \emph{class} level
+\AblationClassOnlyPairs{} that \emph{full} lacks (Section~\ref{sec:res-ablation}). On the two applications with suites, it adds no transition the
 suites exercised beyond \emph{outlet} (Section~\ref{sec:res-earlier}). Most recovered constructs
 earn may, so attribution raises must conversion little (Section~\ref{sec:res-after}). The
 contribution of scope attribution is therefore one model that contains the mechanisms of earlier
-work as levels, and a measurement of what each level adds: most of the gain lies in the lower
-levels, and only the step above \emph{outlet} places navigation outside components, at a cost in
+work as levels, and a measurement of what each level adds: by sites, most of the gain lies in the
+levels below \emph{full}, and only the step above \emph{outlet} places navigation outside components, at a cost in
 precision.
 
 \subsubsection{RQ4: response to source changes}
@@ -112,15 +116,15 @@ guard on a route returned by a wrapper function, and a \texttt{canActivate} elem
 call. Red-team source review found these defects, which the witness check missed, and the mutation
 run neither confirms nor refutes the class.
 
-\subsubsection{RQ5: the applications or the tool}
+\subsubsection{RQ5: the applications or the extractor}
 \label{sec:rq5}
 
-The cause trace of Section~\ref{sec:res-losses} assigns every repaired class to the tool, and two
+The cause trace of Section~\ref{sec:res-losses} assigns every repaired class to the extractor, and two
 open causes as well: the named outlets and ghostfolio's computed routes. Two other causes lie beyond
 any reader of a route table, each found in one application; they are the only evidence for a limit
 of the approach. The rest is unassigned. The losses that this study can explain are therefore
 mostly limits of this extractor rather than of static extraction. Assigning the remaining attribution losses would need a check that separates tool gaps from
-components that no screen may render. Assigning the may-only locations behind application decisions
+components that no screen may render. Assigning the may-only constructs behind application decisions
 would need rules that test whether a decision can vary. The harness also checks only that every
 construct has a label, not that the label is correct.
 
@@ -157,10 +161,10 @@ guards depend on unresolved state and Claim~\ref{claim:must} requires their demo
 \subsection{Limitations and threats to validity}
 \label{sec:limitations}
 
-The tool's author evaluated one tool on one corpus with five methods and end-to-end checks on two
+The extractor's author evaluated one extractor on one corpus with five methods and end-to-end checks on two
 applications, which limits the conclusions. The heaviest threat is that every corpus figure is
 in-sample. The structural references, which apply the analysis's own relations, and the corpus
-selection, which favours the tool, come next. Table~\ref{tab:threats} records each threat, its
+selection, which favours the extractor, come next. Table~\ref{tab:threats} records each threat, its
 effect, the mitigation applied and what remains open.
 
 \begingroup\footnotesize\setlength{\tabcolsep}{3pt}
@@ -179,7 +183,7 @@ Threat & Effect on the results & Mitigation, and what remains open \\
 \endfoot
 \multicolumn{3}{@{}l}{\emph{Internal validity}}\\
 \addlinespace[2pt]
-Tool developed on its evaluation corpus
+Extractor developed on its evaluation corpus
 & Every figure on the six applications is in-sample, because the extractor, parser, mutation harness
 and structural reference were corrected against their inputs (Appendix~\ref{app:corrections} and Section~\ref{sec:res-groundtruth}). The
 reference guided two repairs and the end-to-end check three. Corpus figures therefore do not
@@ -196,7 +200,7 @@ injected receiver.
 & The configuration is reported. \emph{Open:} the results apply only to this configuration. \\
 Mutation experiment
 & Some operator--application samples are single-digit, and graph-based exclusions tie the sample to
-the tool's recovery.
+the extractor's recovery.
 & The quota is seeded and exclusions are reported. Operator choice affects mutation results
 \cite{papadakis2019mutation}, so patterns are read rather than rates. \emph{Open:} the sample is
 not independent of the artefact under test. \\
@@ -216,7 +220,7 @@ construct exists and names the target, and on the other four applications it is 
 \quad Structural references (Section~\ref{sec:res-groundtruth})
 & They cover the two smallest applications, and on alfresco only \GTAlfSites{} sites are
 determined (\GTAlfUndetermined{} undetermined). There, full trades precision for recall against the
-lower levels and the class join it refines. On realworld, the replaced \emph{class} rule adds
+lower levels and the \emph{class} level. On realworld, the class join adds
 \GTClassExcess{} excess pairs at one site (Table~\ref{tab:groundtruth}).
 & The AI assistant built the alfresco reference without the graph, under a protocol committed
 before scoring. \emph{Open:} both references apply the analysis's own relations, so agreement does
@@ -225,14 +229,16 @@ the call graph, written after its finding, is scored on it, so that score shows 
 the repair and cannot validate it independently. \\
 \quad End-to-end check (Section~\ref{sec:res-e2e})
 & It checks whether the graph contains the navigations of two applications' own suites. On both,
-the enclosing-route level of earlier work already contains every pair that full contains
+the \emph{outlet} level of earlier work already contains every pair that full contains
 (Section~\ref{sec:res-earlier}).
 & Section~\ref{sec:res-e2e} lists the hits and misses. \emph{Open:} the check covers two
 applications, the mifos result after the repairs is in-sample, and the mifos graph is wide enough
 that its hits show containment more than discrimination (Section~\ref{sec:approximations}). \\
 \quad Rendered-interface check (Section~\ref{sec:res-scope})
-& It checks one direction on \ScopeApps{} of six applications and \ScopeJudged{}/\ScopeScreens{}
-screens, with links recorded once and re-scored against the final graph.
+& It checks one direction on \ScopeApps{} of six applications and the \ScopeJudged{} of \ScopeScreens{}
+screens that could be judged, with links recorded once and re-scored against the final graph. Only
+predictions carried by a must edge are judged for over-attribution, because a may edge asserts a
+possible link, not a rendered one.
 & \emph{Open:} a predicted link missing from the DOM may need sign-in, so its absence cannot show
 over-attribution. \\
 \addlinespace[2pt]
@@ -266,17 +272,17 @@ applications (\AttrOrderFlipWhere{}).
 \addlinespace[2pt]
 Corpus and selection
 & Six open-source applications at single commits may differ from proprietary ones in size, routing
-and navigation \cite{kalliamvakou2014promises,kalliamvakou2016indepth}. Selection favours the tool:
+and navigation \cite{kalliamvakou2014promises,kalliamvakou2016indepth}. Selection favours the extractor:
 after screening began, \texttt{SAP/spartacus} was rejected for unsupported configuration-driven
 routing (Section~\ref{sec:corpus}), so the results are likely optimistic for Angular applications in general. Mifos dominates pooled
 percentages, so the per-application median, \AttrRecoveredMedian{}, is primary.
 & Six criteria were fixed before results, and rejections are reported with their reasons.
-\emph{Open:} tool support was outside the criteria, and two retained applications fail the
+\emph{Open:} extractor support was outside the criteria, and two retained applications fail the
 test-suite criterion (Section~\ref{sec:corpus}). \\
 Application size and test density
 & Route-tree size and end-to-end test density were inversely related among the candidates
 (Section~\ref{sec:corpus}). No application offers both a large route tree and dense execution-based
-ground truth: the mifos suite covers \EtoEMifosPairs{} transitions against \RoundTwoRoutesMifos{}
+evidence: the mifos suite covers \EtoEMifosPairs{} transitions against \RoundTwoRoutesMifos{}
 route entries.
 & Methods that need suites run where suites exist. \emph{Open:} the execution-based evidence cannot
 confirm the findings about scale. \\
@@ -392,7 +398,7 @@ Reading the sources, I classified every remaining miss (Table~\ref{tab:ceiling})
 and the two structural references (Section~\ref{sec:res-checks})
 by where its destination is fixed. \emph{Inside} the static boundary, frontend code, installed
 libraries or committed configuration fix the destination, so recovering the pair needs a better
-parser, and such a miss marks a limit of this tool, not of static extraction. \emph{Outside}, targets or routes depend on backend
+parser, and such a miss marks a limit of this extractor, not of static extraction. \emph{Outside}, targets or routes depend on backend
 data, fetched configuration or user input. \emph{Held} pairs exist at the landed screen but are
 scored at the requested address under the preregistered redirect rule, so better parsing cannot
 make them hits and they belong to neither side.
@@ -453,15 +459,15 @@ Priorities, ordered by their potential effect on the claims, are:
 \item \emph{An oracle for screen sets on a large application.} The references in Section~\ref{sec:res-groundtruth} cover the two smallest applications using the analysis's relations, but most attributions concern applications with hundreds of screens (Table~\ref{tab:scopebaseline}). Observe rendered links after sign-in or annotate a stratified sample of sites.
 \item \emph{Unimplemented model features.} These include dispatch relations for NgRx effects and router events, the injector hierarchy, since provider bindings are currently resolved application-wide (Section~\ref{sec:approximations}), and guards returning a \texttt{UrlTree}. The broader guard model in Chapter~\ref{ch:analysis} requires substantial work, and guard-removal tests currently reach only recorded guards (Section~\ref{sec:res-mutation}).
 \item \emph{A runtime tier.} Observation identifiers are already valid witnesses. Comparison with dynamic approaches \cite{crawljax2012,feedex2013,fraggen2022} would measure transitions found only by a crawler or only statically. Observation confirms a may edge in one run without promoting it to must, and an unobserved candidate remains may, preserving Claim~\ref{claim:must}. This tier is not built or evaluated here.
-\item \emph{A broader corpus.} Automated selection from a larger repository pool, retaining poorly handled applications \cite{kalliamvakou2014promises,kalliamvakou2016indepth}, would reduce tool-driven bias (Section~\ref{sec:limitations}). A proprietary industrial case study, reporting aggregates, would address external validity. A minimum density of user-interface tests should become an explicit selection criterion whenever execution-based ground truth is needed. Route-tree size and test density were inversely related among the candidates (Section~\ref{sec:corpus}), and without such a criterion a study ends up with its oracle and its scale on different applications.
+\item \emph{A broader corpus.} Automated selection from a larger repository pool, retaining poorly handled applications \cite{kalliamvakou2014promises,kalliamvakou2016indepth}, would reduce extractor-driven bias (Section~\ref{sec:limitations}). A proprietary industrial case study, reporting aggregates, would address external validity. A minimum density of user-interface tests should become an explicit selection criterion whenever execution-based evidence is needed. Route-tree size and test density were inversely related among the candidates (Section~\ref{sec:corpus}), and without such a criterion a study ends up with its oracle and its scale on different applications.
 \item \emph{Consumer evaluation.} Controlled experiments are needed to test benefits for mobile testing agents, coding agents (Chapter~\ref{ch:introduction}) and automated test generation. None was attempted here.
 \end{itemize}
 
 \subsection{Summary}
 
 Three implications follow for static extraction of UI transition graphs. A route table alone is not
-enough: under the loss rules' precedence attribution is the largest loss category, and most of what is recovered comes from the
-containment and outlet rules of earlier work. Deterministic transitions are rare, so may edges are
+enough: under the loss rules' precedence attribution is the largest loss category, and by sites, most of what is recovered comes from the
+levels below \emph{full}. Deterministic transitions are rare, so may edges are
 candidates for runtime confirmation rather than transitions. An evaluation should report losses
 construct by construct and check computed scopes in both directions, which this study could do only
 in part. The heaviest threat to the answers of Section~\ref{sec:findings} is that every corpus figure is

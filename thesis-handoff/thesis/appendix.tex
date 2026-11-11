@@ -78,15 +78,15 @@ A table script stopped.
 Correcting the witness check itself.
   & It checked only the first construct producing an edge, so it missed that later bitwarden citations targeted unresolved \path{/vault}.
   & It checks every cited site. Edges initially took the weakest cited modality (replaced below).
-  & Later citations are \WitnessMergedCitationShareAll{} of all witness citations, and up to \WitnessMergedCitationShareMax{} in one application. The intermediate tier held \RoundMustEdges{} must edges: \RoundMustClean{} passing, \RoundMustViolations{} failing. \\
-\emph{Review}, then \emph{panel}, of all intermediate-tier constructs: \MustCtxEdges{} edges, \MustCtxDistinct{} distinct constructs, \MustCtxConstructs{} citations. Witness checking compares targets, not unconditional execution.
+  & Later citations are \WitnessMergedCitationShareAll{} of all witness citations, and up to \WitnessMergedCitationShareMax{} in one application. The intermediate version held \RoundMustEdges{} must edges: \RoundMustClean{} passing, \RoundMustViolations{} failing. \\
+\emph{Review}, then \emph{panel}, of all intermediate-version constructs: \MustCtxEdges{} edges, \MustCtxDistinct{} distinct constructs, \MustCtxConstructs{} citations. Witness checking compares targets, not unconditional execution.
   & The demotion rules were incomplete: a link under \texttt{*ngIf}, inside \texttt{@if}, a callback or a \texttt{catch}, or after \texttt{await} or an early return was must.
   & Demotion covers Section~\ref{sec:model}'s conditions. Panels added members without unconditional handler calls, conditional component placement, ICU cases and ambiguous routes. Later review added potentially superseding navigation.
   & \MustCtxConditional{}/\MustCtxConstructs{} citations ran under such a condition. \\
 \emph{Review}, as above.
   & A guard on an empty-path child without a component was not read, and \texttt{canMatch}, \texttt{canActivateChild} and \texttt{canLoad} guards not at all.
   & Such a guard gates the screen above. The other three kinds are read.
-  & The current graph reads a guard, missed before, on \MustFateGuard{} of the intermediate tier's edges: every bitwarden edge of that tier and none from another application. \\
+  & The current graph reads a guard, missed before, on \MustFateGuard{} of the intermediate version's edges: every bitwarden edge of that version and none from another application. \\
 \emph{Panel}: a red-team panel.
   & Gating on every destination guard also demoted navigations the router permits.
   & The extractor computes the guards the router runs for each source and destination: levels left, matched, entered, kept.
@@ -94,11 +94,11 @@ Correcting the witness check itself.
 \emph{Review}, as above.
   & Navigation to the current address was treated as occurring on every execution.
   & Such an edge is drawn per screen: must from the others, a may self-loop at the destination.
-  & \MustFateSelfLoop{} of the intermediate tier's edges is such a self-loop. \\
+  & \MustFateSelfLoop{} of the intermediate version's edges is such a self-loop. \\
 Reading the edges that survived.
   & Weakest-modality merging discarded certainty, as with realworld's unconditional Global Feed link.
   & Edges take their strongest construct's modality. Other witnesses keep theirs. Must checking uses only witnesses that earn must.
-  & The final tier has \CensusMust{} edges on \CensusMustSites{} constructs, a set not contained in the intermediate tier. Current conversion counts require each construct to earn must, whereas superseded tables credited every cited construct. \\
+  & The final version has \CensusMust{} edges on \CensusMustSites{} constructs, a set not contained in the intermediate version. Current conversion counts require each construct to earn must, whereas superseded tables credited every cited construct. \\
 \addlinespace
 \multicolumn{4}{@{}l}{\emph{The independent route parser and the denominators}} \\
 First node-audit disagreements: the extractor was scored against paths the independent route parser could not resolve.
@@ -207,18 +207,17 @@ Except for the mifos graph that joined every pair of screens, results marked \em
 \label{app:deviations}
 
 \paragraph{Structural reference for alfresco.} An AI assistant built the reference without the graph
-under a protocol committed before scoring. Afterwards, a second assistant run read the four lines that the
-scorer reported as placed but unlisted. None was a navigation site. They were added to the reference as
-excluded, which deviates from the protocol, since it permitted only adding missed sites. The addition
-changes no figure because unlisted lines are not scored.
+under a protocol committed before scoring. A second assistant run later read the four lines the
+scorer reported as placed but unlisted; none was a navigation site. Adding them to the reference as
+excluded deviates from the protocol, which permitted only adding missed sites; no figure changes.
 
 \paragraph{Rima et al.'s applications.} Adversarial review found that one AI-assistant response wrongly classified a
 shell bar as rendered on sign-in and password-reset screens, where a guard hides it. I corrected the
 affected assessments against the source.
 
-\paragraph{Head-to-head comparison.} An initial pass incorrectly paired the start routes of
-non-navigating workflows. It was withdrawn; the valid remaining assessments were reused and new sample
-pairs assessed. The mifos estimates reuse those samples after excluding cross-mount moves.
+\paragraph{Head-to-head comparison.} An initial pass wrongly paired the start routes of
+non-navigating workflows and was withdrawn; its valid assessments were reused, new sample pairs
+assessed, and the mifos estimates exclude cross-mount moves.
 
 \clearpage
 \section{Declared approximations}

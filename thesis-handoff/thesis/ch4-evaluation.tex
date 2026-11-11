@@ -55,7 +55,7 @@ Four candidates were rejected (counts read from the repositories, not generated)
 \item \texttt{vendure}: 169 end-to-end specifications, all for the GraphQL server and none for the
 user interface;
 \item \texttt{gravitee}: 618 routes but 14 UI specifications (criterion~4, applied as noted above);
-\item \texttt{SAP/spartacus}: configuration-driven routing that the extractor does not support. Tool
+\item \texttt{SAP/spartacus}: configuration-driven routing that the extractor does not support. Extractor
 support was not one of the six criteria; it became a rejection criterion after screening began.
 \end{itemize}
 
@@ -77,7 +77,7 @@ the corpus and manifest are an output of this thesis.
 \subsection{Metrics}
 \label{sec:metrics}
 
-Table~\ref{tab:ratios} defines the measures for each research question. RQ1 has two levels: the
+Table~\ref{tab:ratios} defines the measures for each research question. RQ1 has two measures, one on the node side and one on the edge side: the
 share of declared screens with a node and the share of navigation constructs yielding at least one
 must transition. Both are needed because a transition requires its endpoint screens.
 For RQ2, a defect class requires two lines of evidence, at least one from an evaluation method
@@ -86,8 +86,8 @@ For RQ2, a defect class requires two lines of evidence, at least one from an eva
 RQ3 compares the same extractor with the analysis disabled and enabled, using the references below.
 RQ4 uses mutation testing as a witness-mapping sanity check, not an independent test.
 For RQ5, source analysis assigns each defect class to one of three causes:
-resolved by the final version (a tool defect), still unresolved but statically resolvable, or beyond
-a static route-table reader. The result is a cause list. Every site without a
+resolved by the final version (an extractor defect), still unresolved but statically resolvable, or beyond
+a static route-table reader. The result is a cause list. Every construct without a
 transition must carry a label.
 
 
@@ -136,22 +136,22 @@ construct counts as converted only where it earns must itself.
 \end{itemize}
 
 \textbf{The other ratios.} Prior work calls several measures coverage, but here they differ by more than an order of
-magnitude: the share of sites accounted for is far above the share that convert to must. Node coverage rises when the parser recognises less of an
+magnitude: the share of constructs accounted for is far above the share that convert to must. Node coverage rises when the parser recognises less of an
 application, so it is reported with a blind-spot count. Accounted share measures whether losses are
 declared and says nothing about how much is recovered. The loss tables measure the unrecovered
 constructs, or recovery gap.
 
 \textbf{Agreement between a scope and the rendered interface (RQ3).} The measures above do not test
-whether a site's computed scope matches the screens from which it can fire. The
+whether a construct's computed scope matches the screens from which it can fire. The
 \emph{rendered-interface check} tests one direction using the runtime route oracle's harness
 (Section~\ref{sec:protocol}). It navigates to each screen in the graph, extracts in-app links from
 the DOM and compares them with the graph's per-screen edges.
 
-A rendered link without an edge shows that a site was under-attributed or not extracted. The
-converse is weaker, because links may render conditionally and the harness does not sign in. An unresolved target also yields reduced-confidence edges to every address matching its
-static prefix, and these do not assert that a link exists. The converse is therefore assessed only
-for exact destination predictions, whose count is reported. Three restrictions apply. Only template
-sites are judged, because event-handler calls to \texttt{Router.navigate} leave no DOM link.
+A rendered link without an edge shows that a construct was under-attributed or not extracted. The
+converse is weaker, because links may render conditionally and the harness does not sign in. A may edge, even one to a literal target, asserts a possible link and not a rendered one. The
+converse is therefore assessed only for predictions carried by a must edge, whose count is
+reported; a may edge is never judged as over-attribution. Three restrictions apply. Only template
+constructs are judged, because event-handler calls to \texttt{Router.navigate} leave no DOM link.
 Guard-redirected screens display another screen's links and cannot be judged, so they are counted
 separately. Ghostfolio's
 per-locale build is incompatible with this harness, so only this check excludes it.
@@ -162,36 +162,36 @@ improves agreement with a structural reference or merely produces larger screen 
 The ablation extracts the whole corpus at \AblationLevels{} cumulative levels of the mechanisms of
 Section~\ref{sec:attribution}, each adding mechanisms to the one before:
 \begin{itemize}
-\item \emph{Owned}: a site belongs to the screen whose routed component's own file holds it, the
+\item \emph{Owned}: a construct belongs to the screen whose routed component's own file holds it, the
 direct ownership of the Android literature.
-\item \emph{Nesting}: adds component containment through template element selectors.
+\item \emph{Nesting}: adds component nesting through template element selectors.
 \item \emph{Rooted}: adds the shell rule, so a component the root renders is attributed to every
 screen. Oshima and Kishi assemble their page information from the root component as well
 (Section~\ref{sec:dynamic-spa}), so this level measures how far the prior work reaches here.
-\item \emph{Outlet}: adds router-outlet descent.
+\item \emph{Outlet}: adds outlet descent.
 \item \emph{Full}: adds the member-level call graph, with its fallback join and the stand-ins for
 guards and effects.
 \end{itemize}
 A difference between two levels is the effect of the added mechanisms given those before them,
 and \emph{full} adds several at once. A sixth level,
-\emph{class}, replaces the call graph with the per-class rule, joining a navigating service to every
+\emph{class}, replaces the call graph with the class join, joining a navigating service to every
 component that injects its class. The harness verifies nesting on the application graphs and refuses
 to produce a table if any (site, screen) pair disappears at the next level.
 
 Scoring against the structural reference counts (site, screen) pairs in both directions, at the sites the reference lists. For one application, source inspection
 identified each site's screens with a derivation in \path{route-oracle/ground-truth/realworld.json}.
-This is the structural reference of Section~\ref{sec:scope}, termed ground truth below. A missing
+This is the structural reference of Section~\ref{sec:scope}. A missing
 reference pair indicates under-attribution and an extra pair over-attribution, both relative to the reference. Four limits apply.
 \begin{itemize}
 \item It covers one application, realworld, which is small enough to read exhaustively. A second, alfresco, was built under the same rules by the AI assistant from the sources alone, without the extractor's output (\path{route-oracle/ground-truth/ALFRESCO-PROTOCOL.txt}), and it records sites it cannot determine as undetermined.
-\item The realworld reference is my own reading, so it is not independent of the tool's author. It is published with
+\item The realworld reference is my own reading, so it is not independent of the extractor's author. It is published with
 its reasoning so a reader can check it.
 \item Its rules are the analysis's own relations, and under them a template condition or guard that
-admits a screen only in one sign-in state does not narrow a scope. The ground truth therefore tests
+admits a screen only in one sign-in state does not narrow a scope. The reference therefore tests
 whether the implementation applies the relations correctly and does not test whether they match what
 the running application renders.
 \item The completeness of its site inventory is checked in one direction only: the scorer reports
-every site the graph places that the ground truth omits. This inventory check is separate from
+every site the graph places that the reference omits. This inventory check is separate from
 precision and recall, and it cannot reveal a site that both the graph and the reference omit.
 \end{itemize}
 
@@ -212,11 +212,11 @@ address, as preregistered. The scorer initially departed from this rule
 
 A missed pair is classified automatically from the graph by the first matching rule:
 \begin{itemize}
-\item \emph{redirect}: the navigation was redirected and the graph holds the pair on the address it landed on (the preregistered redirect class);
+\item \emph{redirect}: the navigation was redirected and the graph holds the pair on the address it landed on (the preregistered redirect category);
 \item \emph{base}: the target is reached from a screen above the source but not from the source, as a relative link resolved against the wrong route appears;
 \item \emph{dynamic}: the source screen's routed component, or one above it, holds a site whose target the extractor records as unresolved;
 \item \emph{other}: none of these.
-\end{itemize} The base and dynamic classes were defined after inspecting the misses. Dynamic counts
+\end{itemize} The base and dynamic categories were defined after inspecting the misses. Dynamic counts
 only misses not assigned to base. Every mifos miss met the dynamic test regardless of order, so
 that count alone was uninformative.
 
@@ -256,7 +256,7 @@ Named outlet & targets an auxiliary outlet (\texttt{\{outlets: \ldots\}}) \\
 No commands & names no destination at all \\
 Converted, must or may & is cited as witness by an edge of that tier from a placed screen \\
 Accounted, dynamic & is cited by an edge into a sink: the extractor records its destination as unresolved \\
-Accounted, unplaced & is recorded by the extractor as a site it read but could not place \\
+Accounted, unplaced & is recorded by the extractor as a construct it read but could not place \\
 Attribution, service & has no owning component, or its owner is a class that is not a
 component: a service, guard, interceptor, resolver or effect. A site in a template whose
 owner cannot be resolved falls to \emph{other} instead \\
@@ -280,7 +280,7 @@ Other & matches none of the above; inspected by hand \\
 \par\smallskip{\footnotesize\noindent\emph{Note.} The first three rows take a construct out of the denominator, the next counts it as recovered in the tier that cites it, and the two after that as accounted for. Only a construct that reaches the rows below is lost. The indented rules are the nested decision taken when the construct's owning route component has no node.}
 \end{table}
 
-The nested branch classifies the \emph{owning} route component. A node-category construct can still
+The nested branch classifies the \emph{owning} route component. A construct whose owner has no node can still
 convert if attribution places it through a shell or subtree.
 \emph{Other} counts constructs needing manual inspection and does not stand for a single cause.
 
@@ -316,7 +316,7 @@ Figure~\ref{fig:pipeline} locates the five methods in the extraction pipeline.
 Table~\ref{tab:methods} states their measures and blind spots, and none establishes correctness
 alone. RQ3 adds four checks not listed there: the rendered-interface check, ablation, structural
 reference and end-to-end check. Figure~\ref{fig:oracles} identifies the graph targets and
-ground truths of the four source-based methods.
+references of the four source-based methods.
 
 \input{figures/fig-pipeline}
 
@@ -367,7 +367,7 @@ one a test was observed to reach. Tested subset only. Textual extraction under-s
 transition, so visit pairs are not counted as edges. \\
 \addlinespace
 Mutation test & Detection rate over four operators: rename a path, remove a guard,
-delete a \texttt{routerLink}, retarget a \texttt{navigate}. Ground truth is the
+delete a \texttt{routerLink}, retarget a \texttt{navigate}. The reference is the
 authored delta. Detection is judged on the node and edge sets and on the witness set,
 since several constructs can produce one edge. &
 A mutant whose construct is absent from the baseline graph re-detects a recovery gap and
