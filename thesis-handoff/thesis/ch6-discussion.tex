@@ -39,7 +39,8 @@ it from \CensusMust{} to \GuardOnlyMust{} edges in a separate corpus extraction
 (\texttt{route-oracle/guard-only.mjs}). The rules
 were developed partly in response to red-team panels run with the AI assistant. The witness check
 finds no failure among the must edges, but it cannot read the destinations of \MustWitnessUnread{} of k8s
-dashboard's \CensusMustKdash{} must edges, all of them toolbar edges.
+dashboard's \CensusMustKdash{} must edges, all of them toolbar edges; the post-hoc runtime check clicked them
+(Section~\ref{sec:res-soundness}).
 
 \subsubsection{RQ2: where and why extraction fails}
 \label{sec:rq2}
@@ -264,9 +265,10 @@ independent route set. A preregistered runtime check clicked the must constructs
 mifos: \MustRunAllConfirmed{} of \MustRunAllTriggered{} triggered checks (a must edge with one must
 construct) reached their target (Section~\ref{sec:res-soundness}). \emph{Open:} the witness check
 establishes neither navigation execution nor runtime mounting; the runtime route oracle checks
-mounting separately. The runtime check tries one input per check, clicks template links only, and
-does not run bitwarden or k8s dashboard, whose
-\CensusMustKdash{} must edges include every unread destination. \\
+mounting separately. A post-hoc addendum ran k8s dashboard, whose \CensusMustKdash{} must edges include every unread
+destination: \MustRunAddKdashConfirmed{} of \MustRunAddKdashTriggered{} triggered checks reached
+their target and \MustRunAddKdashUnreached{} were unreached. The checks try one input each, and
+bitwarden is not run. \\
 Precedence of the loss rules
 & Testing targets first would make that category larger than attribution on \AttrOrderFlips{}
 applications (\AttrOrderFlipWhere{}).

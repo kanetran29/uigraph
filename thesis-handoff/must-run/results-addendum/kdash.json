@@ -1,0 +1,1264 @@
+{
+  "base": "http://localhost:8080",
+  "hash": true,
+  "startedAt": "2026-11-11T17:22:57.181Z",
+  "edges": [
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/cluster",
+      "fromUrl": "/cluster?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/clusterrole",
+      "fromUrl": "/clusterrole?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/clusterrole/:resourceName",
+      "fromUrl": "/clusterrole/mustrun-cr?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/clusterrolebinding",
+      "fromUrl": "/clusterrolebinding?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/clusterrolebinding/:resourceName",
+      "fromUrl": "/clusterrolebinding/mustrun-crb?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/config",
+      "fromUrl": "/config?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/configmap",
+      "fromUrl": "/configmap?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/configmap/:resourceNamespace/:resourceName",
+      "fromUrl": "/configmap/must-run/mustrun-cm?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/cronjob",
+      "fromUrl": "/cronjob?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/cronjob/:resourceNamespace/:resourceName",
+      "fromUrl": "/cronjob/must-run/mustrun-cron?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/customresourcedefinition",
+      "fromUrl": "/customresourcedefinition?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/customresourcedefinition/:crdName",
+      "fromUrl": "/customresourcedefinition/crontabs.stable.example.com?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/customresourcedefinition/:crdName/:namespace/:objectName",
+      "fromUrl": "/customresourcedefinition/crontabs.stable.example.com/must-run/mustrun-ct?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/customresourcedefinition/:crdName/:objectName",
+      "fromUrl": "/customresourcedefinition/widgets.stable.example.com/mustrun-widget?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/daemonset",
+      "fromUrl": "/daemonset?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/daemonset/:resourceNamespace/:resourceName",
+      "fromUrl": "/daemonset/must-run/mustrun-ds?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/deployment",
+      "fromUrl": "/deployment?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/deployment/:resourceNamespace/:resourceName",
+      "fromUrl": "/deployment/must-run/mustrun-deploy?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/discovery",
+      "fromUrl": "/discovery?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/error",
+      "fromUrl": "/error?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/event",
+      "fromUrl": "/event?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/ingress",
+      "fromUrl": "/ingress?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/ingress/:resourceNamespace/:resourceName",
+      "fromUrl": "/ingress/must-run/mustrun-ing?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/ingressclass",
+      "fromUrl": "/ingressclass?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/ingressclass/:resourceName",
+      "fromUrl": "/ingressclass/mustrun-ic?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/job",
+      "fromUrl": "/job?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/job/:resourceNamespace/:resourceName",
+      "fromUrl": "/job/must-run/mustrun-job?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/log/:resourceNamespace/:resourceName/:resourceType",
+      "fromUrl": "/log/must-run/mustrun-pod/pod?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/namespace",
+      "fromUrl": "/namespace?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/namespace/:resourceName",
+      "fromUrl": "/namespace/must-run?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/networkpolicy",
+      "fromUrl": "/networkpolicy?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/networkpolicy/:resourceNamespace/:resourceName",
+      "fromUrl": "/networkpolicy/must-run/mustrun-np?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/node",
+      "fromUrl": "/node?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/node/:resourceName",
+      "fromUrl": "/node/must-run-control-plane?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/overview",
+      "fromUrl": "/overview?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/persistentvolume",
+      "fromUrl": "/persistentvolume?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/persistentvolume/:resourceName",
+      "fromUrl": "/persistentvolume/mustrun-pv?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/persistentvolumeclaim",
+      "fromUrl": "/persistentvolumeclaim?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/persistentvolumeclaim/:resourceNamespace/:resourceName",
+      "fromUrl": "/persistentvolumeclaim/must-run/mustrun-pvc?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/pod",
+      "fromUrl": "/pod?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/pod/:resourceNamespace/:resourceName",
+      "fromUrl": "/pod/must-run/mustrun-pod?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/replicaset",
+      "fromUrl": "/replicaset?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/replicaset/:resourceNamespace/:resourceName",
+      "fromUrl": "/replicaset/must-run/mustrun-rs?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/replicationcontroller",
+      "fromUrl": "/replicationcontroller?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/replicationcontroller/:resourceNamespace/:resourceName",
+      "fromUrl": "/replicationcontroller/must-run/mustrun-rc?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/role",
+      "fromUrl": "/role?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/role/:resourceNamespace/:resourceName",
+      "fromUrl": "/role/must-run/mustrun-role?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/rolebinding",
+      "fromUrl": "/rolebinding?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/rolebinding/:resourceNamespace/:resourceName",
+      "fromUrl": "/rolebinding/must-run/mustrun-rb?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/secret",
+      "fromUrl": "/secret?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/secret/:resourceNamespace/:resourceName",
+      "fromUrl": "/secret/must-run/mustrun-secret?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/service",
+      "fromUrl": "/service?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/service/:resourceNamespace/:resourceName",
+      "fromUrl": "/service/must-run/mustrun-svc?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/serviceaccount",
+      "fromUrl": "/serviceaccount?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/serviceaccount/:resourceNamespace/:resourceName",
+      "fromUrl": "/serviceaccount/must-run/mustrun-sa?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/settings",
+      "fromUrl": "/settings?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/shell/:resourceNamespace/:resourceName",
+      "fromUrl": "/shell/must-run/mustrun-pod?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "unreached",
+      "landed": "/shell/:resourceNamespace/:resourceName/:containerName",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/shell/:resourceNamespace/:resourceName/:containerName",
+      "fromUrl": "/shell/must-run/mustrun-pod/main?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/statefulset",
+      "fromUrl": "/statefulset?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/statefulset/:resourceNamespace/:resourceName",
+      "fromUrl": "/statefulset/must-run/mustrun-sts?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/storageclass",
+      "fromUrl": "/storageclass?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/template.html:30",
+      "site": "src/chrome/template.html:30",
+      "from": "/storageclass/:resourceName",
+      "fromUrl": "/storageclass/mustrun-manual?namespace=must-run",
+      "to": "/workloads",
+      "outcome": "confirmed",
+      "landed": "/workloads",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/cluster",
+      "fromUrl": "/cluster?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/clusterrole",
+      "fromUrl": "/clusterrole?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/clusterrole/:resourceName",
+      "fromUrl": "/clusterrole/mustrun-cr?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/clusterrolebinding",
+      "fromUrl": "/clusterrolebinding?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/clusterrolebinding/:resourceName",
+      "fromUrl": "/clusterrolebinding/mustrun-crb?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/config",
+      "fromUrl": "/config?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/configmap",
+      "fromUrl": "/configmap?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/configmap/:resourceNamespace/:resourceName",
+      "fromUrl": "/configmap/must-run/mustrun-cm?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/cronjob",
+      "fromUrl": "/cronjob?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/cronjob/:resourceNamespace/:resourceName",
+      "fromUrl": "/cronjob/must-run/mustrun-cron?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/customresourcedefinition",
+      "fromUrl": "/customresourcedefinition?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/customresourcedefinition/:crdName",
+      "fromUrl": "/customresourcedefinition/crontabs.stable.example.com?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/customresourcedefinition/:crdName/:namespace/:objectName",
+      "fromUrl": "/customresourcedefinition/crontabs.stable.example.com/must-run/mustrun-ct?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/customresourcedefinition/:crdName/:objectName",
+      "fromUrl": "/customresourcedefinition/widgets.stable.example.com/mustrun-widget?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/daemonset",
+      "fromUrl": "/daemonset?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/daemonset/:resourceNamespace/:resourceName",
+      "fromUrl": "/daemonset/must-run/mustrun-ds?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/deployment",
+      "fromUrl": "/deployment?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/deployment/:resourceNamespace/:resourceName",
+      "fromUrl": "/deployment/must-run/mustrun-deploy?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/discovery",
+      "fromUrl": "/discovery?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/error",
+      "fromUrl": "/error?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/event",
+      "fromUrl": "/event?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/ingress",
+      "fromUrl": "/ingress?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/ingress/:resourceNamespace/:resourceName",
+      "fromUrl": "/ingress/must-run/mustrun-ing?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/ingressclass",
+      "fromUrl": "/ingressclass?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/ingressclass/:resourceName",
+      "fromUrl": "/ingressclass/mustrun-ic?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/job",
+      "fromUrl": "/job?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/job/:resourceNamespace/:resourceName",
+      "fromUrl": "/job/must-run/mustrun-job?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/log/:resourceNamespace/:resourceName/:resourceType",
+      "fromUrl": "/log/must-run/mustrun-pod/pod?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/namespace",
+      "fromUrl": "/namespace?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/namespace/:resourceName",
+      "fromUrl": "/namespace/must-run?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/networkpolicy",
+      "fromUrl": "/networkpolicy?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/networkpolicy/:resourceNamespace/:resourceName",
+      "fromUrl": "/networkpolicy/must-run/mustrun-np?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/node",
+      "fromUrl": "/node?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/node/:resourceName",
+      "fromUrl": "/node/must-run-control-plane?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/overview",
+      "fromUrl": "/overview?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/persistentvolume",
+      "fromUrl": "/persistentvolume?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/persistentvolume/:resourceName",
+      "fromUrl": "/persistentvolume/mustrun-pv?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/persistentvolumeclaim",
+      "fromUrl": "/persistentvolumeclaim?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/persistentvolumeclaim/:resourceNamespace/:resourceName",
+      "fromUrl": "/persistentvolumeclaim/must-run/mustrun-pvc?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/pod",
+      "fromUrl": "/pod?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/pod/:resourceNamespace/:resourceName",
+      "fromUrl": "/pod/must-run/mustrun-pod?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/replicaset",
+      "fromUrl": "/replicaset?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/replicaset/:resourceNamespace/:resourceName",
+      "fromUrl": "/replicaset/must-run/mustrun-rs?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/replicationcontroller",
+      "fromUrl": "/replicationcontroller?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/replicationcontroller/:resourceNamespace/:resourceName",
+      "fromUrl": "/replicationcontroller/must-run/mustrun-rc?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/role",
+      "fromUrl": "/role?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/role/:resourceNamespace/:resourceName",
+      "fromUrl": "/role/must-run/mustrun-role?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/rolebinding",
+      "fromUrl": "/rolebinding?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/rolebinding/:resourceNamespace/:resourceName",
+      "fromUrl": "/rolebinding/must-run/mustrun-rb?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/secret",
+      "fromUrl": "/secret?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/secret/:resourceNamespace/:resourceName",
+      "fromUrl": "/secret/must-run/mustrun-secret?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/service",
+      "fromUrl": "/service?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/service/:resourceNamespace/:resourceName",
+      "fromUrl": "/service/must-run/mustrun-svc?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/serviceaccount",
+      "fromUrl": "/serviceaccount?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/serviceaccount/:resourceNamespace/:resourceName",
+      "fromUrl": "/serviceaccount/must-run/mustrun-sa?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/settings",
+      "fromUrl": "/settings?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/shell/:resourceNamespace/:resourceName",
+      "fromUrl": "/shell/must-run/mustrun-pod?namespace=must-run",
+      "to": "/create",
+      "outcome": "unreached",
+      "landed": "/shell/:resourceNamespace/:resourceName/:containerName",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/shell/:resourceNamespace/:resourceName/:containerName",
+      "fromUrl": "/shell/must-run/mustrun-pod/main?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/statefulset",
+      "fromUrl": "/statefulset?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/statefulset/:resourceNamespace/:resourceName",
+      "fromUrl": "/statefulset/must-run/mustrun-sts?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/storageclass",
+      "fromUrl": "/storageclass?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/storageclass/:resourceName",
+      "fromUrl": "/storageclass/mustrun-manual?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    },
+    {
+      "id": "src/chrome/component.ts:82",
+      "site": "src/chrome/component.ts:82",
+      "from": "/workloads",
+      "fromUrl": "/workloads?namespace=must-run",
+      "to": "/create",
+      "outcome": "confirmed",
+      "landed": "/create",
+      "detail": null
+    }
+  ],
+  "counts": {
+    "confirmed": 123,
+    "other-target": 0,
+    "no-navigation": 0,
+    "not-rendered": 0,
+    "unreached": 2
+  }
+}

@@ -141,7 +141,7 @@ negative test excluded. & \EtoERowsAlfresco{} \\
 \paragraph{The attributed graph's must edges.} Where the checker cannot read the
 destination, the edge is neither a pass nor a failure. All
 unread destinations are toolbar edges in one application, k8s dashboard. They rely on the toolbar component's
-computed scope, which no check tested, and on the route-order assumption. The check compares construct and edge
+computed scope, which only the post-hoc runtime check below exercises, one input per edge, and on the route-order assumption. The check compares construct and edge
 destinations. It does not test unconditional execution or router admission, which the demotion
 rules address.
 Neither source inspection nor this mechanical check independently
@@ -156,8 +156,8 @@ browser loaded the edge's source screen, clicked the marked element and compared
 completed navigation with the edge's target. The \MustRunAllChecks{} checks cover all
 \MustRunAllEdges{} must edges and \MustRunAllConstructs{} must constructs of the two applications;
 constructs that a merged edge cites without earning must were not clicked. All
-\MustRunAllConstructs{} are template links (\texttt{routerLink}), so no navigation from component
-code was run. Of the \MustRunAllTriggered{} checks whose construct was clicked,
+\MustRunAllConstructs{} are template links (\texttt{routerLink}), so the first run clicked no
+navigation from component code. Of the \MustRunAllTriggered{} checks whose construct was clicked,
 \MustRunAllConfirmed{} landed on the target (\MustRunAllShare{}, as the first prediction stated);
 \MustRunAllOtherTarget{} landed elsewhere and \MustRunAllNoNavigation{} did not navigate. Checks
 whose construct was absent from a loaded source screen: \MustRunAllNotRendered{}. The other
@@ -167,11 +167,33 @@ preregistration, the run did not create an account on its public backend, which 
 and \MustRunMifosUnreached{} on mifos, whose source screen needs an exchange-rate identifier that
 the driver was not given. The second prediction, that such checks would lie mostly on mifos,
 failed. Mifos ran against the pinned Fineract image, signed in as its seeded super-user. One input
-per check can refute Claim~\ref{claim:must} but cannot establish it. The check excludes k8s
-dashboard and bitwarden, whose backends (a cluster and a vault server) do not run here; k8s
-dashboard holds \CensusMustKdash{} of the \CensusMust{} must edges, including all
-\MustWitnessUnread{} whose destination the witness check cannot read. Deviations from the
+per check can refute Claim~\ref{claim:must} but cannot establish it. Deviations from the
 preregistration are listed in \texttt{must-run/DEVIATIONS.txt}.
+
+An addendum to the preregistration (Addendum~A, commit \texttt{c463833}), written after these
+results were seen and before its own checks ran, extended the check; its results are reported
+apart. On realworld, the \MustRunAddRealworldChecks{} unreached checks were run signed in against a
+local stub of the RealWorld API, written for the run, that answers the calls those screens make:
+\MustRunAddRealworldConfirmed{} landed on the target. On k8s dashboard, which holds
+\CensusMustKdash{} of the \CensusMust{} must edges, including all \MustWitnessUnread{} whose
+destination the witness check cannot read, both must constructs were clicked against a local cluster,
+with the dashboard's own servers built from the pinned checkout: \MustRunAddKdashChecks{} checks,
+one per must edge. One construct is a \texttt{router.navigate} call in component code with a literal target,
+marked at the template binding that calls it, so this run also clicks one navigation made from
+code. Of the \MustRunAddKdashTriggered{} triggered checks, \MustRunAddKdashConfirmed{} landed on the
+target; \MustRunAddKdashUnreached{} more were unreached, since their source, a shell screen,
+forwards at once to its per-container variant. These figures come from a second pass. A first pass
+loaded parameterised screens by bare links, which the application's namespace selector rewrites
+to the list screen: \MustRunAddFirstKdashConfirmed{} of \MustRunAddFirstKdashTriggered{} triggered
+checks landed on the target and \MustRunAddFirstKdashUnreached{} were unreached. The second pass
+ran all \MustRunAddKdashChecks{} checks again with the namespace query that the application's own
+links carry. This departs from the addendum and was committed with the rebuilt inputs before the
+second pass ran (\texttt{must-run/DEVIATIONS.txt}, A4, commit \texttt{285808e}). The choice of
+pass changes only which checks are unreached, since every triggered check landed on its target in
+both. The first two predictions held. The third, that unreached screens would mostly need a live
+container or a custom-resource object, held on the second pass and failed on the first, where
+every parameterised screen was unreached.
+Bitwarden was not run: its backend, a vault server, does not run here.
 
 Most of the must tier rests on the route-order assumption A1 (Section~\ref{sec:model}). Of the
 \RouteOrderMust{} must edges, \RouteOrderResting{} hold only under A1, and these come from

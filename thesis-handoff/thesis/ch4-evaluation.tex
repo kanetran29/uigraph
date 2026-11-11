@@ -400,7 +400,7 @@ is scope and not reading. Its result files record no extractor commit or runtime
 \toprule
 Reading & Checked & Not checked \\
 \midrule
-Final must tier (Section~\ref{sec:model}) & Checked against source by the declared AI assistant, with the extractor's decisions visible. At run time, \MustRunAllConfirmed{} of \MustRunAllTriggered{} triggered checks (a must edge with one must construct) reached their target (Section~\ref{sec:res-soundness}). & No independent reading that reproduces the decisions is recorded, and no second reading, by a person or a model. The run tried one input per check, left \MustRunAllUnreached{} unreached and omitted k8s dashboard and bitwarden. \\
+Final must tier (Section~\ref{sec:model}) & Checked against source by the declared AI assistant, with the extractor's decisions visible. At run time, \MustRunAllConfirmed{} of \MustRunAllTriggered{} triggered checks reached their target; an addendum on realworld and k8s dashboard adds \MustRunAddAllConfirmed{} of \MustRunAddAllTriggered{} (Section~\ref{sec:res-soundness}). & No independent reading that reproduces the decisions is recorded, and no second reading, by a person or a model. One input per check. Still unreached: \MustRunMifosUnreached{} from the first run, \MustRunAddAllUnreached{} from the addendum. Bitwarden was not run. \\
 \addlinespace
 Structural reference on alfresco (Section~\ref{sec:res-groundtruth}) & Built from the sources
 without the graph, under a protocol committed before scoring. A second assistant run read the
