@@ -85,8 +85,10 @@ raises recall and lowers precision below that of the lower levels and of the cla
 (Section~\ref{sec:res-groundtruth}). On the two applications with suites, it adds no transition the
 suites exercised beyond \emph{outlet} (Section~\ref{sec:res-earlier}). Most recovered constructs
 earn may, so attribution raises must conversion little (Section~\ref{sec:res-after}). The
-contribution of scope attribution is therefore this model and the measurement of what each of its
-levels adds.
+contribution of scope attribution is therefore one model that contains the mechanisms of earlier
+work as levels, and a measurement of what each level adds: most of the gain lies in the lower
+levels, and only the step above \emph{outlet} places navigation outside components, at a cost in
+precision.
 
 \subsubsection{RQ4: response to source changes}
 \label{sec:rq4}
@@ -300,8 +302,8 @@ Oracle independence
 & The independent parser shares no code with the extractor but may be wrong. Both apply the same
 rules to forms added during development, namely frozen tables, constant-built paths and workspace
 aliases (Table~\ref{tab:repairs}), so agreement on those forms is weaker evidence.
-& Disagreements were resolved against the source. \emph{Open:} the author of both resolved them, and
-differential testing detects disagreement without establishing correctness. \\
+& Disagreements were resolved against the source. \emph{Open:} both readers were built in this thesis and I resolved the
+disagreements, and differential testing detects disagreement without establishing correctness. \\
 Experimenter bias
 & I wrote the extractor, designed the evaluation, selected the corpus and defined the defect classes,
 the last after initial observations. The experimenter was unblinded.
@@ -404,7 +406,7 @@ ceiling is weak evidence, since they place every pair inside by construction
 (Section~\ref{sec:limitations}). Only the suites can reveal outside misses, and neither does. The
 ceiling excludes unexercised causes, such as the two cases beyond a static route-table reader in
 Section~\ref{sec:res-losses}, and excess may edges: mifos's graph contains \EtoEMifosGraphPairs{} of
-\EtoEMifosPossiblePairs{} possible pairs (Section~\ref{sec:res-e2e}). The author classified each
+\EtoEMifosPossiblePairs{} possible pairs (Section~\ref{sec:res-e2e}). I classified each
 miss, and the joining script rejects missing and surplus classifications.
 
 \begin{table}[t]\footnotesize
@@ -457,6 +459,11 @@ Priorities, ordered by their potential effect on the claims, are:
 
 \subsection{Summary}
 
-The heaviest threat to the answers of Section~\ref{sec:findings} is that every corpus figure is
+Three implications follow for static extraction of UI transition graphs. A route table alone is not
+enough: under the loss rules' precedence attribution is the largest loss category, and most of what is recovered comes from the
+containment and outlet rules of earlier work. Deterministic transitions are rare, so may edges are
+candidates for runtime confirmation rather than transitions. An evaluation should report losses
+construct by construct and check computed scopes in both directions, which this study could do only
+in part. The heaviest threat to the answers of Section~\ref{sec:findings} is that every corpus figure is
 in-sample, and transfer to other routers remains unmeasured. The priorities are an oracle for screen sets on a
 large application and a runtime tier that extends the graph to signed-in use.
