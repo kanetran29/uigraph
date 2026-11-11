@@ -1,0 +1,135 @@
+[
+ {
+  "id": "src/app/core/layout/footer.component.html:3",
+  "site": "src/app/core/layout/footer.component.html:3",
+  "from": "/tag/:tag",
+  "fromUrl": null,
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/footer.component.html:3",
+  "site": "src/app/core/layout/footer.component.html:3",
+  "from": "/article/:slug",
+  "fromUrl": null,
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/footer.component.html:3",
+  "site": "src/app/core/layout/footer.component.html:3",
+  "from": "/editor",
+  "fromUrl": "/editor",
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/footer.component.html:3",
+  "site": "src/app/core/layout/footer.component.html:3",
+  "from": "/editor/:slug",
+  "fromUrl": null,
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/footer.component.html:3",
+  "site": "src/app/core/layout/footer.component.html:3",
+  "from": "/login",
+  "fromUrl": "/login",
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/footer.component.html:3",
+  "site": "src/app/core/layout/footer.component.html:3",
+  "from": "/profile/:username",
+  "fromUrl": null,
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/footer.component.html:3",
+  "site": "src/app/core/layout/footer.component.html:3",
+  "from": "/profile/:username/favorites",
+  "fromUrl": null,
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/footer.component.html:3",
+  "site": "src/app/core/layout/footer.component.html:3",
+  "from": "/register",
+  "fromUrl": "/register",
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/footer.component.html:3",
+  "site": "src/app/core/layout/footer.component.html:3",
+  "from": "/settings",
+  "fromUrl": "/settings",
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/header.component.html:3",
+  "site": "src/app/core/layout/header.component.html:3",
+  "from": "/tag/:tag",
+  "fromUrl": null,
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/header.component.html:3",
+  "site": "src/app/core/layout/header.component.html:3",
+  "from": "/article/:slug",
+  "fromUrl": null,
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/header.component.html:3",
+  "site": "src/app/core/layout/header.component.html:3",
+  "from": "/editor",
+  "fromUrl": "/editor",
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/header.component.html:3",
+  "site": "src/app/core/layout/header.component.html:3",
+  "from": "/editor/:slug",
+  "fromUrl": null,
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/header.component.html:3",
+  "site": "src/app/core/layout/header.component.html:3",
+  "from": "/login",
+  "fromUrl": "/login",
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/header.component.html:3",
+  "site": "src/app/core/layout/header.component.html:3",
+  "from": "/profile/:username",
+  "fromUrl": null,
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/header.component.html:3",
+  "site": "src/app/core/layout/header.component.html:3",
+  "from": "/profile/:username/favorites",
+  "fromUrl": null,
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/header.component.html:3",
+  "site": "src/app/core/layout/header.component.html:3",
+  "from": "/register",
+  "fromUrl": "/register",
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/header.component.html:3",
+  "site": "src/app/core/layout/header.component.html:3",
+  "from": "/settings",
+  "fromUrl": "/settings",
+  "to": "/"
+ },
+ {
+  "id": "src/app/features/article/pages/home/home.component.html:35",
+  "site": "src/app/features/article/pages/home/home.component.html:35",
+  "from": "/tag/:tag",
+  "fromUrl": null,
+  "to": "/"
+ }
+]

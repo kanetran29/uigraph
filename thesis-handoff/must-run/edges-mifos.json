@@ -1,0 +1,198 @@
+[
+ {
+  "id": "src/app/accounting/accounting-rules/create-rule/create-rule.component.html:146",
+  "site": "src/app/accounting/accounting-rules/create-rule/create-rule.component.html:146",
+  "from": "/accounting/accounting-rules/create",
+  "fromUrl": "/accounting/accounting-rules/create",
+  "to": "/accounting"
+ },
+ {
+  "id": "src/app/accounting/create-journal-entry/create-journal-entry.component.html:212",
+  "site": "src/app/accounting/create-journal-entry/create-journal-entry.component.html:212",
+  "from": "/accounting/journal-entries/create",
+  "fromUrl": "/accounting/journal-entries/create",
+  "to": "/accounting"
+ },
+ {
+  "id": "src/app/accounting/frequent-postings/frequent-postings.component.html:226",
+  "site": "src/app/accounting/frequent-postings/frequent-postings.component.html:226",
+  "from": "/accounting/journal-entries/frequent-postings",
+  "fromUrl": "/accounting/journal-entries/frequent-postings",
+  "to": "/accounting"
+ },
+ {
+  "id": "src/app/accounting/periodic-accruals/periodic-accruals.component.html:37",
+  "site": "src/app/accounting/periodic-accruals/periodic-accruals.component.html:37",
+  "from": "/accounting/periodic-accruals",
+  "fromUrl": "/accounting/periodic-accruals",
+  "to": "/accounting"
+ },
+ {
+  "id": "src/app/centers/create-center/create-center.component.html:163",
+  "site": "src/app/centers/create-center/create-center.component.html:163",
+  "from": "/centers/create",
+  "fromUrl": "/centers/create",
+  "to": "/centers"
+ },
+ {
+  "id": "src/app/groups/create-group/create-group.component.html:169",
+  "site": "src/app/groups/create-group/create-group.component.html:169",
+  "from": "/groups/create",
+  "fromUrl": "/groups/create",
+  "to": "/groups"
+ },
+ {
+  "id": "src/app/organization/bulk-loan-reassignmnet/bulk-loan-reassignmnet.component.html:163",
+  "site": "src/app/organization/bulk-loan-reassignmnet/bulk-loan-reassignmnet.component.html:163",
+  "from": "/organization/bulkloan",
+  "fromUrl": "/organization/bulkloan",
+  "to": "/organization"
+ },
+ {
+  "id": "src/app/organization/exchange-rates/view-exchange-rate/view-exchange-rate.component.html:55",
+  "site": "src/app/organization/exchange-rates/view-exchange-rate/view-exchange-rate.component.html:55",
+  "from": "/organization/exchange-rates/:id",
+  "fromUrl": null,
+  "to": "/organization"
+ },
+ {
+  "id": "src/app/organization/password-preferences/password-preferences.component.html:35",
+  "site": "src/app/organization/password-preferences/password-preferences.component.html:35",
+  "from": "/organization/password-preferences",
+  "fromUrl": "/organization/password-preferences",
+  "to": "/organization"
+ },
+ {
+  "id": "src/app/organization/working-days/working-days.component.html:45",
+  "site": "src/app/organization/working-days/working-days.component.html:45",
+  "from": "/organization/working-days",
+  "fromUrl": "/organization/working-days",
+  "to": "/organization"
+ },
+ {
+  "id": "src/app/system/system.component.html:294",
+  "site": "src/app/system/system.component.html:294",
+  "from": "/system",
+  "fromUrl": "/system",
+  "to": "/system/system-information"
+ },
+ {
+  "id": "src/app/system/system.component.html:296",
+  "site": "src/app/system/system.component.html:296",
+  "from": "/system",
+  "fromUrl": "/system",
+  "to": "/system/system-information"
+ },
+ {
+  "id": "src/app/system/system.component.html:538",
+  "site": "src/app/system/system.component.html:538",
+  "from": "/system",
+  "fromUrl": "/system",
+  "to": "/system/external-services"
+ },
+ {
+  "id": "src/app/system/system.component.html:540",
+  "site": "src/app/system/system.component.html:540",
+  "from": "/system",
+  "fromUrl": "/system",
+  "to": "/system/external-services"
+ },
+ {
+  "id": "src/app/system/system.component.html:572",
+  "site": "src/app/system/system.component.html:572",
+  "from": "/system",
+  "fromUrl": "/system",
+  "to": "/system/manage-dashboards"
+ },
+ {
+  "id": "src/app/system/system.component.html:574",
+  "site": "src/app/system/system.component.html:574",
+  "from": "/system",
+  "fromUrl": "/system",
+  "to": "/system/manage-dashboards"
+ },
+ {
+  "id": "src/app/system/system.component.html:606",
+  "site": "src/app/system/system.component.html:606",
+  "from": "/system",
+  "fromUrl": "/system",
+  "to": "/system/about-us"
+ },
+ {
+  "id": "src/app/system/system.component.html:608",
+  "site": "src/app/system/system.component.html:608",
+  "from": "/system",
+  "fromUrl": "/system",
+  "to": "/system/about-us"
+ },
+ {
+  "id": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "site": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "from": "/checker-inbox-and-tasks",
+  "fromUrl": "/checker-inbox-and-tasks",
+  "to": "/checker-inbox-and-tasks/requests"
+ },
+ {
+  "id": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "site": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "from": "/checker-inbox-and-tasks/checker-inbox",
+  "fromUrl": "/checker-inbox-and-tasks/checker-inbox",
+  "to": "/checker-inbox-and-tasks/requests"
+ },
+ {
+  "id": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "site": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "from": "/checker-inbox-and-tasks/client-approval",
+  "fromUrl": "/checker-inbox-and-tasks/client-approval",
+  "to": "/checker-inbox-and-tasks/requests"
+ },
+ {
+  "id": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "site": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "from": "/checker-inbox-and-tasks/council-approval",
+  "fromUrl": "/checker-inbox-and-tasks/council-approval",
+  "to": "/checker-inbox-and-tasks/requests"
+ },
+ {
+  "id": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "site": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "from": "/checker-inbox-and-tasks/credit",
+  "fromUrl": "/checker-inbox-and-tasks/credit",
+  "to": "/checker-inbox-and-tasks/requests"
+ },
+ {
+  "id": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "site": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "from": "/checker-inbox-and-tasks/enrollment-status",
+  "fromUrl": "/checker-inbox-and-tasks/enrollment-status",
+  "to": "/checker-inbox-and-tasks/requests"
+ },
+ {
+  "id": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "site": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "from": "/checker-inbox-and-tasks/loan-approval",
+  "fromUrl": "/checker-inbox-and-tasks/loan-approval",
+  "to": "/checker-inbox-and-tasks/requests"
+ },
+ {
+  "id": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "site": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "from": "/checker-inbox-and-tasks/loan-disbursal",
+  "fromUrl": "/checker-inbox-and-tasks/loan-disbursal",
+  "to": "/checker-inbox-and-tasks/requests"
+ },
+ {
+  "id": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "site": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "from": "/checker-inbox-and-tasks/pending-prospects",
+  "fromUrl": "/checker-inbox-and-tasks/pending-prospects",
+  "to": "/checker-inbox-and-tasks/requests"
+ },
+ {
+  "id": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "site": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:77",
+  "from": "/checker-inbox-and-tasks/reschedule-loan",
+  "fromUrl": "/checker-inbox-and-tasks/reschedule-loan",
+  "to": "/checker-inbox-and-tasks/requests"
+ }
+]
