@@ -8,7 +8,7 @@ Deviations from PREREGISTRATION.txt (head-to-head), recorded 5 Nov 2026 after th
    by the file and start line of the route object; where that fails (most of k8sdash, whose lines differ
    by the tool's convention) their path text is kept. The strata by path (results/strata-by-path.json) are
    kept. The mapping can only help their tool.
-3. One reading supplied by hand (results/corrections.json): a reader returned a mifos pair under a
+3. One reading supplied by the author (results/corrections.json): a reader returned a mifos pair under a
    mistyped start screen; its evidence concerned the target, which no code navigates to.
 4. Group "corpus without mifos" added to the pooled figures after reading, because mifos's pair count
    (161k of 163k for this extractor) decides the pooled precision.

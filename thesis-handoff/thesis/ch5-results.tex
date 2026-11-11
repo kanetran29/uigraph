@@ -652,11 +652,11 @@ most links of a shell. The per-start-route row of Table~\ref{tab:rima} counts th
 
 Besides the counted pairs, the graph holds \RimaExtra{} others, and \RimaExtraInPs{} of them are
 pairs of the entries the preregistered rule drops. Of the \RimaJudged{} pairs read from the source,
-\RimaJudgedReal{} are transitions the application has and \RimaJudgedSpurious{} are not. A navigation
-whose target is matched to longer routes than its command can produce accounts for
-\RimaSpuriousTarget{} of the spurious pairs. A navigation placed on a sign-in or password-reset
-screen, where the component holding it is not shown, accounts for the other
-\RimaSpuriousAttribution{}. Read per start route, Rima et al.'s reference lists these
+\RimaJudgedReal{} are transitions the application has and \RimaJudgedSpurious{} are not. Reading
+their source, I traced \RimaSpuriousTarget{} of the spurious pairs to a navigation whose target is
+matched to longer routes than its command can produce, and the other \RimaSpuriousAttribution{} to a
+navigation placed on a sign-in or password-reset screen, where the component holding it is not
+shown. Read per start route, Rima et al.'s reference lists these
 \RimaSpuriousAttribution{} pairs too. All
 \RimaJudgedSpurious{} spurious pairs are at the may tier: the number with a must edge is
 \RimaSpuriousMust{}.
@@ -666,8 +666,8 @@ run logs of the head-to-head comparison record Claude Sonnet 5.5 as the reader a
 as the stronger model. The archived records of the other readings do not name the model, so for
 them the model rests on my own record. Table~\ref{tab:ai-readings} states how the
 assessments were checked. Adversarial review found that one response wrongly classified a shell bar
-as rendered on sign-in and password-reset screens, where a guard hides it, and the affected assessments
-were corrected.
+as rendered on sign-in and password-reset screens, where a guard hides it, and I corrected the affected
+assessments against the source.
 
 The comparison prompted four repairs (Table~\ref{tab:repairs}), after which the post-hoc
 re-extraction holds \RimaRepHitFull{}/\RimaPairs{} reference pairs and \RimaRepExtra{} additional

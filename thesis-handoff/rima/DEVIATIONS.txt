@@ -16,7 +16,7 @@ Deviations from PREREGISTRATION.txt, recorded 5 Nov 2026 after the results were 
      read, so this measure can only rise;
    - recall per start route, keeping the entries the preregistered rule drops (terminal among the start
      routes, typically a shell link listed from every screen). Its misses were not read.
-4. Causes of spurious pairs (spurious-causes.json) were assigned by hand from the edge evidence and the
+4. Causes of spurious pairs (spurious-causes.json) were assigned by the author from the edge evidence and the
    source; the preregistration did not ask for them.
 5. Reporting (outcome S1): tab:rw gained no row; the result went into a new subsection with tab:rima and
    rows in tab:earlier, tab:world and tab:rqanswers.
