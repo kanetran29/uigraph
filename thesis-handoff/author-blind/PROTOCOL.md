@@ -29,7 +29,23 @@ decoys (items with the other verdict), in an order fixed by a hash of the item i
    screen, is it always shown and never stopped. The reader's tier is must when both answers are
    yes, may when either is no, undecided otherwise.
 2. Further sheets (Rima et al. comparison, head-to-head samples, cited sites without a token,
-   alfresco reference) are described in this file when they are committed, before they are read.
+   alfresco reference) are described in this file when they are committed, before they are read
+   (sections Sheet A to Sheet D below). Suggested order: A, B, C, D, since sheet C shows the sites
+   an AI reading cited.
+
+Already seen. `rima/STUDENT-READING.md` (5 Nov) lists AI verdicts in four tiers: tier 1, 41
+head-to-head pairs on five corpus applications, which the author re-read with the verdict visible
+(`rima/head2head/results-v3/author-check.json`); tier 2, the first comparison's 5 misses and 11
+pairs judged spurious; tier 3, the 40 mifos pairs of the head-to-head sample; tier 4, the 12
+head-to-head pairs on Rima et al.'s subjects not judged real. The record shows the author's reading
+of tier 1, his causes for the 11 spurious pairs (`rima/spurious-causes.json`) and his three
+corrections (`rima/corrections.json`); it does not say whether he read tiers 2 to 4. Before the
+first answer on sheet A or B the author adds one line here saying whether he did. The thesis text
+(Section 5, first comparison) also describes the five misses and the causes of the spurious pairs.
+
+Shared code: `sheet-lib.mjs` (ids, excerpts, the application directories of
+`rima/head2head/apps.txt`, the reading rule shown at the top of sheets A and B). Every sheet orders
+its items by id, a hash of the item.
 
 ## Recording and order of events
 
@@ -44,3 +60,50 @@ Per set, raw counts: items read, reader agrees with the AI or extractor, disagre
 Disagreements are listed with the reader's reason. No agreement coefficient is reported. Counts
 reach the thesis only through generated macros. The extractor, the graphs and the must tier are not
 changed in response to the reading.
+
+## Sheet A: first comparison with Rima et al. (`rima-sheet.json`, 54 items)
+
+Built by `make-rima-sheet.mjs` from `rima/adjudication.json` (final verdicts),
+`rima/adjudication-input.json` (what the AI readers were given), `rima/corrections.json` and the
+graphs at 2aac284 (`rima/graphs`). Sources: the subject checkouts at the commits of
+`rima/subjects.txt`.
+
+Items:
+- the 5 reference pairs the graph missed (\RimaMissed);
+- 30 of the extra pairs judged real, drawn per subject, the stratum of the original reading (which
+  sampled per subject), in proportion to each subject's real pairs by largest remainder:
+  posts-users-ui-ng 6, heroes-angular 2, airbus-inventory 3, spring-petclinic-angular 6,
+  ever-traduora 6, angular-jumpstart 5, event-booking-mean 2. Within a subject the draw is
+  `sample()` of `rima/adjudication-input.mjs` with seed 20261111. The pool is the 170 real pairs
+  less the one the author re-cited (`corrections.json`), so 169;
+- the 11 extra pairs judged spurious;
+- 8 constructed decoys.
+
+Decoys and why. Without decoys every extra pair on the sheet would be one judged real. The 11
+spurious pairs are the comparison's only pairs with the other verdict, so they are included,
+although the author assigned their causes with the verdict visible and the thesis describes them:
+their answers are reported apart and are not a blind check. Because the author may recognise them,
+8 decoys that no reading has judged are added: per subject (one each; two for
+spring-petclinic-angular and ever-traduora, the largest; none for heroes-angular, whose graph joins
+every pair of its screens), a pair (s, t) of screens with no graph edge at 2aac284 once scopes are
+expanded, not among the pairs either comparison read, shown with one witness of an edge entering t
+from another screen, picked in hash order. Neither tool holds these pairs, so the expected answer
+is spurious; a decoy read as real is a transition both tools may miss, listed but not counted
+against any reading. The misses are on the sheet because no person has re-read them; the thesis
+text describes all five, so they are not blind either and are reported as their own kind.
+
+Shown per item: the pair, the subject's directory, the reading rule (sheet intro) and the source
+around the sites a tool relates to the pair: for an extra pair the witnesses of its graph edges
+(as given to the AI reader, without event or modality), for a miss the trigger lines of the
+reference entries (the two entries that name only a component say so), for a decoy the one witness.
+
+Question: can a user on s trigger a navigation that lands on t, the trigger shown while the user
+stays on s? real / spurious / unclear.
+
+Scoring (`score-rima.mjs`, test `score-rima.test.mjs`). Expected answer: a miss of class e (the
+reference entry is wrong) spurious; a miss of any other class real, since those classes say the
+source holds the transition and the graph lost it (the class, not the recorded reason, sets it); an
+extra pair its final verdict; a decoy spurious. Per kind (misses, real, spurious, decoys): items,
+agree, disagree, undecided (unclear). Macros `\AuthorRima<Kind><Items|Agree|Disagree|Undecided>`
+and `\AuthorRimaItems`; disagreements with the reasons in `rima-comparison.json`. The scorer
+refuses while any item is unanswered. The blind result is the real kind and the decoys.

@@ -1,0 +1,5608 @@
+{
+ "built": "make-rima-sheet.mjs",
+ "title": "Rima et al.'s subjects, first comparison",
+ "intro": "A pair (s, t) is real if a user on screen s can trigger a navigation that lands on t: a link, or a handler that calls the router directly, through helpers or through an injected service, in a component shown on s (the routed components, the shell above the outlet, what their templates include, dialogs they open), possibly after an await or behind a guard, the trigger being shown while the user stays on s. Spurious if no such trigger exists. Unclear if the source does not decide it. A route parameter may take any value; a redirect counts. The sites shown under an item are starting points, constructs a tool relates to the pair or to its target (no tool is named); they are not evidence either way, so read the source around and beyond them.",
+ "questions": [
+  {
+   "key": "verdict",
+   "text": "Can a user on {from} trigger a navigation that lands on {to}, the trigger shown while the user stays on {from}?",
+   "options": [
+    "real",
+    "spurious",
+    "unclear"
+   ]
+  }
+ ],
+ "items": [
+  {
+   "id": "19110cebd1",
+   "app": "spring-petclinic-angular",
+   "from": "/owners/:id/pets/add",
+   "to": "/owners/:id/edit",
+   "title": "spring-petclinic-angular · /owners/:id/pets/add → /owners/:id/edit",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/pets/pet-add/pet-add.component.ts:90",
+     "lines": [
+      {
+       "n": 82,
+       "text": "        this.pet = newPet;",
+       "cited": false
+      },
+      {
+       "n": 83,
+       "text": "        this.addedSuccess = true;",
+       "cited": false
+      },
+      {
+       "n": 84,
+       "text": "        this.gotoOwnerDetail();",
+       "cited": false
+      },
+      {
+       "n": 85,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 86,
+       "text": "      error => this.errorMessage = error as any);",
+       "cited": false
+      },
+      {
+       "n": 87,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 88,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 89,
+       "text": "  gotoOwnerDetail() {",
+       "cited": false
+      },
+      {
+       "n": 90,
+       "text": "    this.router.navigate(['/owners', this.currentOwner.id]);",
+       "cited": true
+      },
+      {
+       "n": 91,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 92,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 93,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 94,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "1afc6ce8a9",
+   "app": "posts-users-ui-ng",
+   "from": "/users/:id",
+   "to": "/new-post",
+   "title": "posts-users-ui-ng · /users/:id → /new-post",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/anonbnr__posts-users-ui-ng"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/header/header.component.html:8",
+     "lines": [
+      {
+       "n": 1,
+       "text": "<mat-toolbar color=\"primary\">",
+       "cited": false
+      },
+      {
+       "n": 2,
+       "text": "    <mat-icon>menu</mat-icon>",
+       "cited": false
+      },
+      {
+       "n": 3,
+       "text": "    <span>NG Posts & Users</span>",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "    <span class=\"spacer\"></span>",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "    <button mat-button [routerLink]=\"'/posts'\">Posts</button>",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "    <button mat-button [routerLink]=\"'/new-post'\">Add a New Post</button>",
+       "cited": true
+      },
+      {
+       "n": 9,
+       "text": "    <button mat-button [routerLink]=\"'/users'\">Users</button>",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "    <button mat-button [routerLink]=\"'/new-user'\">Add a New User</button>",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "    <button mat-button [routerLink]=\"'/user-search'\">Search Users</button>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "    <button mat-button [routerLink]=\"'/user-availability-schedule'\">Schedule Availability</button>",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "</mat-toolbar>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "1b6e14b6f6",
+   "app": "airbus-inventory",
+   "from": "/getAllProducts",
+   "to": "/add",
+   "title": "airbus-inventory · /getAllProducts → /add",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/main-nav/main-nav.component.html:26",
+     "lines": [
+      {
+       "n": 18,
+       "text": "      <br>",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "      <a mat-list-item class=\"nav2\" routerLink=\"/getAllProducts\">Get All Products   ",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "        <span class=\"material-icons\">",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "          visibility",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "          </span>",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "    </a>",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 25,
+       "text": "    <br>",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "      <a mat-list-item class=\"nav2\" routerLink=\"/add\">Add Product       ",
+       "cited": true
+      },
+      {
+       "n": 27,
+       "text": "        <span class=\"material-icons\">",
+       "cited": false
+      },
+      {
+       "n": 28,
+       "text": "          add",
+       "cited": false
+      },
+      {
+       "n": 29,
+       "text": "          </span>",
+       "cited": false
+      },
+      {
+       "n": 30,
+       "text": "    </a>",
+       "cited": false
+      },
+      {
+       "n": 31,
+       "text": "    <br>",
+       "cited": false
+      },
+      {
+       "n": 32,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "      <!-- <a mat-list-item href=\"#\">Link 3</a> -->",
+       "cited": false
+      },
+      {
+       "n": 34,
+       "text": "    </mat-nav-list>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "1c686d9302",
+   "app": "heroes-angular",
+   "from": "/about",
+   "to": "/heroes",
+   "title": "heroes-angular · /about → /heroes",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/johnpapa__heroes-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/core/components/nav.component.ts:10",
+     "lines": [
+      {
+       "n": 2,
+       "text": "// import { faCoffee } from '@fortawesome/free-solid-svg-icons';",
+       "cited": false
+      },
+      {
+       "n": 3,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "@Component({",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "  selector: 'app-nav',",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "  template: `",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "  <nav class=\"menu\">",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "    <p class=\"menu-label\">Menu</p>",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "    <ul class=\"menu-list\">",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "      <a routerLink=\"/heroes\" routerLinkActive=\"router-link-active\">",
+       "cited": true
+      },
+      {
+       "n": 11,
+       "text": "        <span>Heroes</span>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "      <a routerLink=\"/villains\" routerLinkActive=\"router-link-active\">",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "        <span>Villains</span>",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "      <a routerLink=\"/about\" routerLinkActive=\"router-link-active\">",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "        <span>About</span>",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "      </a>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "339ec80f33",
+   "app": "spring-petclinic-angular",
+   "from": "/pettypes",
+   "to": "/pettypes/add",
+   "title": "spring-petclinic-angular · /pettypes → /pettypes/add",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/pettypes/pettype-add/pettype-add.component.html:22",
+     "lines": [
+      {
+       "n": 14,
+       "text": "  ~  * See the License for the specific language governing permissions and",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "  ~  * limitations under the License.",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "  ~  */",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "  -->",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "<div class=\"container-fluid\">",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "  <div class=\"container xd-container\">",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "    <h2>New Pet Type</h2>",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "    <form id=\"pettype\" class=\"form-horizontal\" (ngSubmit)=\"onSubmit(pettypeForm.value)\" #pettypeForm=\"ngForm\" data-formid=\"f-pettype-add\">",
+       "cited": true
+      },
+      {
+       "n": 23,
+       "text": "      <div class=\"form-group\" hidden=\"true\">",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "        <input type=\"text\" hidden=\"true\" class=\"form-control\" id=\"id\" [(ngModel)]=\"pettype.id\" name=\"id\"/>",
+       "cited": false
+      },
+      {
+       "n": 25,
+       "text": "      </div>",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "      <div class=\"form-group has-feedback\"  [class.has-success]=\"name.dirty && name.valid\" [class.has-error]=\"name.dirty &&  !name.valid\">",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "        <div class=\"form-group \">",
+       "cited": false
+      },
+      {
+       "n": 28,
+       "text": "          <label class=\"col-sm-1 control-label\">Name</label>",
+       "cited": false
+      },
+      {
+       "n": 29,
+       "text": "          <div class=\"col-sm-6\">",
+       "cited": false
+      },
+      {
+       "n": 30,
+       "text": "            <input id=\"name\" name=\"name\" class=\"form-control\" required type=\"text\" [(ngModel)]=\"pettype.name\" #name=\"ngModel\" (ngModelChange)=\"log('t25-pettype-add-name')\" data-testid=\"t25-pettype-add-name\"/>",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/pettypes/pettype-add/pettype-add.component.html:34",
+     "lines": [
+      {
+       "n": 26,
+       "text": "      <div class=\"form-group has-feedback\"  [class.has-success]=\"name.dirty && name.valid\" [class.has-error]=\"name.dirty &&  !name.valid\">",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "        <div class=\"form-group \">",
+       "cited": false
+      },
+      {
+       "n": 28,
+       "text": "          <label class=\"col-sm-1 control-label\">Name</label>",
+       "cited": false
+      },
+      {
+       "n": 29,
+       "text": "          <div class=\"col-sm-6\">",
+       "cited": false
+      },
+      {
+       "n": 30,
+       "text": "            <input id=\"name\" name=\"name\" class=\"form-control\" required type=\"text\" [(ngModel)]=\"pettype.name\" #name=\"ngModel\" (ngModelChange)=\"log('t25-pettype-add-name')\" data-testid=\"t25-pettype-add-name\"/>",
+       "cited": false
+      },
+      {
+       "n": 31,
+       "text": "            <span class=\"glyphicon form-control-feedback\" [class.glyphicon-ok]=\"name.valid\" [class.glyphicon-remove]=\"!name.valid\" aria-hidden=\"true\"></span>",
+       "cited": false
+      },
+      {
+       "n": 32,
+       "text": "            <span class=\"help-block\" *ngIf=\"(pettypeForm.submitted && name.hasError('required')) || (name.dirty && name.hasError('required'))\">Name is required</span>",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "          </div>",
+       "cited": false
+      },
+      {
+       "n": 34,
+       "text": "          <button class=\"btn btn-default\" type=\"submit\" (click)=\"log('c46-pettype-add-save-submit')\" data-testid=\"c46-pettype-add-save-submit\" data-submitid=\"f-pettype-add\">Save</button>",
+       "cited": true
+      },
+      {
+       "n": 35,
+       "text": "        </div>",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "      </div>",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "    </form>",
+       "cited": false
+      },
+      {
+       "n": 38,
+       "text": "  </div>",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "</div>",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "33ecb59501",
+   "app": "ever-traduora",
+   "from": "/login",
+   "to": "/projects/:projectId/import",
+   "title": "ever-traduora · /login → /projects/:projectId/import",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/projects/components/project-settings/project-settings.component.html:46",
+     "lines": [
+      {
+       "n": 38,
+       "text": "            maxlength=\"255\"",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "          />",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "        </div>",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "        <div class=\"d-flex justify-content-end\" *ngIf=\"(true | can: 'EditProject' | async)\">",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "          <button",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "            type=\"button\"",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "            class=\"btn btn-sm btn-link-secondary mr-3\"",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "            [routerLink]=\"['/projects', project.id]\"",
+       "cited": true
+      },
+      {
+       "n": 47,
+       "text": "            ",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "            Cancel",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "          </button>",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "          <button",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "            type=\"submit\"",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "            [disabled]=\"!detailsForm.valid || (isLoading$ | async)\"",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "            class=\"btn btn-sm btn-primary w-100\"",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "3a1274704c",
+   "app": "posts-users-ui-ng",
+   "from": "/user-search",
+   "to": "/new-user",
+   "title": "posts-users-ui-ng · /user-search → /new-user",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/anonbnr__posts-users-ui-ng"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/header/header.component.html:10",
+     "lines": [
+      {
+       "n": 2,
+       "text": "    <mat-icon>menu</mat-icon>",
+       "cited": false
+      },
+      {
+       "n": 3,
+       "text": "    <span>NG Posts & Users</span>",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "    <span class=\"spacer\"></span>",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "    <button mat-button [routerLink]=\"'/posts'\">Posts</button>",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "    <button mat-button [routerLink]=\"'/new-post'\">Add a New Post</button>",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "    <button mat-button [routerLink]=\"'/users'\">Users</button>",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "    <button mat-button [routerLink]=\"'/new-user'\">Add a New User</button>",
+       "cited": true
+      },
+      {
+       "n": 11,
+       "text": "    <button mat-button [routerLink]=\"'/user-search'\">Search Users</button>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "    <button mat-button [routerLink]=\"'/user-availability-schedule'\">Schedule Availability</button>",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "</mat-toolbar>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "3cbd6a4d9b",
+   "app": "airbus-inventory",
+   "from": "/login",
+   "to": "/productByCategory",
+   "title": "airbus-inventory · /login → /productByCategory",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/main-nav/main-nav.component.html:11",
+     "lines": [
+      {
+       "n": 3,
+       "text": "      [attr.role]=\"(isHandset$ | async) ? 'dialog' : 'navigation'\"",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "      [mode]=\"(isHandset$ | async) ? 'over' : 'side'\"",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "      [opened]=\"(isHandset$ | async) === false\">",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "    <mat-toolbar class=\"menu-bar\">Menu</mat-toolbar>",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "    <mat-divider></mat-divider>",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "    <mat-nav-list>",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "      <a mat-list-item class=\"nav2\" routerLink=\"/productByCategory\">Get Products by Category",
+       "cited": true
+      },
+      {
+       "n": 12,
+       "text": "        <span class=\"material-icons\">",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "          category",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "          </span>",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "          ",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "    ",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "      <br>",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "      <a mat-list-item class=\"nav2\" routerLink=\"/getAllProducts\">Get All Products   ",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "4104b7ed25",
+   "app": "posts-users-ui-ng",
+   "from": "/users",
+   "to": "/user-availability-schedule",
+   "title": "posts-users-ui-ng · /users → /user-availability-schedule",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/anonbnr__posts-users-ui-ng"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/header/header.component.html:12",
+     "lines": [
+      {
+       "n": 4,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "    <span class=\"spacer\"></span>",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "    <button mat-button [routerLink]=\"'/posts'\">Posts</button>",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "    <button mat-button [routerLink]=\"'/new-post'\">Add a New Post</button>",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "    <button mat-button [routerLink]=\"'/users'\">Users</button>",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "    <button mat-button [routerLink]=\"'/new-user'\">Add a New User</button>",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "    <button mat-button [routerLink]=\"'/user-search'\">Search Users</button>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "    <button mat-button [routerLink]=\"'/user-availability-schedule'\">Schedule Availability</button>",
+       "cited": true
+      },
+      {
+       "n": 13,
+       "text": "</mat-toolbar>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "418421aaab",
+   "app": "airbus-inventory",
+   "from": "/login",
+   "to": "/getAllProducts",
+   "title": "airbus-inventory · /login → /getAllProducts",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/main-nav/main-nav.component.html:19",
+     "lines": [
+      {
+       "n": 11,
+       "text": "      <a mat-list-item class=\"nav2\" routerLink=\"/productByCategory\">Get Products by Category",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "        <span class=\"material-icons\">",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "          category",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "          </span>",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "          ",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "    ",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "      <br>",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "      <a mat-list-item class=\"nav2\" routerLink=\"/getAllProducts\">Get All Products   ",
+       "cited": true
+      },
+      {
+       "n": 20,
+       "text": "        <span class=\"material-icons\">",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "          visibility",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "          </span>",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "    </a>",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 25,
+       "text": "    <br>",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "      <a mat-list-item class=\"nav2\" routerLink=\"/add\">Add Product       ",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "        <span class=\"material-icons\">",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/services/router.service.ts:20",
+     "lines": [
+      {
+       "n": 12,
+       "text": "    this.router.navigate(['login']);",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "  routeToDashboard(){",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "    this.router.navigate(['dashboard']);",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "  routeToAllProduct(){",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "    this.router.navigate(['getAllProducts']);",
+       "cited": true
+      },
+      {
+       "n": 21,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "  routeToUpdateProduct(){",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "    this.router.navigate(['update']);",
+       "cited": false
+      },
+      {
+       "n": 25,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "539f8b3116",
+   "app": "airbus-inventory",
+   "from": "/productByCategory",
+   "to": "/login",
+   "title": "airbus-inventory · /productByCategory → /login",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/main-nav/main-nav.component.html:52",
+     "lines": [
+      {
+       "n": 44,
+       "text": "        *ngIf=\"isHandset$ | async\">",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "        <mat-icon aria-label=\"Side nav toggle icon\">menu</mat-icon>",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "      </button>",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "      <span>Airbus Inventory</span>",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "      <span class=\"example-spacer\"></span>",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "          ",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "      <span class=\"material-icons home myDIV\" style=\"float: right;\" routerLink=\"/login\" (click)=\"logout()\"> logout</span>",
+       "cited": true
+      },
+      {
+       "n": 53,
+       "text": "      <div class=\"hide\" style=\"float: right;\" routerLink=\"/login\" (click)=\"logout()\"><b>Logout</b></div>",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "    </mat-toolbar>",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "    <ng-content></ng-content>",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "    <!-- Add Content Here -->",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "  </mat-sidenav-content>",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "</mat-sidenav-container>",
+       "cited": false
+      },
+      {
+       "n": 59,
+       "text": "",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/services/router.service.ts:12",
+     "lines": [
+      {
+       "n": 4,
+       "text": "@Injectable({",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "  providedIn: 'root'",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "})",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "export class RouterService {",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "  constructor(private router:Router) { }",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "  routeToLogin(){",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "    this.router.navigate(['login']);",
+       "cited": true
+      },
+      {
+       "n": 13,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "  routeToDashboard(){",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "    this.router.navigate(['dashboard']);",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "  routeToAllProduct(){",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "    this.router.navigate(['getAllProducts']);",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "5d23355a27",
+   "app": "spring-petclinic-angular",
+   "from": "/visits",
+   "to": "/specialties/:id/edit",
+   "title": "spring-petclinic-angular · /visits → /specialties/:id/edit",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/specialties/specialty-list/specialty-list.component.ts:80",
+     "lines": [
+      {
+       "n": 72,
+       "text": "    this.showAddSpecialtyComponent();",
+       "cited": false
+      },
+      {
+       "n": 73,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 74,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 75,
+       "text": "  showAddSpecialtyComponent() {",
+       "cited": false
+      },
+      {
+       "n": 76,
+       "text": "    this.isInsert = !this.isInsert;",
+       "cited": false
+      },
+      {
+       "n": 77,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 78,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 79,
+       "text": "  showEditSpecialtyComponent(updatedSpecialty: Specialty) {",
+       "cited": false
+      },
+      {
+       "n": 80,
+       "text": "    this.router.navigate(['/specialties', updatedSpecialty.id.toString(), 'edit']);",
+       "cited": true
+      },
+      {
+       "n": 81,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 82,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 83,
+       "text": "  gotoHome() {",
+       "cited": false
+      },
+      {
+       "n": 84,
+       "text": "    this.router.navigate(['/welcome']);",
+       "cited": false
+      },
+      {
+       "n": 85,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 86,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 87,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 88,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "62098d81a6",
+   "app": "airbus-inventory",
+   "from": "/dashboard",
+   "to": "/add",
+   "title": "airbus-inventory · /dashboard → /add",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/main-nav/main-nav.component.html:26",
+     "lines": [
+      {
+       "n": 18,
+       "text": "      <br>",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "      <a mat-list-item class=\"nav2\" routerLink=\"/getAllProducts\">Get All Products   ",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "        <span class=\"material-icons\">",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "          visibility",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "          </span>",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "    </a>",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 25,
+       "text": "    <br>",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "      <a mat-list-item class=\"nav2\" routerLink=\"/add\">Add Product       ",
+       "cited": true
+      },
+      {
+       "n": 27,
+       "text": "        <span class=\"material-icons\">",
+       "cited": false
+      },
+      {
+       "n": 28,
+       "text": "          add",
+       "cited": false
+      },
+      {
+       "n": 29,
+       "text": "          </span>",
+       "cited": false
+      },
+      {
+       "n": 30,
+       "text": "    </a>",
+       "cited": false
+      },
+      {
+       "n": 31,
+       "text": "    <br>",
+       "cited": false
+      },
+      {
+       "n": 32,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "      <!-- <a mat-list-item href=\"#\">Link 3</a> -->",
+       "cited": false
+      },
+      {
+       "n": 34,
+       "text": "    </mat-nav-list>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "65e4dfc0d8",
+   "app": "ever-traduora",
+   "from": "/projects/:projectId/export",
+   "to": "/projects/:projectId/settings",
+   "title": "ever-traduora · /projects/:projectId/export → /projects/:projectId/settings",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/projects/components/project-container/project-container.component.html:93",
+     "lines": [
+      {
+       "n": 85,
+       "text": "            routerLinkActive=\"active\"",
+       "cited": false
+      },
+      {
+       "n": 86,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 87,
+       "text": "            <i class=\"material-icons mr-1\">https</i>",
+       "cited": false
+      },
+      {
+       "n": 88,
+       "text": "            <ng-container >API Keys</ng-container>",
+       "cited": false
+      },
+      {
+       "n": 89,
+       "text": "          </a>",
+       "cited": false
+      },
+      {
+       "n": 90,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 91,
+       "text": "          <a",
+       "cited": false
+      },
+      {
+       "n": 92,
+       "text": "            class=\"nav-item nav-link text-sm px-3 mb-1 d-flex justify-content-start align-items-center\"",
+       "cited": false
+      },
+      {
+       "n": 93,
+       "text": "            routerLink=\"settings\"",
+       "cited": true
+      },
+      {
+       "n": 94,
+       "text": "            routerLinkActive=\"active\"",
+       "cited": false
+      },
+      {
+       "n": 95,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 96,
+       "text": "            <i class=\"material-icons mr-1\">settings_applications</i>",
+       "cited": false
+      },
+      {
+       "n": 97,
+       "text": "            <ng-container >Project Settings</ng-container>",
+       "cited": false
+      },
+      {
+       "n": 98,
+       "text": "          </a>",
+       "cited": false
+      },
+      {
+       "n": 99,
+       "text": "        </div>",
+       "cited": false
+      },
+      {
+       "n": 100,
+       "text": "      </div>",
+       "cited": false
+      },
+      {
+       "n": 101,
+       "text": "    </div>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "6f70ff4565",
+   "app": "ever-traduora",
+   "from": "/projects/:projectId/settings",
+   "to": "/projects/:projectId/import",
+   "title": "ever-traduora · /projects/:projectId/settings → /projects/:projectId/import",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/projects/components/project-settings/project-settings.component.html:46",
+     "lines": [
+      {
+       "n": 38,
+       "text": "            maxlength=\"255\"",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "          />",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "        </div>",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "        <div class=\"d-flex justify-content-end\" *ngIf=\"(true | can: 'EditProject' | async)\">",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "          <button",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "            type=\"button\"",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "            class=\"btn btn-sm btn-link-secondary mr-3\"",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "            [routerLink]=\"['/projects', project.id]\"",
+       "cited": true
+      },
+      {
+       "n": 47,
+       "text": "            ",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "            Cancel",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "          </button>",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "          <button",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "            type=\"submit\"",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "            [disabled]=\"!detailsForm.valid || (isLoading$ | async)\"",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "            class=\"btn btn-sm btn-primary w-100\"",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/projects/components/project-container/project-container.component.html:65",
+     "lines": [
+      {
+       "n": 57,
+       "text": "          <a class=\"nav-item nav-link text-sm px-3 mb-1 d-flex justify-content-start align-items-center\" routerLink=\"team\" routerLinkActive=\"active\">",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "            <i class=\"material-icons mr-1\">people</i>",
+       "cited": false
+      },
+      {
+       "n": 59,
+       "text": "            <ng-container >Team</ng-container>",
+       "cited": false
+      },
+      {
+       "n": 60,
+       "text": "          </a>",
+       "cited": false
+      },
+      {
+       "n": 61,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 62,
+       "text": "          <a",
+       "cited": false
+      },
+      {
+       "n": 63,
+       "text": "            class=\"nav-item nav-link text-sm px-3 mb-1 d-flex justify-content-start align-items-center\"",
+       "cited": false
+      },
+      {
+       "n": 64,
+       "text": "            [ngClass]=\"{ disabled: !(true | can: 'ImportTranslation' | async) }\"",
+       "cited": false
+      },
+      {
+       "n": 65,
+       "text": "            routerLink=\"import\"",
+       "cited": true
+      },
+      {
+       "n": 66,
+       "text": "            routerLinkActive=\"active\"",
+       "cited": false
+      },
+      {
+       "n": 67,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 68,
+       "text": "            <i class=\"material-icons mr-1\">note_add</i>",
+       "cited": false
+      },
+      {
+       "n": 69,
+       "text": "            <ng-container >Import</ng-container>",
+       "cited": false
+      },
+      {
+       "n": 70,
+       "text": "          </a>",
+       "cited": false
+      },
+      {
+       "n": 71,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 72,
+       "text": "          <a",
+       "cited": false
+      },
+      {
+       "n": 73,
+       "text": "            class=\"nav-item nav-link text-sm px-3 mb-1 d-flex justify-content-start align-items-center\"",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "750ff10d54",
+   "app": "event-booking-mean",
+   "from": "/",
+   "to": "/my-Events",
+   "title": "event-booking-mean · / → /my-Events",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/header/header.component.html:29",
+     "lines": [
+      {
+       "n": 21,
+       "text": "              <!-- When user is logged in -->",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "              <li><a *ngIf=\"isLoggedIn\" class=\"my-events\">RSVPs</a></li>",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "              <li *ngIf=\"isLoggedIn\" class=\"nav-item dropdown\" >",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "                <a class=\"nav-link dropdown-toggle custom-dropdown-toggle\" href=\"#\" id=\"navbarDropdown\" role=\"button\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">",
+       "cited": false
+      },
+      {
+       "n": 25,
+       "text": "                  <div class=\"user-initials\">{{ authService.getUserInitials() }}</div>",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "                  </a>",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "                <ul class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">",
+       "cited": false
+      },
+      {
+       "n": 28,
+       "text": "                  ",
+       "cited": false
+      },
+      {
+       "n": 29,
+       "text": "                  <li class=\"dropdown-item\"  ><a routerLink=\"/my-Events\">My Events</a></li>",
+       "cited": true
+      },
+      {
+       "n": 30,
+       "text": "                  <li><hr class=\"dropdown-divider\"></li>",
+       "cited": false
+      },
+      {
+       "n": 31,
+       "text": "                  <li><a class=\"dropdown-item\" (click)=\"logout()\">Logout</a></li> ",
+       "cited": false
+      },
+      {
+       "n": 32,
+       "text": "                </ul>",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "              </li>            </ul>",
+       "cited": false
+      },
+      {
+       "n": 34,
+       "text": "            <i class=\"bi bi-list mobile-nav-toggle\"></i>",
+       "cited": false
+      },
+      {
+       "n": 35,
+       "text": "          </nav>",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "    <!-- .navbar -->",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "    ",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "7b47d5abc5",
+   "app": "spring-petclinic-angular",
+   "from": "*",
+   "to": "/vets/add",
+   "title": "spring-petclinic-angular · * → /vets/add",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular",
+    "'*' and '/**' name the screen of the wildcard route, shown for any address no other route matches."
+   ],
+   "blocks": [
+    {
+     "label": "src/app/app.component.html:54",
+     "lines": [
+      {
+       "n": 46,
+       "text": "    <li class=\"dropdown\">",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "      <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" role=\"button\"",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "          aria-haspopup=\"true\" aria-expanded=\"false\" (click)=\"log('c5-navbar-vets')\" data-testid=\"c5-navbar-vets\">",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "          <span class=\"glyphicon glyphicon-education\" aria-hidden=\"true\"></span> Veterinarians<span class=\"caret\"></span>",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "      <ul class=\"dropdown-menu\">",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "        <li><a routerLink=\"/vets\" (click)=\"log('c6-navbar-vets-all')\" data-testid=\"c6-navbar-vets-all\"><span class=\"glyphicon glyphicon-search\" aria-hidden=\"true\"></span><span> All</span></a>",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "        </li>",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "        <li><a routerLink=\"/vets/add\" (click)=\"log('c7-navbar-vets-add-new')\" data-testid=\"c7-navbar-vets-add-new\"><span class=\"glyphicon glyphicon-plus\"",
+       "cited": true
+      },
+      {
+       "n": 55,
+       "text": "                                            aria-hidden=\"true\"></span><span> Add New</span></a></li>",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "      </ul>",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "    </li>",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "    <li>",
+       "cited": false
+      },
+      {
+       "n": 59,
+       "text": "      <a routerLink=\"/pettypes\" routerLinkActive=\"active\" title=\"pettypes\" (click)=\"log('c8-navbar-pet-types')\" data-testid=\"c8-navbar-pet-types\">",
+       "cited": false
+      },
+      {
+       "n": 60,
+       "text": "        <span class=\"glyphicon glyphicon-heart\" aria-hidden=\"true\"></span>",
+       "cited": false
+      },
+      {
+       "n": 61,
+       "text": "        <span> Pet Types</span>",
+       "cited": false
+      },
+      {
+       "n": 62,
+       "text": "      </a>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "9114ac504c",
+   "app": "spring-petclinic-angular",
+   "from": "/visits/add",
+   "to": "/pets/1/visits/add",
+   "title": "spring-petclinic-angular · /visits/add → /pets/1/visits/add",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/visits/visit-add/visit-add.component.html:43",
+     "lines": [
+      {
+       "n": 35,
+       "text": "        <td>{{ currentPet.name }}</td>",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "        <td>{{ currentPet.birthDate }}</td>",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "        <td>{{ currentPetType.name }}</td>",
+       "cited": false
+      },
+      {
+       "n": 38,
+       "text": "        <td>{{ currentOwner.firstName }} {{ currentOwner.lastName }}</td>",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "      </tr>",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "    </table>",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "    <form id=\"visit\" class=\"form-horizontal\" (ngSubmit)=\"onSubmit(visitForm.value)\" #visitForm=\"ngForm\" data-formid=\"f-visit-add\">",
+       "cited": true
+      },
+      {
+       "n": 44,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "      <div class=\"form-group\" >",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "        <div class=\"form-group has-feedback\" [class.has-success]=\"date.dirty && date.valid\" [class.has-error]=\"date.dirty && !date.valid\">",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "          <label class=\"col-sm-2 control-label\">Date</label>",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "          <div class=\"col-sm-10\">",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "            <input matInput [matDatepicker]=\"visitDateDatepicker\" required [ngModel]=\"visit.date | date:'yyyy-MM-dd'\" name=\"date\"  #date=\"ngModel\" (ngModelChange)=\"log('t11-visit-add-visit-date')\" data-testid=\"t11-visit-add-visit-date\">",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "            <mat-datepicker-toggle matSuffix [for]=\"visitDateDatepicker\"></mat-datepicker-toggle>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "940e53a18a",
+   "app": "spring-petclinic-angular",
+   "from": "/visits/:id/edit",
+   "to": "/welcome",
+   "title": "spring-petclinic-angular · /visits/:id/edit → /welcome",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/app.component.html:28",
+     "lines": [
+      {
+       "n": 20,
+       "text": "  <nav class=\"navbar navbar-default \" role=\"navigation\">",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "  <div class=\"container-fluid\">",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "  <div class=\"navbar-header\">",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "    <a class=\"navbar-brand\" href=\"#\"><span></span></a>",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "  </div>",
+       "cited": false
+      },
+      {
+       "n": 25,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "  <ul class=\"nav navbar-nav\">",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "    <li>",
+       "cited": false
+      },
+      {
+       "n": 28,
+       "text": "      <a routerLink=\"welcome\" title=\"home page\" (click)=\"log('c1-navbar-home')\" data-testid=\"c1-navbar-home\">",
+       "cited": true
+      },
+      {
+       "n": 29,
+       "text": "        <span class=\"glyphicon glyphicon-home\" aria-hidden=\"true\"></span>",
+       "cited": false
+      },
+      {
+       "n": 30,
+       "text": "        <span> Home</span>",
+       "cited": false
+      },
+      {
+       "n": 31,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 32,
+       "text": "    </li>",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 34,
+       "text": "    <li class=\"dropdown\">",
+       "cited": false
+      },
+      {
+       "n": 35,
+       "text": "      <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" role=\"button\"",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "          aria-haspopup=\"true\" aria-expanded=\"false\" (click)=\"log('c2-navbar-owners')\" data-testid=\"c2-navbar-owners\">",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "976b48ffd1",
+   "app": "event-booking-mean",
+   "from": "/my-Events",
+   "to": "/",
+   "title": "event-booking-mean · /my-Events → /",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/user/login/login.component.ts:33",
+     "lines": [
+      {
+       "n": 25,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "  constructor(private authService: AuthService, private router: Router) {}",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 28,
+       "text": "  onLogin() {",
+       "cited": false
+      },
+      {
+       "n": 29,
+       "text": "    this.authService.login(this.user.email, this.user.password).subscribe(",
+       "cited": false
+      },
+      {
+       "n": 30,
+       "text": "      response => {",
+       "cited": false
+      },
+      {
+       "n": 31,
+       "text": "        console.log(response.user);",
+       "cited": false
+      },
+      {
+       "n": 32,
+       "text": "        this.authService.setUser(response.user);",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "          this.router.navigate(['/']);",
+       "cited": true
+      },
+      {
+       "n": 34,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 35,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "      error => {",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "        console.error('Registration error:', error);",
+       "cited": false
+      },
+      {
+       "n": 38,
+       "text": "        this.errorMessage = 'Invalid credentials. Please try again.';",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "      }",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "    );",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "    }",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "a24d7d5cb1",
+   "app": "spring-petclinic-angular",
+   "from": "/pets/:id/visits/add",
+   "to": "/owners/:id/pets/add",
+   "title": "spring-petclinic-angular · /pets/:id/visits/add → /owners/:id/pets/add",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/visits/visit-add/visit-add.component.ts:102",
+     "lines": [
+      {
+       "n": 94,
+       "text": "        this.addedSuccess = true;",
+       "cited": false
+      },
+      {
+       "n": 95,
+       "text": "        that.gotoOwnerDetail();",
+       "cited": false
+      },
+      {
+       "n": 96,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 97,
+       "text": "      error => this.errorMessage = error as any",
+       "cited": false
+      },
+      {
+       "n": 98,
+       "text": "    );",
+       "cited": false
+      },
+      {
+       "n": 99,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 100,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 101,
+       "text": "  gotoOwnerDetail() {",
+       "cited": false
+      },
+      {
+       "n": 102,
+       "text": "    this.router.navigate(['/owners', this.currentOwner.id]);",
+       "cited": true
+      },
+      {
+       "n": 103,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 104,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 105,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 106,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "a99bce74dd",
+   "app": "ever-traduora",
+   "from": "/projects/:projectId/translations",
+   "to": "/projects/:projectId/translations/:localeCode",
+   "title": "ever-traduora · /projects/:projectId/translations → /projects/:projectId/translations/:localeCode",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp",
+    "No line is cited; the trigger is named as: ProjectLocalesComponent · Link."
+   ],
+   "blocks": []
+  },
+  {
+   "id": "ac63027fab",
+   "app": "posts-users-ui-ng",
+   "from": "/user-availability-schedule",
+   "to": "/users/:id",
+   "title": "posts-users-ui-ng · /user-availability-schedule → /users/:id",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/anonbnr__posts-users-ui-ng"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/new-user/new-user.component.ts:71",
+     "lines": [
+      {
+       "n": 63,
+       "text": "    );",
+       "cited": false
+      },
+      {
+       "n": 64,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 65,
+       "text": "    this.userService.addUser(newUser).subscribe({",
+       "cited": false
+      },
+      {
+       "n": 66,
+       "text": "      next: (createdUser) => {",
+       "cited": false
+      },
+      {
+       "n": 67,
+       "text": "        // console.log(\"User created successfully!\", createdUser);",
+       "cited": false
+      },
+      {
+       "n": 68,
+       "text": "        this.userService.getUsers();  // Refresh the user list",
+       "cited": false
+      },
+      {
+       "n": 69,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 70,
+       "text": "        if (createdUser.id) {",
+       "cited": false
+      },
+      {
+       "n": 71,
+       "text": "          this.router.navigate(['/users', createdUser.id]);  // ✅ Navigate using the generated ID",
+       "cited": true
+      },
+      {
+       "n": 72,
+       "text": "        } else {",
+       "cited": false
+      },
+      {
+       "n": 73,
+       "text": "          console.error(\"Received user without an ID:\", createdUser);",
+       "cited": false
+      },
+      {
+       "n": 74,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 75,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 76,
+       "text": "      error: (err) => console.error(\"Failed to create user:\", err)",
+       "cited": false
+      },
+      {
+       "n": 77,
+       "text": "    })",
+       "cited": false
+      },
+      {
+       "n": 78,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 79,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ace4622c1c",
+   "app": "ever-traduora",
+   "from": "/forgot-password",
+   "to": "/projects",
+   "title": "ever-traduora · /forgot-password → /projects",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/components/app-bar/app-bar.component.html:2",
+     "lines": [
+      {
+       "n": 1,
+       "text": "<nav class=\"navbar navbar-dark bg-primary shadow-sm px-4\">",
+       "cited": false
+      },
+      {
+       "n": 2,
+       "text": "  <a class=\"navbar-brand\" routerLink=\"/\">",
+       "cited": true
+      },
+      {
+       "n": 3,
+       "text": "    <app-logo></app-logo>",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "  </a>",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "  <span class=\"flex-1\"></span>",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "  <div class=\"d-flex\" *ngIf=\"(user$ | async) as user\">",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "    <button",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "      class=\"btn btn-primary btn-sm d-flex justify-content-center align-items-center mr-1\"",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "      routerLink=\"/projects\"",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "    >",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "acfc8112d8",
+   "app": "angular-jumpstart",
+   "from": "/customers/:id/details",
+   "to": "/customers/:id/orders",
+   "title": "angular-jumpstart · /customers/:id/details → /customers/:id/orders",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/DanWahlin__Angular-JumpStart"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/customer/customer.component.html:16",
+     "lines": [
+      {
+       "n": 8,
+       "text": "            <ul class=\"nav\">",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "                <li class=\"toolbar-item\">",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "                    <a routerLink=\"details\" routerLinkActive=\"active\">",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "                       <span class=\"glyphicon glyphicon-list\"></span>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "                       Customer Details",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "                    </a>",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "                </li>",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "                <li class=\"toolbar-item\">",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "                    <a routerLink=\"orders\" routerLinkActive=\"active\">",
+       "cited": true
+      },
+      {
+       "n": 17,
+       "text": "                        <span class=\"glyphicon glyphicon-tags\"></span>",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "                        Customer Orders",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "                    </a>",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "                </li>",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "                <li class=\"toolbar-item\">",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "                    <a routerLink=\"edit\" routerLinkActive=\"active\">",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "                        <span class=\"glyphicon glyphicon-edit\"></span>",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "                        Edit Customer",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "aeb25cf4aa",
+   "app": "spring-petclinic-angular",
+   "from": "/",
+   "to": "/owners",
+   "title": "spring-petclinic-angular · / → /owners",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/app.component.html:40",
+     "lines": [
+      {
+       "n": 32,
+       "text": "    </li>",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 34,
+       "text": "    <li class=\"dropdown\">",
+       "cited": false
+      },
+      {
+       "n": 35,
+       "text": "      <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" role=\"button\"",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "          aria-haspopup=\"true\" aria-expanded=\"false\" (click)=\"log('c2-navbar-owners')\" data-testid=\"c2-navbar-owners\">",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "          <span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\"></span> Owners<span class=\"caret\"></span>",
+       "cited": false
+      },
+      {
+       "n": 38,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "      <ul class=\"dropdown-menu\">",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "        <li><a routerLink=\"/owners\" (click)=\"log('c3-navbar-owners-search')\" data-testid=\"c3-navbar-owners-search\"><span class=\"glyphicon glyphicon-search\"",
+       "cited": true
+      },
+      {
+       "n": 41,
+       "text": "                                          aria-hidden=\"true\"></span><span> Search</span></a></li>",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "        <li><a routerLink=\"/owners/add\" (click)=\"log('c4-navbar-owners-add-new')\" data-testid=\"c4-navbar-owners-add-new\"><span class=\"glyphicon glyphicon-plus\" aria-hidden=\"true\"></span><span> Add New</span></a>",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "        </li>",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "      </ul>",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "    </li>",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "    <li class=\"dropdown\">",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "      <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" role=\"button\"",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "          aria-haspopup=\"true\" aria-expanded=\"false\" (click)=\"log('c5-navbar-vets')\" data-testid=\"c5-navbar-vets\">",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "af9554a88f",
+   "app": "airbus-inventory",
+   "from": "/productByCategory",
+   "to": "/update",
+   "title": "airbus-inventory · /productByCategory → /update",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/services/router.service.ts:24",
+     "lines": [
+      {
+       "n": 16,
+       "text": "    this.router.navigate(['dashboard']);",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "  routeToAllProduct(){",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "    this.router.navigate(['getAllProducts']);",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "  routeToUpdateProduct(){",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "    this.router.navigate(['update']);",
+       "cited": true
+      },
+      {
+       "n": 25,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bbaa5419f1",
+   "app": "spring-petclinic-angular",
+   "from": "/pets/:id/edit",
+   "to": "/pets/:id/visits/add",
+   "title": "spring-petclinic-angular · /pets/:id/edit → /pets/:id/visits/add",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/pets/pet-list/pet-list.component.ts:67",
+     "lines": [
+      {
+       "n": 59,
+       "text": "      response => {",
+       "cited": false
+      },
+      {
+       "n": 60,
+       "text": "        this.deleteSuccess = true;",
+       "cited": false
+      },
+      {
+       "n": 61,
+       "text": "        this.pet = {} as Pet;",
+       "cited": false
+      },
+      {
+       "n": 62,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 63,
+       "text": "      error => this.errorMessage = error as any);",
+       "cited": false
+      },
+      {
+       "n": 64,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 65,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 66,
+       "text": "  addVisit(pet: Pet) {",
+       "cited": false
+      },
+      {
+       "n": 67,
+       "text": "    this.router.navigate(['/pets', pet.id, 'visits', 'add']);",
+       "cited": true
+      },
+      {
+       "n": 68,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 69,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 70,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 71,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bccd2278cb",
+   "app": "spring-petclinic-angular",
+   "from": "/pettypes",
+   "to": "/vets",
+   "title": "spring-petclinic-angular · /pettypes → /vets",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/app.component.html:52",
+     "lines": [
+      {
+       "n": 44,
+       "text": "      </ul>",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "    </li>",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "    <li class=\"dropdown\">",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "      <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" role=\"button\"",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "          aria-haspopup=\"true\" aria-expanded=\"false\" (click)=\"log('c5-navbar-vets')\" data-testid=\"c5-navbar-vets\">",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "          <span class=\"glyphicon glyphicon-education\" aria-hidden=\"true\"></span> Veterinarians<span class=\"caret\"></span>",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "      <ul class=\"dropdown-menu\">",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "        <li><a routerLink=\"/vets\" (click)=\"log('c6-navbar-vets-all')\" data-testid=\"c6-navbar-vets-all\"><span class=\"glyphicon glyphicon-search\" aria-hidden=\"true\"></span><span> All</span></a>",
+       "cited": true
+      },
+      {
+       "n": 53,
+       "text": "        </li>",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "        <li><a routerLink=\"/vets/add\" (click)=\"log('c7-navbar-vets-add-new')\" data-testid=\"c7-navbar-vets-add-new\"><span class=\"glyphicon glyphicon-plus\"",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "                                            aria-hidden=\"true\"></span><span> Add New</span></a></li>",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "      </ul>",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "    </li>",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "    <li>",
+       "cited": false
+      },
+      {
+       "n": 59,
+       "text": "      <a routerLink=\"/pettypes\" routerLinkActive=\"active\" title=\"pettypes\" (click)=\"log('c8-navbar-pet-types')\" data-testid=\"c8-navbar-pet-types\">",
+       "cited": false
+      },
+      {
+       "n": 60,
+       "text": "        <span class=\"glyphicon glyphicon-heart\" aria-hidden=\"true\"></span>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "c46ce6d05c",
+   "app": "posts-users-ui-ng",
+   "from": "/posts",
+   "to": "/user-search",
+   "title": "posts-users-ui-ng · /posts → /user-search",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/anonbnr__posts-users-ui-ng"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/header/header.component.html:11",
+     "lines": [
+      {
+       "n": 3,
+       "text": "    <span>NG Posts & Users</span>",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "    <span class=\"spacer\"></span>",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "    <button mat-button [routerLink]=\"'/posts'\">Posts</button>",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "    <button mat-button [routerLink]=\"'/new-post'\">Add a New Post</button>",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "    <button mat-button [routerLink]=\"'/users'\">Users</button>",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "    <button mat-button [routerLink]=\"'/new-user'\">Add a New User</button>",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "    <button mat-button [routerLink]=\"'/user-search'\">Search Users</button>",
+       "cited": true
+      },
+      {
+       "n": 12,
+       "text": "    <button mat-button [routerLink]=\"'/user-availability-schedule'\">Schedule Availability</button>",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "</mat-toolbar>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "c50c67e421",
+   "app": "ever-traduora",
+   "from": "/login",
+   "to": "/projects/:projectId/translations",
+   "title": "ever-traduora · /login → /projects/:projectId/translations",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/projects/components/project-settings/project-settings.component.html:46",
+     "lines": [
+      {
+       "n": 38,
+       "text": "            maxlength=\"255\"",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "          />",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "        </div>",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "        <div class=\"d-flex justify-content-end\" *ngIf=\"(true | can: 'EditProject' | async)\">",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "          <button",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "            type=\"button\"",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "            class=\"btn btn-sm btn-link-secondary mr-3\"",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "            [routerLink]=\"['/projects', project.id]\"",
+       "cited": true
+      },
+      {
+       "n": 47,
+       "text": "            ",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "            Cancel",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "          </button>",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "          <button",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "            type=\"submit\"",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "            [disabled]=\"!detailsForm.valid || (isLoading$ | async)\"",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "            class=\"btn btn-sm btn-primary w-100\"",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "c88949e6bc",
+   "app": "event-booking-mean",
+   "from": "/create-event",
+   "to": "/my-Events",
+   "title": "event-booking-mean · /create-event → /my-Events",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/create-event/create-event.component.ts:74",
+     "lines": [
+      {
+       "n": 66,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 67,
+       "text": "    this.eventService.createEvent(formData).subscribe(",
+       "cited": false
+      },
+      {
+       "n": 68,
+       "text": "      (response: any) => {",
+       "cited": false
+      },
+      {
+       "n": 69,
+       "text": "        const eventId = response._id;",
+       "cited": false
+      },
+      {
+       "n": 70,
+       "text": "        this.eventService.addToMyEvents(userId, eventId).subscribe(",
+       "cited": false
+      },
+      {
+       "n": 71,
+       "text": "          (res) =>{",
+       "cited": false
+      },
+      {
+       "n": 72,
+       "text": "            console.log(\"Event should be added here\");",
+       "cited": false
+      },
+      {
+       "n": 73,
+       "text": "            console.log('Event added to myEvents', res)",
+       "cited": false
+      },
+      {
+       "n": 74,
+       "text": "            this.router.navigate(['/my-Events']);",
+       "cited": true
+      },
+      {
+       "n": 75,
+       "text": "          }, ",
+       "cited": false
+      },
+      {
+       "n": 76,
+       "text": "            ",
+       "cited": false
+      },
+      {
+       "n": 77,
+       "text": "          (error) =>{",
+       "cited": false
+      },
+      {
+       "n": 78,
+       "text": "            console.log(\"********Error**********-\");",
+       "cited": false
+      },
+      {
+       "n": 79,
+       "text": "            console.error(error)}, ",
+       "cited": false
+      },
+      {
+       "n": 80,
+       "text": "        );",
+       "cited": false
+      },
+      {
+       "n": 81,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 82,
+       "text": "      (error) => console.error(error)",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/header/header.component.html:29",
+     "lines": [
+      {
+       "n": 21,
+       "text": "              <!-- When user is logged in -->",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "              <li><a *ngIf=\"isLoggedIn\" class=\"my-events\">RSVPs</a></li>",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "              <li *ngIf=\"isLoggedIn\" class=\"nav-item dropdown\" >",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "                <a class=\"nav-link dropdown-toggle custom-dropdown-toggle\" href=\"#\" id=\"navbarDropdown\" role=\"button\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">",
+       "cited": false
+      },
+      {
+       "n": 25,
+       "text": "                  <div class=\"user-initials\">{{ authService.getUserInitials() }}</div>",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "                  </a>",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "                <ul class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">",
+       "cited": false
+      },
+      {
+       "n": 28,
+       "text": "                  ",
+       "cited": false
+      },
+      {
+       "n": 29,
+       "text": "                  <li class=\"dropdown-item\"  ><a routerLink=\"/my-Events\">My Events</a></li>",
+       "cited": true
+      },
+      {
+       "n": 30,
+       "text": "                  <li><hr class=\"dropdown-divider\"></li>",
+       "cited": false
+      },
+      {
+       "n": 31,
+       "text": "                  <li><a class=\"dropdown-item\" (click)=\"logout()\">Logout</a></li> ",
+       "cited": false
+      },
+      {
+       "n": 32,
+       "text": "                </ul>",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "              </li>            </ul>",
+       "cited": false
+      },
+      {
+       "n": 34,
+       "text": "            <i class=\"bi bi-list mobile-nav-toggle\"></i>",
+       "cited": false
+      },
+      {
+       "n": 35,
+       "text": "          </nav>",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "    <!-- .navbar -->",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "    ",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "c8b389b3e4",
+   "app": "posts-users-ui-ng",
+   "from": "/new-post",
+   "to": "/user-search",
+   "title": "posts-users-ui-ng · /new-post → /user-search",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/anonbnr__posts-users-ui-ng"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/header/header.component.html:11",
+     "lines": [
+      {
+       "n": 3,
+       "text": "    <span>NG Posts & Users</span>",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "    <span class=\"spacer\"></span>",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "    <button mat-button [routerLink]=\"'/posts'\">Posts</button>",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "    <button mat-button [routerLink]=\"'/new-post'\">Add a New Post</button>",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "    <button mat-button [routerLink]=\"'/users'\">Users</button>",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "    <button mat-button [routerLink]=\"'/new-user'\">Add a New User</button>",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "    <button mat-button [routerLink]=\"'/user-search'\">Search Users</button>",
+       "cited": true
+      },
+      {
+       "n": 12,
+       "text": "    <button mat-button [routerLink]=\"'/user-availability-schedule'\">Schedule Availability</button>",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "</mat-toolbar>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "c8d0541829",
+   "app": "angular-jumpstart",
+   "from": "/customers/:id",
+   "to": "/customers/:id/details",
+   "title": "angular-jumpstart · /customers/:id → /customers/:id/details",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/DanWahlin__Angular-JumpStart"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/customer/customer.component.html:10",
+     "lines": [
+      {
+       "n": 2,
+       "text": "    <div class=\"page-header\">",
+       "cited": false
+      },
+      {
+       "n": 3,
+       "text": "        <h1 class=\"page-title\">Customer Information</h1>",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "    </div>",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "    ",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "    <div class=\"customer-tabs\">",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "        <div class=\"navbar\">",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "            <ul class=\"nav\">",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "                <li class=\"toolbar-item\">",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "                    <a routerLink=\"details\" routerLinkActive=\"active\">",
+       "cited": true
+      },
+      {
+       "n": 11,
+       "text": "                       <span class=\"glyphicon glyphicon-list\"></span>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "                       Customer Details",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "                    </a>",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "                </li>",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "                <li class=\"toolbar-item\">",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "                    <a routerLink=\"orders\" routerLinkActive=\"active\">",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "                        <span class=\"glyphicon glyphicon-tags\"></span>",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "                        Customer Orders",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cd9b46b553",
+   "app": "angular-jumpstart",
+   "from": "/about",
+   "to": "/customers",
+   "title": "angular-jumpstart · /about → /customers",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/DanWahlin__Angular-JumpStart"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/core/navbar/navbar.component.html:11",
+     "lines": [
+      {
+       "n": 3,
+       "text": "        <div class=\"navbar-header\">",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "            <button type=\"button\" class=\"navbar-toggle\" ",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "                    (click)=\"isCollapsed = !isCollapsed\">",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "                <span class=\"sr-only\">Toggle navigation</span>",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "                <span class=\"icon-bar\"></span>",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "                <span class=\"icon-bar\"></span>",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "                <span class=\"icon-bar\"></span>",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "            </button>",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "            <a class=\"navbar-brand\" routerLink=\"/customers\">",
+       "cited": true
+      },
+      {
+       "n": 12,
+       "text": "                <span class=\"app-title\">Customer Manager</span>",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "            </a>",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "            <span class=\"navbar-collapse\" [attr.data-collapse]=\"isCollapsed\">",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "                <ul class=\"nav navbar-nav nav-pills navBarPadding\">",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "                    <li routerLinkActive=\"active\"><a routerLink=\"/customers\">Customers</a></li>",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "                    <li routerLinkActive=\"active\"><a routerLink=\"/orders\">Orders</a></li>",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "                    <li routerLinkActive=\"active\"><a routerLink=\"/about\">About</a></li>",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "                    <li routerLinkActive=\"active\" (click)=\"loginOrOut()\" data-cy=\"login-logout\"><a>{{ loginLogoutText }}</a></li>",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/core/navbar/navbar.component.ts:48",
+     "lines": [
+      {
+       "n": 40,
+       "text": "    loginOrOut() {",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "        const isAuthenticated = this.authservice.isAuthenticated;",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "        if (isAuthenticated) {",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "            this.authservice.logout()",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "                .subscribe({",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "                    next: (status: boolean) => {",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "                        this.setLoginLogoutText();",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "                        this.growler.growl('Logged Out', GrowlerMessageType.Info);",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "                        this.router.navigate(['/customers']);",
+       "cited": true
+      },
+      {
+       "n": 49,
+       "text": "                        return;",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "                    },",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "                    error: (err: any) => this.logger.log(err)",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "                });",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "        this.redirectToLogin();",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "    }",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "d097ef699b",
+   "app": "ever-traduora",
+   "from": "/projects/:projectId/terms",
+   "to": "/projects/:projectId/translations",
+   "title": "ever-traduora · /projects/:projectId/terms → /projects/:projectId/translations",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/projects/components/project-container/project-container.component.html:41",
+     "lines": [
+      {
+       "n": 33,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 34,
+       "text": "          <a class=\"nav-item nav-link text-sm px-3 mb-1 d-flex justify-content-start align-items-center\" routerLink=\"terms\" routerLinkActive=\"active\">",
+       "cited": false
+      },
+      {
+       "n": 35,
+       "text": "            <i class=\"material-icons mr-1\">list</i>",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "            <ng-container >Terms</ng-container>",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "          </a>",
+       "cited": false
+      },
+      {
+       "n": 38,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "          <a",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "            class=\"nav-item nav-link text-sm px-3 mb-1 d-flex justify-content-start align-items-center\"",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "            routerLink=\"translations\"",
+       "cited": true
+      },
+      {
+       "n": 42,
+       "text": "            routerLinkActive=\"active\"",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "            <i class=\"material-icons mr-1\">language</i>",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "            <ng-container >Translations</ng-container>",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "          </a>",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "          <a",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "            class=\"nav-item nav-link text-sm px-3 mb-1 d-flex justify-content-start align-items-center\"",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "d13f886a36",
+   "app": "angular-jumpstart",
+   "from": "/customers/:id/orders",
+   "to": "/customers/:id/details",
+   "title": "angular-jumpstart · /customers/:id/orders → /customers/:id/details",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/DanWahlin__Angular-JumpStart"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/customer/customer.component.html:10",
+     "lines": [
+      {
+       "n": 2,
+       "text": "    <div class=\"page-header\">",
+       "cited": false
+      },
+      {
+       "n": 3,
+       "text": "        <h1 class=\"page-title\">Customer Information</h1>",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "    </div>",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "    ",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "    <div class=\"customer-tabs\">",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "        <div class=\"navbar\">",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "            <ul class=\"nav\">",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "                <li class=\"toolbar-item\">",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "                    <a routerLink=\"details\" routerLinkActive=\"active\">",
+       "cited": true
+      },
+      {
+       "n": 11,
+       "text": "                       <span class=\"glyphicon glyphicon-list\"></span>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "                       Customer Details",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "                    </a>",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "                </li>",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "                <li class=\"toolbar-item\">",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "                    <a routerLink=\"orders\" routerLinkActive=\"active\">",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "                        <span class=\"glyphicon glyphicon-tags\"></span>",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "                        Customer Orders",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "d516a06bfa",
+   "app": "airbus-inventory",
+   "from": "/login",
+   "to": "/add",
+   "title": "airbus-inventory · /login → /add",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/main-nav/main-nav.component.html:26",
+     "lines": [
+      {
+       "n": 18,
+       "text": "      <br>",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "      <a mat-list-item class=\"nav2\" routerLink=\"/getAllProducts\">Get All Products   ",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "        <span class=\"material-icons\">",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "          visibility",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "          </span>",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "    </a>",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 25,
+       "text": "    <br>",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "      <a mat-list-item class=\"nav2\" routerLink=\"/add\">Add Product       ",
+       "cited": true
+      },
+      {
+       "n": 27,
+       "text": "        <span class=\"material-icons\">",
+       "cited": false
+      },
+      {
+       "n": 28,
+       "text": "          add",
+       "cited": false
+      },
+      {
+       "n": 29,
+       "text": "          </span>",
+       "cited": false
+      },
+      {
+       "n": 30,
+       "text": "    </a>",
+       "cited": false
+      },
+      {
+       "n": 31,
+       "text": "    <br>",
+       "cited": false
+      },
+      {
+       "n": 32,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "      <!-- <a mat-list-item href=\"#\">Link 3</a> -->",
+       "cited": false
+      },
+      {
+       "n": 34,
+       "text": "    </mat-nav-list>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "d7011569c3",
+   "app": "angular-jumpstart",
+   "from": "/customers",
+   "to": "/orders",
+   "title": "angular-jumpstart · /customers → /orders",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/DanWahlin__Angular-JumpStart"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/core/navbar/navbar.component.html:17",
+     "lines": [
+      {
+       "n": 9,
+       "text": "                <span class=\"icon-bar\"></span>",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "            </button>",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "            <a class=\"navbar-brand\" routerLink=\"/customers\">",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "                <span class=\"app-title\">Customer Manager</span>",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "            </a>",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "            <span class=\"navbar-collapse\" [attr.data-collapse]=\"isCollapsed\">",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "                <ul class=\"nav navbar-nav nav-pills navBarPadding\">",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "                    <li routerLinkActive=\"active\"><a routerLink=\"/customers\">Customers</a></li>",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "                    <li routerLinkActive=\"active\"><a routerLink=\"/orders\">Orders</a></li>",
+       "cited": true
+      },
+      {
+       "n": 18,
+       "text": "                    <li routerLinkActive=\"active\"><a routerLink=\"/about\">About</a></li>",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "                    <li routerLinkActive=\"active\" (click)=\"loginOrOut()\" data-cy=\"login-logout\"><a>{{ loginLogoutText }}</a></li>",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "                </ul>",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "            </span>",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "        </div>",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "    </div>",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "</nav>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "d9a83f7b09",
+   "app": "spring-petclinic-angular",
+   "from": "/owners/:id/edit",
+   "to": "/owners/:id/pets/add",
+   "title": "spring-petclinic-angular · /owners/:id/edit → /owners/:id/pets/add",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/owners/owner-edit/owner-edit.component.ts:70",
+     "lines": [
+      {
+       "n": 62,
+       "text": "    this.ownerService.updateOwner(ownerId , owner).subscribe(",
+       "cited": false
+      },
+      {
+       "n": 63,
+       "text": "      (res) => this.gotoOwnerDetail(owner),",
+       "cited": false
+      },
+      {
+       "n": 64,
+       "text": "      (error) => (this.errorMessage = error as any)",
+       "cited": false
+      },
+      {
+       "n": 65,
+       "text": "    );",
+       "cited": false
+      },
+      {
+       "n": 66,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 67,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 68,
+       "text": "  gotoOwnerDetail(owner: Owner) {",
+       "cited": false
+      },
+      {
+       "n": 69,
+       "text": "    this.errorMessage = null;",
+       "cited": false
+      },
+      {
+       "n": 70,
+       "text": "    this.router.navigate(['/owners', owner.id]);",
+       "cited": true
+      },
+      {
+       "n": 71,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 72,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 73,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "dfac8dc6bf",
+   "app": "heroes-angular",
+   "from": "*",
+   "to": "/villains",
+   "title": "heroes-angular · * → /villains",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/johnpapa__heroes-angular",
+    "'*' and '/**' name the screen of the wildcard route, shown for any address no other route matches."
+   ],
+   "blocks": [
+    {
+     "label": "src/app/core/components/nav.component.ts:13",
+     "lines": [
+      {
+       "n": 5,
+       "text": "  selector: 'app-nav',",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "  template: `",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "  <nav class=\"menu\">",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "    <p class=\"menu-label\">Menu</p>",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "    <ul class=\"menu-list\">",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "      <a routerLink=\"/heroes\" routerLinkActive=\"router-link-active\">",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "        <span>Heroes</span>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "      <a routerLink=\"/villains\" routerLinkActive=\"router-link-active\">",
+       "cited": true
+      },
+      {
+       "n": 14,
+       "text": "        <span>Villains</span>",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "      <a routerLink=\"/about\" routerLinkActive=\"router-link-active\">",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "        <span>About</span>",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "    </ul>",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "  </nav>",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "  `",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "e1f8e8da0c",
+   "app": "spring-petclinic-angular",
+   "from": "/pets",
+   "to": "/**",
+   "title": "spring-petclinic-angular · /pets → /**",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular",
+    "'*' and '/**' name the screen of the wildcard route, shown for any address no other route matches."
+   ],
+   "blocks": [
+    {
+     "label": "src/app/app.component.html:35",
+     "lines": [
+      {
+       "n": 27,
+       "text": "    <li>",
+       "cited": false
+      },
+      {
+       "n": 28,
+       "text": "      <a routerLink=\"welcome\" title=\"home page\" (click)=\"log('c1-navbar-home')\" data-testid=\"c1-navbar-home\">",
+       "cited": false
+      },
+      {
+       "n": 29,
+       "text": "        <span class=\"glyphicon glyphicon-home\" aria-hidden=\"true\"></span>",
+       "cited": false
+      },
+      {
+       "n": 30,
+       "text": "        <span> Home</span>",
+       "cited": false
+      },
+      {
+       "n": 31,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 32,
+       "text": "    </li>",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 34,
+       "text": "    <li class=\"dropdown\">",
+       "cited": false
+      },
+      {
+       "n": 35,
+       "text": "      <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" role=\"button\"",
+       "cited": true
+      },
+      {
+       "n": 36,
+       "text": "          aria-haspopup=\"true\" aria-expanded=\"false\" (click)=\"log('c2-navbar-owners')\" data-testid=\"c2-navbar-owners\">",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "          <span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\"></span> Owners<span class=\"caret\"></span>",
+       "cited": false
+      },
+      {
+       "n": 38,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "      <ul class=\"dropdown-menu\">",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "        <li><a routerLink=\"/owners\" (click)=\"log('c3-navbar-owners-search')\" data-testid=\"c3-navbar-owners-search\"><span class=\"glyphicon glyphicon-search\"",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "                                          aria-hidden=\"true\"></span><span> Search</span></a></li>",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "        <li><a routerLink=\"/owners/add\" (click)=\"log('c4-navbar-owners-add-new')\" data-testid=\"c4-navbar-owners-add-new\"><span class=\"glyphicon glyphicon-plus\" aria-hidden=\"true\"></span><span> Add New</span></a>",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "        </li>",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/app.component.html:47",
+     "lines": [
+      {
+       "n": 39,
+       "text": "      <ul class=\"dropdown-menu\">",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "        <li><a routerLink=\"/owners\" (click)=\"log('c3-navbar-owners-search')\" data-testid=\"c3-navbar-owners-search\"><span class=\"glyphicon glyphicon-search\"",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "                                          aria-hidden=\"true\"></span><span> Search</span></a></li>",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "        <li><a routerLink=\"/owners/add\" (click)=\"log('c4-navbar-owners-add-new')\" data-testid=\"c4-navbar-owners-add-new\"><span class=\"glyphicon glyphicon-plus\" aria-hidden=\"true\"></span><span> Add New</span></a>",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "        </li>",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "      </ul>",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "    </li>",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "    <li class=\"dropdown\">",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "      <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" role=\"button\"",
+       "cited": true
+      },
+      {
+       "n": 48,
+       "text": "          aria-haspopup=\"true\" aria-expanded=\"false\" (click)=\"log('c5-navbar-vets')\" data-testid=\"c5-navbar-vets\">",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "          <span class=\"glyphicon glyphicon-education\" aria-hidden=\"true\"></span> Veterinarians<span class=\"caret\"></span>",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "      <ul class=\"dropdown-menu\">",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "        <li><a routerLink=\"/vets\" (click)=\"log('c6-navbar-vets-all')\" data-testid=\"c6-navbar-vets-all\"><span class=\"glyphicon glyphicon-search\" aria-hidden=\"true\"></span><span> All</span></a>",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "        </li>",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "        <li><a routerLink=\"/vets/add\" (click)=\"log('c7-navbar-vets-add-new')\" data-testid=\"c7-navbar-vets-add-new\"><span class=\"glyphicon glyphicon-plus\"",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "                                            aria-hidden=\"true\"></span><span> Add New</span></a></li>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "e30aa8b4fc",
+   "app": "posts-users-ui-ng",
+   "from": "/new-post",
+   "to": "/new-user",
+   "title": "posts-users-ui-ng · /new-post → /new-user",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/anonbnr__posts-users-ui-ng"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/header/header.component.html:10",
+     "lines": [
+      {
+       "n": 2,
+       "text": "    <mat-icon>menu</mat-icon>",
+       "cited": false
+      },
+      {
+       "n": 3,
+       "text": "    <span>NG Posts & Users</span>",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "    <span class=\"spacer\"></span>",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "    <button mat-button [routerLink]=\"'/posts'\">Posts</button>",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "    <button mat-button [routerLink]=\"'/new-post'\">Add a New Post</button>",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "    <button mat-button [routerLink]=\"'/users'\">Users</button>",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "    <button mat-button [routerLink]=\"'/new-user'\">Add a New User</button>",
+       "cited": true
+      },
+      {
+       "n": 11,
+       "text": "    <button mat-button [routerLink]=\"'/user-search'\">Search Users</button>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "    <button mat-button [routerLink]=\"'/user-availability-schedule'\">Schedule Availability</button>",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "</mat-toolbar>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "e7c9a1e17c",
+   "app": "ever-traduora",
+   "from": "/projects/:projectId",
+   "to": "/projects/:projectId/translations/:localeCode",
+   "title": "ever-traduora · /projects/:projectId → /projects/:projectId/translations/:localeCode",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp",
+    "No line is cited; the trigger is named as: ProjectLocalesComponent · Link."
+   ],
+   "blocks": []
+  },
+  {
+   "id": "e8e33cf8c9",
+   "app": "angular-jumpstart",
+   "from": "/login",
+   "to": "/customers/:id/details",
+   "title": "angular-jumpstart · /login → /customers/:id/details",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/DanWahlin__Angular-JumpStart"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/customers/customers-card/customers-card.component.html:8",
+     "lines": [
+      {
+       "n": 1,
+       "text": "<div class=\"container-card\">",
+       "cited": false
+      },
+      {
+       "n": 2,
+       "text": "    <div class=\"cards-grid\">",
+       "cited": false
+      },
+      {
+       "n": 3,
+       "text": "        @for (customer of customers; track trackbyService.customer($index, customer)) {",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "            <div class=\"customer-card card\">",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "            <div class=\"card-header\">",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "                <div class=\"card-header-content\">",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "                    <h3 class=\"customer-name\">",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "                        <a [routerLink]=\"['/customers',customer.id,'details']\">",
+       "cited": true
+      },
+      {
+       "n": 9,
+       "text": "                            {{customer.firstName | capitalize }} {{ customer.lastName | capitalize }}",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "                        </a>",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "                    </h3>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "                    <div class=\"card-actions\">",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "                        <a [routerLink]=\"['/customers',customer.id,'edit']\" ",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "                           class=\"action-btn action-btn--small action-btn--edit\" ",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "                           title=\"Edit Customer\">",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "                            <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "e9f0792924",
+   "app": "ever-traduora",
+   "from": "/projects/:projectId",
+   "to": "/projects/:projectId/labels",
+   "title": "ever-traduora · /projects/:projectId → /projects/:projectId/labels",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/projects/components/project-container/project-container.component.html:50",
+     "lines": [
+      {
+       "n": 42,
+       "text": "            routerLinkActive=\"active\"",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "            <i class=\"material-icons mr-1\">language</i>",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "            <ng-container >Translations</ng-container>",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "          </a>",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "          <a",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "            class=\"nav-item nav-link text-sm px-3 mb-1 d-flex justify-content-start align-items-center\"",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "            routerLink=\"labels\"",
+       "cited": true
+      },
+      {
+       "n": 51,
+       "text": "            routerLinkActive=\"active\"",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "            <i class=\"material-icons mr-1\">label</i>",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "            <ng-container >Labels</ng-container>",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "          </a>",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "          <a class=\"nav-item nav-link text-sm px-3 mb-1 d-flex justify-content-start align-items-center\" routerLink=\"team\" routerLinkActive=\"active\">",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "            <i class=\"material-icons mr-1\">people</i>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ee9e696cb7",
+   "app": "spring-petclinic-angular",
+   "from": "/visits/:id/edit",
+   "to": "/owners/:id/edit",
+   "title": "spring-petclinic-angular · /visits/:id/edit → /owners/:id/edit",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/visits/visit-edit/visit-edit.component.ts:98",
+     "lines": [
+      {
+       "n": 90,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 91,
+       "text": "    this.visitService.updateVisit(visit.id.toString(), visit).subscribe(",
+       "cited": false
+      },
+      {
+       "n": 92,
+       "text": "      res => this.gotoOwnerDetail(),",
+       "cited": false
+      },
+      {
+       "n": 93,
+       "text": "      error => this.errorMessage = error as any);",
+       "cited": false
+      },
+      {
+       "n": 94,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 95,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 96,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 97,
+       "text": "  gotoOwnerDetail() {",
+       "cited": false
+      },
+      {
+       "n": 98,
+       "text": "    this.router.navigate(['/owners', this.currentOwner.id]);",
+       "cited": true
+      },
+      {
+       "n": 99,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 100,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 101,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 102,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "f0e041e1f0",
+   "app": "ever-traduora",
+   "from": "/forgot-password",
+   "to": "/user-settings",
+   "title": "ever-traduora · /forgot-password → /user-settings",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/components/app-bar/app-bar.component.html:21",
+     "lines": [
+      {
+       "n": 13,
+       "text": "    <div ngbDropdown display=\"dynamic\" class=\"d-inline-block\" placement=\"bottom-right\">",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "      <button",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "        class=\"btn btn-primary btn-sm d-flex justify-content-center align-items-center\"",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "        ngbDropdownToggle",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "      >",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "        <i class=\"material-icons mr-1\">account_circle</i>{{ user.name || user.email }}",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "      </button>",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "      <div ngbDropdownMenu>",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "        <button class=\"dropdown-item\" routerLink=\"/user-settings\" >Account Settings</button>",
+       "cited": true
+      },
+      {
+       "n": 22,
+       "text": "        <button class=\"dropdown-item\" (click)=\"logout()\" >Logout</button>",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "      </div>",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "    </div>",
+       "cited": false
+      },
+      {
+       "n": 25,
+       "text": "  </div>",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "</nav>",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "f20f8800b4",
+   "app": "spring-petclinic-angular",
+   "from": "/vets/:id/edit",
+   "to": "/pettypes",
+   "title": "spring-petclinic-angular · /vets/:id/edit → /pettypes",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/app.component.html:59",
+     "lines": [
+      {
+       "n": 51,
+       "text": "      <ul class=\"dropdown-menu\">",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "        <li><a routerLink=\"/vets\" (click)=\"log('c6-navbar-vets-all')\" data-testid=\"c6-navbar-vets-all\"><span class=\"glyphicon glyphicon-search\" aria-hidden=\"true\"></span><span> All</span></a>",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "        </li>",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "        <li><a routerLink=\"/vets/add\" (click)=\"log('c7-navbar-vets-add-new')\" data-testid=\"c7-navbar-vets-add-new\"><span class=\"glyphicon glyphicon-plus\"",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "                                            aria-hidden=\"true\"></span><span> Add New</span></a></li>",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "      </ul>",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "    </li>",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "    <li>",
+       "cited": false
+      },
+      {
+       "n": 59,
+       "text": "      <a routerLink=\"/pettypes\" routerLinkActive=\"active\" title=\"pettypes\" (click)=\"log('c8-navbar-pet-types')\" data-testid=\"c8-navbar-pet-types\">",
+       "cited": true
+      },
+      {
+       "n": 60,
+       "text": "        <span class=\"glyphicon glyphicon-heart\" aria-hidden=\"true\"></span>",
+       "cited": false
+      },
+      {
+       "n": 61,
+       "text": "        <span> Pet Types</span>",
+       "cited": false
+      },
+      {
+       "n": 62,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 63,
+       "text": "    </li>",
+       "cited": false
+      },
+      {
+       "n": 64,
+       "text": "    <li>",
+       "cited": false
+      },
+      {
+       "n": 65,
+       "text": "      <a routerLink=\"/specialties\" routerLinkActive=\"active\" title=\"specialties\" (click)=\"log('c9-navbar-specialties')\" data-testid=\"c9-navbar-specialties\">",
+       "cited": false
+      },
+      {
+       "n": 66,
+       "text": "        <span class=\"glyphicon glyphicon-th-list\" aria-hidden=\"true\"></span>",
+       "cited": false
+      },
+      {
+       "n": 67,
+       "text": "        <span> Specialties</span>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "f55290466d",
+   "app": "ever-traduora",
+   "from": "/projects/:projectId/import",
+   "to": "/projects",
+   "title": "ever-traduora · /projects/:projectId/import → /projects",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/components/app-bar/app-bar.component.html:2",
+     "lines": [
+      {
+       "n": 1,
+       "text": "<nav class=\"navbar navbar-dark bg-primary shadow-sm px-4\">",
+       "cited": false
+      },
+      {
+       "n": 2,
+       "text": "  <a class=\"navbar-brand\" routerLink=\"/\">",
+       "cited": true
+      },
+      {
+       "n": 3,
+       "text": "    <app-logo></app-logo>",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "  </a>",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "  <span class=\"flex-1\"></span>",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "  <div class=\"d-flex\" *ngIf=\"(user$ | async) as user\">",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "    <button",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "      class=\"btn btn-primary btn-sm d-flex justify-content-center align-items-center mr-1\"",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "      routerLink=\"/projects\"",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "    >",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "f8cd91806a",
+   "app": "ever-traduora",
+   "from": "/projects/:projectId/labels",
+   "to": "/projects/:projectId/team",
+   "title": "ever-traduora · /projects/:projectId/labels → /projects/:projectId/team",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/projects/components/project-container/project-container.component.html:57",
+     "lines": [
+      {
+       "n": 49,
+       "text": "            class=\"nav-item nav-link text-sm px-3 mb-1 d-flex justify-content-start align-items-center\"",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "            routerLink=\"labels\"",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "            routerLinkActive=\"active\"",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "            <i class=\"material-icons mr-1\">label</i>",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "            <ng-container >Labels</ng-container>",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "          </a>",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "          <a class=\"nav-item nav-link text-sm px-3 mb-1 d-flex justify-content-start align-items-center\" routerLink=\"team\" routerLinkActive=\"active\">",
+       "cited": true
+      },
+      {
+       "n": 58,
+       "text": "            <i class=\"material-icons mr-1\">people</i>",
+       "cited": false
+      },
+      {
+       "n": 59,
+       "text": "            <ng-container >Team</ng-container>",
+       "cited": false
+      },
+      {
+       "n": 60,
+       "text": "          </a>",
+       "cited": false
+      },
+      {
+       "n": 61,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 62,
+       "text": "          <a",
+       "cited": false
+      },
+      {
+       "n": 63,
+       "text": "            class=\"nav-item nav-link text-sm px-3 mb-1 d-flex justify-content-start align-items-center\"",
+       "cited": false
+      },
+      {
+       "n": 64,
+       "text": "            [ngClass]=\"{ disabled: !(true | can: 'ImportTranslation' | async) }\"",
+       "cited": false
+      },
+      {
+       "n": 65,
+       "text": "            routerLink=\"import\"",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fa42fc9ffa",
+   "app": "spring-petclinic-angular",
+   "from": "/visits/:id/edit",
+   "to": "/owners",
+   "title": "spring-petclinic-angular · /visits/:id/edit → /owners",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/app.component.html:40",
+     "lines": [
+      {
+       "n": 32,
+       "text": "    </li>",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 34,
+       "text": "    <li class=\"dropdown\">",
+       "cited": false
+      },
+      {
+       "n": 35,
+       "text": "      <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" role=\"button\"",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "          aria-haspopup=\"true\" aria-expanded=\"false\" (click)=\"log('c2-navbar-owners')\" data-testid=\"c2-navbar-owners\">",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "          <span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\"></span> Owners<span class=\"caret\"></span>",
+       "cited": false
+      },
+      {
+       "n": 38,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "      <ul class=\"dropdown-menu\">",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "        <li><a routerLink=\"/owners\" (click)=\"log('c3-navbar-owners-search')\" data-testid=\"c3-navbar-owners-search\"><span class=\"glyphicon glyphicon-search\"",
+       "cited": true
+      },
+      {
+       "n": 41,
+       "text": "                                          aria-hidden=\"true\"></span><span> Search</span></a></li>",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "        <li><a routerLink=\"/owners/add\" (click)=\"log('c4-navbar-owners-add-new')\" data-testid=\"c4-navbar-owners-add-new\"><span class=\"glyphicon glyphicon-plus\" aria-hidden=\"true\"></span><span> Add New</span></a>",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "        </li>",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "      </ul>",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "    </li>",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "    <li class=\"dropdown\">",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "      <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" role=\"button\"",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "          aria-haspopup=\"true\" aria-expanded=\"false\" (click)=\"log('c5-navbar-vets')\" data-testid=\"c5-navbar-vets\">",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fa47ef3f26",
+   "app": "ever-traduora",
+   "from": "/projects/:projectId/settings",
+   "to": "/projects/:projectId/translations/:localeCode",
+   "title": "ever-traduora · /projects/:projectId/settings → /projects/:projectId/translations/:localeCode",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/projects/components/project-settings/project-settings.component.html:46",
+     "lines": [
+      {
+       "n": 38,
+       "text": "            maxlength=\"255\"",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "          />",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "        </div>",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "        <div class=\"d-flex justify-content-end\" *ngIf=\"(true | can: 'EditProject' | async)\">",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "          <button",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "            type=\"button\"",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "            class=\"btn btn-sm btn-link-secondary mr-3\"",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "            [routerLink]=\"['/projects', project.id]\"",
+       "cited": true
+      },
+      {
+       "n": 47,
+       "text": "            ",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "            Cancel",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "          </button>",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "          <button",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "            type=\"submit\"",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "            [disabled]=\"!detailsForm.valid || (isLoading$ | async)\"",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "            class=\"btn btn-sm btn-primary w-100\"",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fef9440f1c",
+   "app": "spring-petclinic-angular",
+   "from": "/visits/add",
+   "to": "/owners/:id/edit",
+   "title": "spring-petclinic-angular · /visits/add → /owners/:id/edit",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/visits/visit-add/visit-add.component.ts:102",
+     "lines": [
+      {
+       "n": 94,
+       "text": "        this.addedSuccess = true;",
+       "cited": false
+      },
+      {
+       "n": 95,
+       "text": "        that.gotoOwnerDetail();",
+       "cited": false
+      },
+      {
+       "n": 96,
+       "text": "      },",
+       "cited": false
+      },
+      {
+       "n": 97,
+       "text": "      error => this.errorMessage = error as any",
+       "cited": false
+      },
+      {
+       "n": 98,
+       "text": "    );",
+       "cited": false
+      },
+      {
+       "n": 99,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 100,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 101,
+       "text": "  gotoOwnerDetail() {",
+       "cited": false
+      },
+      {
+       "n": 102,
+       "text": "    this.router.navigate(['/owners', this.currentOwner.id]);",
+       "cited": true
+      },
+      {
+       "n": 103,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 104,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 105,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 106,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

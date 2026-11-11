@@ -3,7 +3,8 @@
  * The page shows each item's source lines and claim, never a verdict; every change is written at
  * once to the verdicts file with the time it was given, so the record shows when each item was read.
  * The sheet supplies its own questions ({"questions": [{key, text, options}]}); a question's text may
- * name an item field as {field}. Sheets without questions get the must-tier pair.
+ * name an item field as {field}. Sheets without questions get the must-tier pair. An optional
+ * sheet-level "intro" states the reading rule above the items.
  *
  * Usage: node serve.mjs --sheet must-sheet.json --verdicts must-verdicts.json [--port 4610]
  */
@@ -39,7 +40,7 @@ const fill = (text, it) => esc(text).replace(/\{(\w+)\}/g, (_, k) => `<code>${es
 function card(it, i, saved, questions) {
   const v = saved[it.id] ?? {}
   const radios = (q) => q.options.map((o) => `<label><input type="radio" name="${q.key}-${it.id}" value="${esc(o)}" ${v[q.key] === o ? 'checked' : ''}> ${esc(o)}</label>`).join(' ')
-  const title = it.title ?? `${it.app} · <code>${esc(it.file)}:${it.line}</code>`
+  const title = it.title ? esc(it.title) : `${it.app} · <code>${esc(it.file)}:${it.line}</code>`
   const sources = it.sources ? `<br>Source screens (${it.sources.length}): ${it.sources.length > 6 ? `${it.sources.slice(0, 6).map(esc).join(', ')} and ${it.sources.length - 6} more` : it.sources.map(esc).join(', ')}` : ''
   const claim = it.claim ? fill(it.claim, it) : `Claim: on each source screen below, clicking the highlighted construct navigates to <code>${esc(it.target)}</code>.`
   const context = (it.context ?? []).map((c) => `<li>${esc(c)}</li>`).join('')
@@ -56,7 +57,7 @@ ${questions.map((q, k) => `<p class="q">${k + 1}. ${fill(q.text, it)} ${radios(q
 
 /** Builds the whole page from the sheet and the answers recorded so far. */
 function page() {
-  const { items, questions, title } = loadSheet()
+  const { items, questions, title, intro } = loadSheet()
   const saved = loadVerdicts().verdicts
   return `<!doctype html><html><head><meta charset="utf-8"><title>Blind reading</title><style>
 body{font:15px/1.5 system-ui,sans-serif;max-width:980px;margin:0 auto;padding:16px;color:#1f1f1f;background:#fafaf8}
@@ -67,6 +68,7 @@ pre{background:#f4f3ef;padding:8px;overflow-x:auto;font-size:12.5px;line-height:
 #bar{position:sticky;top:0;background:#fafaf8;padding:6px 0;border-bottom:1px solid #ddd}
 </style></head><body>
 <div id="bar"><b>${esc(title ?? 'Blind reading')}: ${items.length} items</b> · complete <span id="done">0</span> / ${items.length}. Decide from the source (open the files in your editor if the excerpt is not enough) before looking at any earlier reading, and write one line on what you read. Answers save as you go.</div>
+${intro ? `<p>${esc(intro)}</p>` : ''}
 ${items.map((it, i) => card(it, i, saved, questions)).join('\n')}
 <script>
 const KEYS=${JSON.stringify(questions.map((q) => q.key))}
