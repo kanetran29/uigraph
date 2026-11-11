@@ -141,15 +141,17 @@ negative test excluded. & \EtoERowsAlfresco{} \\
 \paragraph{The attributed graph's must edges.} Where the checker cannot read the
 destination, the edge is neither a pass nor a failure. All
 unread destinations are toolbar edges in one application, k8s dashboard. They rely on the toolbar component's
-computed scope, which only the post-hoc runtime check below exercises, one input per edge, and on the route-order assumption. The check compares construct and edge
+computed scope and on the route-order assumption. Only the post-hoc runtime check below exercises
+that scope, with one input per edge. The check compares construct and edge
 destinations. It does not test unconditional execution or router admission, which the demotion
 rules address.
 Neither source inspection nor this mechanical check independently
 proves Claim~\ref{claim:must}.
 
 \paragraph{The must tier at run time.} A runtime check of the must edges of realworld and mifos
-was preregistered (\texttt{must-run/PREREGISTRATION.txt}, commit \texttt{1eaae6c}) before it was
-first run. A temporary build of each application marked the element at each must construct's
+was preregistered: its protocol (\texttt{must-run/PREREGISTRATION.txt}, commit \texttt{1eaae6c})
+was committed before its first run, although an earlier end-to-end run had already logged some
+realworld navigations (\texttt{must-run/DEVIATIONS.txt}, item~7). A temporary build of each application marked the element at each must construct's
 template line, and a navigation logger recorded where the router landed; the extractor and the
 graph were not changed. A \emph{check} is one must edge with one must construct it cites: a
 browser loaded the edge's source screen, clicked the marked element and compared the first
@@ -158,14 +160,14 @@ completed navigation with the edge's target. The \MustRunAllChecks{} checks cove
 constructs that a merged edge cites without earning must were not clicked. All
 \MustRunAllConstructs{} are template links (\texttt{routerLink}), so the first run clicked no
 navigation from component code. Of the \MustRunAllTriggered{} checks whose construct was clicked,
-\MustRunAllConfirmed{} landed on the target (\MustRunAllShare{}, as the first prediction stated);
-\MustRunAllOtherTarget{} landed elsewhere and \MustRunAllNoNavigation{} did not navigate. Checks
-whose construct was absent from a loaded source screen: \MustRunAllNotRendered{}. The other
-\MustRunAllUnreached{} checks did not run because their source screen could not be loaded:
-\MustRunRealworldUnreached{} on realworld's signed-in screens, since, departing from the
-preregistration, the run did not create an account on its public backend, which is not pinned;
-and \MustRunMifosUnreached{} on mifos, whose source screen needs an exchange-rate identifier that
-the driver was not given. The second prediction, that such checks would lie mostly on mifos,
+\MustRunAllConfirmed{} landed on the target (\MustRunAllShare{}), as the first prediction stated;
+\MustRunAllOtherTarget{} landed elsewhere, \MustRunAllNoNavigation{} failed to navigate, and on
+\MustRunAllNotRendered{} loaded source screens the construct was missing. The other
+\MustRunAllUnreached{} checks did not run because their source screen could not be loaded.
+Of these, \MustRunRealworldUnreached{} were on realworld's signed-in screens: signing in needed a new account
+on its public backend, which is not pinned, and none was created, departing from the
+preregistration. The rest, on mifos, needed an exchange-rate identifier that the driver was not
+given. The second prediction, that such checks would lie mostly on mifos,
 failed. Mifos ran against the pinned Fineract image, signed in as its seeded super-user. One input
 per check can refute Claim~\ref{claim:must} but cannot establish it. Deviations from the
 preregistration are listed in \texttt{must-run/DEVIATIONS.txt}.
@@ -177,27 +179,38 @@ local stub of the RealWorld API, written for the run, that answers the calls tho
 \MustRunAddRealworldConfirmed{} landed on the target. On k8s dashboard, which holds
 \CensusMustKdash{} of the \CensusMust{} must edges, including all \MustWitnessUnread{} whose
 destination the witness check cannot read, both must constructs were clicked against a local cluster,
-with the dashboard's own servers built from the pinned checkout: \MustRunAddKdashChecks{} checks,
-one per must edge. One construct is a \texttt{router.navigate} call in component code with a literal target,
+with the dashboard's own servers built from the pinned checkout and run directly, without the
+project's gateway (\texttt{DEVIATIONS.txt}, A2): \MustRunAddKdashChecks{} checks, one per must edge.
+The run was signed in with a cluster-administrator token, so, as on mifos, an element hidden from a
+less privileged user would not be seen to be missing. One construct is a \texttt{router.navigate} call in component code with a literal target,
 marked at the template binding that calls it, so this run also clicks one navigation made from
 code. Of the \MustRunAddKdashTriggered{} triggered checks, \MustRunAddKdashConfirmed{} landed on the
 target; \MustRunAddKdashUnreached{} more were unreached, since their source, a shell screen,
-forwards at once to its per-container variant. These figures come from a second pass. A first pass
-loaded parameterised screens by bare links, which the application's namespace selector rewrites
-to the list screen: \MustRunAddFirstKdashConfirmed{} of \MustRunAddFirstKdashTriggered{} triggered
+forwards at once to its per-container variant.
+
+These figures come from a second pass. A first pass loaded parameterised screens by links without
+the namespace query; the application then adds the query by navigating to the list screen, so the
+record screen was never shown: \MustRunAddFirstKdashConfirmed{} of \MustRunAddFirstKdashTriggered{} triggered
 checks landed on the target and \MustRunAddFirstKdashUnreached{} were unreached. The second pass
 ran all \MustRunAddKdashChecks{} checks again with the namespace query that the application's own
 links carry. This departs from the addendum and was committed with the rebuilt inputs before the
 second pass ran (\texttt{must-run/DEVIATIONS.txt}, A4, commit \texttt{285808e}). The choice of
 pass changes only which checks are unreached, since every triggered check landed on its target in
-both. The first two predictions held. The third, that unreached screens would mostly need a live
+both. The addendum's first two predictions held: \MustRunAddAllConfirmed{} of \MustRunAddAllTriggered{} triggered checks landed, and
+\MustRunAddRealworldTriggered{} of the \MustRunAddRealworldChecks{} realworld checks were triggered. The third, that unreached screens would mostly need a live
 container or a custom-resource object, held on the second pass and failed on the first, where
 every parameterised screen was unreached.
-Bitwarden was not run: its backend, a vault server, does not run here.
+
+Over both runs, \MustRunConfirmedConstructs{} of the \CensusMustSites{} must constructs were
+clicked and landed on their target at least once; \MustRunAddKdashConfirmed{} of the confirmed
+checks click the two toolbar elements from different source screens. Bitwarden was not run: it
+needs a vault server, which was not set up for this study.
 
 Most of the must tier rests on the route-order assumption A1 (Section~\ref{sec:model}). Of the
 \RouteOrderMust{} must edges, \RouteOrderResting{} hold only under A1, and these come from
-\RouteOrderRestingSites{} constructs in \RouteOrderRestingApps{} applications. Without A1,
+\RouteOrderRestingSites{} constructs in \RouteOrderRestingApps{} applications. The addendum checked each of these edges on k8s dashboard once:
+\MustRunAddKdashConfirmed{} of its \MustRunAddKdashTriggered{} triggered checks landed on their
+target, consistent with A1, and \MustRunAddKdashUnreached{} were unreached. Without A1,
 \RouteOrderMustWithout{} must edges remain, on \RouteOrderSitesWithout{} of the \RouteOrderSites{}
 constructs. Joins over an ambiguous selector, which A2 excludes from the sites of must edges, occur
 in k8s dashboard and bitwarden, but no final must edge cites a construct placed through one. The
@@ -482,7 +495,9 @@ visited with a placeholder segment lists no articles. The other
 Only predictions carried by a must edge are judged in this direction.
 \ScopeExact{} predictions on the judged screens are carried by a must edge, against \ScopeApprox{} by may
 edges. Of the \ScopeExact{}, \ScopeOverAttributed{} are not rendered, so the check found no
-over-attribution; with \ScopeExact{} predictions it barely tests for it.
+over-attribution; with \ScopeExact{} predictions it barely tests for it. The runtime check of the
+must tier adds a larger test in this direction: on every source screen it loaded, the must
+construct was rendered (Section~\ref{sec:res-soundness}).
 
 \paragraph{Agreement with a structural reference.}
 \label{sec:res-groundtruth}
@@ -613,7 +628,8 @@ preregistered rule. As predicted, no matched pair has a must edge. One of the
 shell construct whose target begins with two unresolved parameters, so it matches every account
 screen from every screen. The hit shows that the graph contains the pair, but it does not show that the construct
 was resolved. After the repairs the graph holds \EtoEMifosGraphPairs{} of the \EtoEMifosPossiblePairs{} possible pairs,
-against \EtoEMifosGraphPairsUnfixed{} before; the tray is the main addition, and it reduces discrimination.
+against \EtoEMifosGraphPairsUnfixed{} before; the tray, which reaches every account screen from every screen, accounts for much of the difference
+and reduces discrimination.
 Uniform pairs at that density would yield \EtoEMifosChanceHits{}/\EtoEMifosPairs{} hits (realworld:
 \EtoERealworldChanceHits{}/\EtoERealworldPairs{}). That chance level is not the suite's expected
 success rate, and the observed hits show that the graph contains the pairs more than that it discriminates. No other
@@ -1040,8 +1056,8 @@ The measurements for each research question are, in brief:
 \begin{description}[nosep,leftmargin=2.6em,labelwidth=2.2em]
 \item[RQ1] Every screen a static reader can enumerate has a node; the mounted screens without a
 node lie almost entirely behind one construct in ghostfolio. \CensusMustSites{} constructs earn
-must, and \CensusMustKdash{} of the \CensusMust{} must edges come from one toolbar in k8s dashboard
-(Section~\ref{sec:res-soundness}).
+must, and \CensusMustKdash{} of the \CensusMust{} must edges come from one toolbar in k8s dashboard. A runtime
+check clicked \MustRunConfirmedConstructs{} of the constructs with one input per check and found no failure (Section~\ref{sec:res-soundness}).
 \item[RQ2] Under the precedence of the loss rules, attribution is the largest loss category in every
 application. Of five defect classes and one candidate class, the lazy-boundary, constant-path and
 unlinked-component classes have no instances on the final version (Section~\ref{sec:res-defects}).

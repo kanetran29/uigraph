@@ -19,6 +19,7 @@ the other.
 On the six applications, the extractor recovers every screen that a static reader can enumerate
 but few deterministic transitions: \CensusMustSites{} constructs earn must (\RoundTwoMustConv{} of
 the in-scope constructs), and their edges hold only under the assumptions of Claim~\ref{claim:must}.
+A runtime check clicked \MustRunConfirmedConstructs{} of them with one input per check and found no failure (Section~\ref{sec:res-soundness}).
 
 \paragraph{Nodes.}
 Node completeness has two definitions. Against the static readers of the route configuration,
@@ -39,7 +40,8 @@ it from \CensusMust{} to \GuardOnlyMust{} edges in a separate corpus extraction
 (\texttt{route-oracle/guard-only.mjs}). The rules
 were developed partly in response to red-team panels run with the AI assistant. The witness check
 finds no failure among the must edges, but it cannot read the destinations of \MustWitnessUnread{} of k8s
-dashboard's \CensusMustKdash{} must edges, all of them toolbar edges; the post-hoc runtime check clicked them
+dashboard's \CensusMustKdash{} must edges, all of them toolbar edges; the post-hoc runtime check clicked the construct
+behind them from every source screen it could load, and every click landed on the target
 (Section~\ref{sec:res-soundness}).
 
 \subsubsection{RQ2: where and why extraction fails}
@@ -162,8 +164,8 @@ guards depend on unresolved state and Claim~\ref{claim:must} requires their demo
 \subsection{Limitations and threats to validity}
 \label{sec:limitations}
 
-The extractor's author evaluated one extractor on one corpus with five methods and end-to-end checks on two
-applications, which limits the conclusions. The heaviest threat is that every corpus figure is
+The extractor's author evaluated one extractor on one corpus with five methods, end-to-end checks on two
+applications and a runtime check of the must tier on three, which limits the conclusions. The heaviest threat is that every corpus figure is
 in-sample. The structural references, which apply the analysis's own relations, and the corpus
 selection, which favours the extractor, come next. Table~\ref{tab:threats} records each threat, its
 effect, the mitigation applied and what remains open.
@@ -261,14 +263,14 @@ Witness check
 & Must conversion rests on must witnesses, whose target consistency is limited to what re-parsing
 the cited source resolves. \MustWitnessUnread{} destinations stay unresolved and are reported apart.
 & Every must witness, merged ones included, is compared with its edge, and its destination with the
-independent route set. A preregistered runtime check clicked the must constructs of realworld and
-mifos: \MustRunAllConfirmed{} of \MustRunAllTriggered{} triggered checks (a must edge with one must
-construct) reached their target (Section~\ref{sec:res-soundness}). \emph{Open:} the witness check
-establishes neither navigation execution nor runtime mounting; the runtime route oracle checks
-mounting separately. A post-hoc addendum ran k8s dashboard, whose \CensusMustKdash{} must edges include every unread
-destination: \MustRunAddKdashConfirmed{} of \MustRunAddKdashTriggered{} triggered checks reached
-their target and \MustRunAddKdashUnreached{} were unreached. The checks try one input each, and
-bitwarden is not run. \\
+independent route set. A runtime check, with a protocol committed before its first run, clicked
+the must constructs of realworld and mifos: \MustRunAllConfirmed{} of \MustRunAllTriggered{}
+triggered checks (a must edge with one must construct) reached their target. A post-hoc addendum
+ran k8s dashboard, whose \CensusMustKdash{} must edges include every unread destination:
+\MustRunAddKdashConfirmed{} of \MustRunAddKdashTriggered{} reached their target and
+\MustRunAddKdashUnreached{} were unreached (Section~\ref{sec:res-soundness}). \emph{Open:} each
+check tries one input as one user (signed out or the stub's one account on realworld, the most privileged user on mifos and k8s dashboard), so execution for every input is not established;
+bitwarden is not run; the runtime route oracle checks mounting separately. \\
 Precedence of the loss rules
 & Testing targets first would make that category larger than attribution on \AttrOrderFlips{}
 applications (\AttrOrderFlipWhere{}).

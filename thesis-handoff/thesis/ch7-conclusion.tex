@@ -21,7 +21,7 @@ the rest is unassigned (Section~\ref{sec:rq5}).
 formal model of the screens a navigation site can fire from, which contains the attribution
 rules of earlier Angular extractions as levels; the second is a measurement of what each level
 adds and what static extraction loses. The measurement covers six pinned applications, uses five evaluation methods
-with different blind spots and four further scope checks, and classifies every lost construct. The extractor also handles nested and parameterised
+with different blind spots, four further scope checks and a runtime check of the must tier, and classifies every lost construct. The extractor also handles nested and parameterised
 route trees, which Oshima and Kishi exclude (Section~\ref{sec:res-earlier}).
 
 Tables are generated from harness results, and the source-based methods re-run from pinned
@@ -33,7 +33,10 @@ on two applications only, against references that apply the analysis's own relat
 Rendered-interface checks covered only screens reachable without signing in; the rest
 needs signed-in execution (Section~\ref{sec:future}). Consumer benefit is unmeasured.
 
-Part of the evidence rests on AI readings: the AI assistant checked the must tier against the source, and two readings by one model family measure consistency rather than correctness. The
+Part of the evidence rests on AI readings: the AI assistant checked the must tier against the source, and two readings by one model family
+measure consistency rather than correctness. A runtime check that rests on no reading then clicked
+\MustRunConfirmedConstructs{} of its constructs with one input per check and found no failure
+(Section~\ref{sec:res-soundness}). The
 comparison with Rima et al.'s tool uses small AI-read samples, and I agreed with
 \HHAuthorAgree{} of the \HHAuthorJudged{} cases I re-read (Section~\ref{sec:res-h2h}).
 
