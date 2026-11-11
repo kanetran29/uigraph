@@ -1,0 +1,203 @@
+# Records for the parameterised k8s dashboard source screens (Addendum A2): one object of each
+# kind the must edges start from, with fixed names that params-k8sdash.json points at. Every pod
+# runs the pause image the kind node already holds, so seeding pulls nothing.
+apiVersion: v1
+kind: Namespace
+metadata: {name: must-run}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata: {name: mustrun-sa, namespace: must-run}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: mustrun-cm, namespace: must-run}
+data: {k: v}
+---
+apiVersion: v1
+kind: Secret
+metadata: {name: mustrun-secret, namespace: must-run}
+stringData: {k: v}
+---
+apiVersion: v1
+kind: Pod
+metadata: {name: mustrun-pod, namespace: must-run, labels: {app: mustrun}}
+spec:
+  containers: [{name: main, image: registry.k8s.io/pause:3.10, imagePullPolicy: Never}]
+---
+apiVersion: v1
+kind: Service
+metadata: {name: mustrun-svc, namespace: must-run}
+spec: {selector: {app: mustrun}, ports: [{port: 80}]}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: mustrun-deploy, namespace: must-run}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: mustrun-deploy}}
+  template:
+    metadata: {labels: {app: mustrun-deploy}}
+    spec: {containers: [{name: main, image: registry.k8s.io/pause:3.10, imagePullPolicy: Never}]}
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata: {name: mustrun-rs, namespace: must-run}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: mustrun-rs}}
+  template:
+    metadata: {labels: {app: mustrun-rs}}
+    spec: {containers: [{name: main, image: registry.k8s.io/pause:3.10, imagePullPolicy: Never}]}
+---
+apiVersion: v1
+kind: ReplicationController
+metadata: {name: mustrun-rc, namespace: must-run}
+spec:
+  replicas: 1
+  selector: {app: mustrun-rc}
+  template:
+    metadata: {labels: {app: mustrun-rc}}
+    spec: {containers: [{name: main, image: registry.k8s.io/pause:3.10, imagePullPolicy: Never}]}
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata: {name: mustrun-ds, namespace: must-run}
+spec:
+  selector: {matchLabels: {app: mustrun-ds}}
+  template:
+    metadata: {labels: {app: mustrun-ds}}
+    spec: {containers: [{name: main, image: registry.k8s.io/pause:3.10, imagePullPolicy: Never}]}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: {name: mustrun-sts, namespace: must-run}
+spec:
+  serviceName: mustrun-svc
+  replicas: 1
+  selector: {matchLabels: {app: mustrun-sts}}
+  template:
+    metadata: {labels: {app: mustrun-sts}}
+    spec: {containers: [{name: main, image: registry.k8s.io/pause:3.10, imagePullPolicy: Never}]}
+---
+apiVersion: batch/v1
+kind: Job
+metadata: {name: mustrun-job, namespace: must-run}
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers: [{name: main, image: registry.k8s.io/pause:3.10, imagePullPolicy: Never}]
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata: {name: mustrun-cron, namespace: must-run}
+spec:
+  schedule: "0 0 1 1 *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers: [{name: main, image: registry.k8s.io/pause:3.10, imagePullPolicy: Never}]
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata: {name: mustrun-ic}
+spec: {controller: example.com/none}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata: {name: mustrun-ing, namespace: must-run}
+spec:
+  ingressClassName: mustrun-ic
+  defaultBackend: {service: {name: mustrun-svc, port: {number: 80}}}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: mustrun-np, namespace: must-run}
+spec: {podSelector: {}, policyTypes: [Ingress]}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata: {name: mustrun-pv}
+spec:
+  capacity: {storage: 1Mi}
+  accessModes: [ReadWriteOnce]
+  storageClassName: mustrun-manual
+  hostPath: {path: /tmp/mustrun-pv}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: mustrun-pvc, namespace: must-run}
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: mustrun-manual
+  resources: {requests: {storage: 1Mi}}
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata: {name: mustrun-manual}
+provisioner: kubernetes.io/no-provisioner
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata: {name: mustrun-role, namespace: must-run}
+rules: [{apiGroups: [""], resources: [pods], verbs: [get]}]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata: {name: mustrun-rb, namespace: must-run}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: Role, name: mustrun-role}
+subjects: [{kind: ServiceAccount, name: mustrun-sa, namespace: must-run}]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata: {name: mustrun-cr}
+rules: [{apiGroups: [""], resources: [pods], verbs: [get]}]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata: {name: mustrun-crb}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: mustrun-cr}
+subjects: [{kind: ServiceAccount, name: mustrun-sa, namespace: must-run}]
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata: {name: crontabs.stable.example.com}
+spec:
+  group: stable.example.com
+  scope: Namespaced
+  names: {plural: crontabs, singular: crontab, kind: CronTab}
+  versions: [{name: v1, served: true, storage: true, schema: {openAPIV3Schema: {type: object, x-kubernetes-preserve-unknown-fields: true}}}]
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata: {name: widgets.stable.example.com}
+spec:
+  group: stable.example.com
+  scope: Cluster
+  names: {plural: widgets, singular: widget, kind: Widget}
+  versions: [{name: v1, served: true, storage: true, schema: {openAPIV3Schema: {type: object, x-kubernetes-preserve-unknown-fields: true}}}]
+---
+# The dashboard user: a service account bound to cluster-admin in this throwaway cluster only.
+apiVersion: v1
+kind: ServiceAccount
+metadata: {name: dashboard-admin, namespace: kube-system}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata: {name: must-run-dashboard-admin}
+roleRef: {apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: cluster-admin}
+subjects: [{kind: ServiceAccount, name: dashboard-admin, namespace: kube-system}]
+---
+# One object of each custom resource (applied after the definitions above are established).
+apiVersion: stable.example.com/v1
+kind: CronTab
+metadata: {name: mustrun-ct, namespace: must-run}
+spec: {cronSpec: "* * * * */5"}
+---
+apiVersion: stable.example.com/v1
+kind: Widget
+metadata: {name: mustrun-widget}
+spec: {size: 1}

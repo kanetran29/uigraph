@@ -1,0 +1,74 @@
+{
+  "base": "http://localhost:4200",
+  "hash": false,
+  "startedAt": "2026-11-11T17:14:47.626Z",
+  "edges": [
+    {
+      "id": "src/app/core/layout/footer.component.html:3",
+      "site": "src/app/core/layout/footer.component.html:3",
+      "from": "/editor",
+      "fromUrl": "/editor",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/footer.component.html:3",
+      "site": "src/app/core/layout/footer.component.html:3",
+      "from": "/editor/:slug",
+      "fromUrl": "/editor/introduction-to-machine-learning-for-developers",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/footer.component.html:3",
+      "site": "src/app/core/layout/footer.component.html:3",
+      "from": "/settings",
+      "fromUrl": "/settings",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/header.component.html:3",
+      "site": "src/app/core/layout/header.component.html:3",
+      "from": "/editor",
+      "fromUrl": "/editor",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/header.component.html:3",
+      "site": "src/app/core/layout/header.component.html:3",
+      "from": "/editor/:slug",
+      "fromUrl": "/editor/introduction-to-machine-learning-for-developers",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    },
+    {
+      "id": "src/app/core/layout/header.component.html:3",
+      "site": "src/app/core/layout/header.component.html:3",
+      "from": "/settings",
+      "fromUrl": "/settings",
+      "to": "/",
+      "outcome": "confirmed",
+      "landed": "/",
+      "detail": null
+    }
+  ],
+  "counts": {
+    "confirmed": 6,
+    "other-target": 0,
+    "no-navigation": 0,
+    "not-rendered": 0,
+    "unreached": 0
+  }
+}

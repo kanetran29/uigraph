@@ -1,0 +1,44 @@
+[
+ {
+  "id": "src/app/core/layout/footer.component.html:3",
+  "site": "src/app/core/layout/footer.component.html:3",
+  "from": "/editor",
+  "fromUrl": "/editor",
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/footer.component.html:3",
+  "site": "src/app/core/layout/footer.component.html:3",
+  "from": "/editor/:slug",
+  "fromUrl": "/editor/introduction-to-machine-learning-for-developers",
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/footer.component.html:3",
+  "site": "src/app/core/layout/footer.component.html:3",
+  "from": "/settings",
+  "fromUrl": "/settings",
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/header.component.html:3",
+  "site": "src/app/core/layout/header.component.html:3",
+  "from": "/editor",
+  "fromUrl": "/editor",
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/header.component.html:3",
+  "site": "src/app/core/layout/header.component.html:3",
+  "from": "/editor/:slug",
+  "fromUrl": "/editor/introduction-to-machine-learning-for-developers",
+  "to": "/"
+ },
+ {
+  "id": "src/app/core/layout/header.component.html:3",
+  "site": "src/app/core/layout/header.component.html:3",
+  "from": "/settings",
+  "fromUrl": "/settings",
+  "to": "/"
+ }
+]

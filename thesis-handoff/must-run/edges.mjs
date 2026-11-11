@@ -3,8 +3,10 @@
  * (sites.json), every must edge the final graph draws from it, with its source screen, a
  * concrete URL to load that screen, and its target pattern. Parameterised source screens get
  * a value from --params (a JSON map "pattern" -> "concrete path") or are listed as needing one.
+ * --query appends a query string to every source URL (k8s dashboard: the namespace that every
+ * in-app link carries).
  *
- * Usage: node edges.mjs --app <slug> --db <final uigraph.db> --out <edges.json> [--params <map.json>]
+ * Usage: node edges.mjs --app <slug> --db <final uigraph.db> --out <edges.json> [--params <map.json>] [--query k=v]
  */
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { DatabaseSync } from 'node:sqlite'
@@ -27,7 +29,8 @@ for (const s of sites) {
     const from = route.get(e.from)
     const to = route.get(e.to)
     if (typeof from !== 'string' || typeof to !== 'string') continue
-    const fromUrl = from.includes(':') ? params[from] : from
+    const base = from.includes(':') ? params[from] : from
+    const fromUrl = base && a.query ? `${base}?${a.query}` : base
     if (!fromUrl) needParam.add(from)
     edges.push({ id: s.site, site: s.site, from, fromUrl: fromUrl ?? null, to })
   }

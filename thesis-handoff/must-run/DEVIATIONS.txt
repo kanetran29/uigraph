@@ -27,3 +27,26 @@ Deviations from PREREGISTRATION.txt (must-tier runtime check)
    for this check only: the earlier end-to-end check (e2e-nav) ran both applications' own test
    suites, and its realworld log already holds navigations to / from /login, /register,
    /tag/:tag, /article/:slug and /settings. This check was preregistered before its own first run.
+
+Addendum A (11 Nov 2026)
+
+A1. realworld: the work copy's api.interceptor.ts was pointed at the local stub
+    (http://127.0.0.1:4601/api) instead of the public backend; the stub's article is written by
+    the stub's test account, so /editor/:slug passes its author check. Login: login-realworld.json.
+A2. k8s dashboard: the dashboard's api, auth and web servers were built from the work copy at
+    0ba796d and run directly on this machine (ports 8101-8103) behind the Angular dev server's
+    proxy (proxy.must-run.json, the routes of hack/gateway/dev.kong.yml), not in the project's
+    Docker Compose setup with its Kong gateway; the metrics scraper was not run
+    (--metrics-provider none). Cluster: kind v0.27.0, kindest/node v1.32.2, seeded from
+    seed-k8sdash.yaml.
+A3. k8s dashboard, before the full run: one smoke run of 3 edges (all confirmed) checked the
+    sign-in and the logger's patterns; the full run repeats those edges.
+A4. k8s dashboard, first full pass (results-addendum/pass1/kdash.json): the 60 checks from
+    parameterised source screens were unreached. Loading such a screen by its bare deep link
+    (/#/clusterrole/mustrun-cr) lets the namespace selector add the missing ?namespace= query by
+    navigating to its own route's URL (common/components/namespace/component.ts,
+    setDefaultQueryParams_), which drops the record name and lands on the list screen. Every
+    in-app link carries the namespace query (queryParamsHandling: 'preserve'), so the edges were
+    rebuilt with ?namespace=must-run on every source URL (edges.mjs --query) and all 125 checks
+    were run again; the second pass is the one reported. This changes the driver's input, not
+    the extractor, the graph or the must tier.

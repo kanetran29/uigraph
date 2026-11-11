@@ -1,0 +1,19 @@
+{
+ "url": "/login",
+ "steps": [
+  {
+   "fill": "input[name=email]",
+   "value": "must-run@stub.local"
+  },
+  {
+   "fill": "input[name=password]",
+   "value": "stub-only"
+  },
+  {
+   "click": "button.btn-primary"
+  },
+  {
+   "waitFor": "a[href=\"/settings\"]"
+  }
+ ]
+}
