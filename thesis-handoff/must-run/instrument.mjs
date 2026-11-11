@@ -1,8 +1,9 @@
 /**
  * Marks each preregistered must construct in a temporary copy of an application: on the cited
- * template line it inserts data-must-site="<file:line>" before the first routerLink binding, so
- * the driver can click exactly that element. Refuses a line with no routerLink, and never runs
- * on the corpus checkouts themselves.
+ * template line (or, for a construct in component code, the template line given as "mark", whose
+ * element calls it) it inserts data-must-site="<file:line>" before the first routerLink or (click)
+ * binding, so the driver can click exactly that element. Refuses a line with neither, and never
+ * runs on the corpus checkouts themselves.
  *
  * Usage: node instrument.mjs --app <slug> --dir <temporary app copy>
  */
@@ -15,13 +16,13 @@ for (let i = 2; i < process.argv.length; i += 2) a[process.argv[i].replace(/^--/
 if (resolve(a.dir).startsWith(join(homedir(), 'personal/uigraph-corpus'))) throw new Error('refusing to patch a corpus checkout')
 const sites = JSON.parse(readFileSync(new URL('./sites.json', import.meta.url), 'utf8')).filter((s) => s.app === a.app)
 for (const s of sites) {
-  const [file, line] = s.site.split(':')
+  const [file, line] = (s.mark ?? s.site).split(':')
   const path = join(a.dir, file)
   const lines = readFileSync(path, 'utf8').split('\n')
   const i = Number(line) - 1
   if (lines[i].includes('data-must-site=')) continue
-  const m = lines[i].match(/\[?routerLink\]?=/)
-  if (!m) throw new Error(`no routerLink on ${s.site}`)
+  const m = lines[i].match(/\[?routerLink\]?=|\(click\)=/)
+  if (!m) throw new Error(`no routerLink or (click) on ${s.mark ?? s.site}`)
   lines[i] = lines[i].slice(0, m.index) + `data-must-site="${s.site}" ` + lines[i].slice(m.index)
   writeFileSync(path, lines.join('\n'))
 }

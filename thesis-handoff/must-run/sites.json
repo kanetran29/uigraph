@@ -174,5 +174,22 @@
    "/checker-inbox-and-tasks/requests"
   ],
   "verdict": "must"
+ },
+ {
+  "app": "k8sdash",
+  "site": "src/chrome/template.html:30",
+  "targets": [
+   "/workloads"
+  ],
+  "verdict": "must"
+ },
+ {
+  "app": "k8sdash",
+  "site": "src/chrome/component.ts:82",
+  "mark": "src/chrome/template.html:56",
+  "targets": [
+   "/create"
+  ],
+  "verdict": "must"
  }
 ]

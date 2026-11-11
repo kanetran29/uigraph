@@ -45,3 +45,37 @@ Predictions (fixed before running)
   extractor is NOT repaired in response before submission, and the must tier is not edited.
 
 Deviations will be recorded in must-run/DEVIATIONS.txt.
+
+Addendum A (written 11 Nov 2026, after the first results above were seen and committed in
+5db3a61, before any check below was run)
+
+  The author asked for two extensions after seeing the first results. They are post hoc in that
+  sense and are reported apart from the first run: results in results-addendum/, macros named
+  MustRunAdd<App><Measure> (score.mjs --prefix MustRunAdd), never summed into the first run's
+  figures without saying so.
+
+  A1 realworld signed in. The 6 checks the first run recorded as unreached (/editor,
+     /editor/:slug and /settings, each from the header and the footer construct), driven
+     signed in. The backend is a local stub of the RealWorld API written for this run
+     (must-run/stub-realworld.mjs), not a published implementation: it answers the calls these
+     screens make with records shaped per the API specification pinned in the theme submodule
+     (specs/api/openapi.yml at ffbd690). Its one test account exists only in the stub. The check
+     is about where a click navigates, not about backend behaviour.
+  A2 k8s dashboard. Its 2 must constructs, added to sites.json: src/chrome/template.html:30
+     (toolbar logo link, target /workloads) and src/chrome/component.ts:82 (goToCreateState(),
+     target /create), with every must edge the final graph draws from them (125). The second is
+     in component code, so the marked element is the template element that calls it
+     (src/chrome/template.html:56, (click)="goToCreateState()"); instrument.mjs takes that line
+     from the site's "mark" field. Backend: a local kind cluster, with the dashboard's api, auth
+     and web servers built from the pinned checkout (0ba796d), the frontend served by the
+     instrumented dev server, signed in with the token of a service account created in that
+     cluster. Parameterised source screens use records seeded into the cluster for this run.
+
+  Method, outcomes and measures are those above. The extractor is not repaired in response and
+  the must tier is not edited, whatever the outcome.
+
+  Predictions
+  A-P1 M1 is 100 % on both: every triggered check lands on its target.
+  A-P2 All 6 realworld checks are triggered (none unreached once signed in).
+  A-P3 On k8s dashboard some source screens are unreached or not-rendered, mostly those that
+       need a live container (/shell/..., /log/...) or a custom-resource object.
