@@ -107,3 +107,39 @@ extra pair its final verdict; a decoy spurious. Per kind (misses, real, spurious
 agree, disagree, undecided (unclear). Macros `\AuthorRima<Kind><Items|Agree|Disagree|Undecided>`
 and `\AuthorRimaItems`; disagreements with the reasons in `rima-comparison.json`. The scorer
 refuses while any item is unanswered. The blind result is the real kind and the decoys.
+
+## Sheet B: head-to-head samples (`h2h-sheet.json`, 50 items)
+
+Built by `make-h2h-sheet.mjs` from `rima/head2head/results-v3/score.json` (final verdicts and
+strata) and `results-v3/reading.json` (the sites the AI readers were given). Sources: the
+checkouts of `rima/head2head/apps.txt`.
+
+Items:
+- all 40 pairs of the mifos sample (the samples behind the mifos figures);
+- one pair per stratum (application and which tool found the pair) on Rima et al.'s subjects,
+  drawn by `sample()` of `rima/adjudication-input.mjs` with seed 20261111 among the pairs the
+  first comparison did not also read: 10 strata. Five strata (heroes-angular both,
+  airbus-inventory theirs, ever-traduora theirs, angular-jumpstart ours, event-booking-mean ours)
+  hold only pairs the first comparison read; those pairs belong to sheet A's pool and are not drawn
+  again, so no pair is asked on both sheets.
+
+The 41 pairs the author re-read with the verdict visible (`author-check.json`) are on the five
+other corpus applications and are not on this sheet.
+
+Decoys: none are added. The readings on the sheet carry both verdicts (on mifos most are
+spurious, on Rima et al.'s subjects most real), so the selection does not give an item's verdict.
+All 40 mifos pairs and the tier 4 pairs drawn here were listed with their verdict in
+`STUDENT-READING.md` (see above); the comparison output marks nothing as seen, and the thesis
+states whatever the author records about those tiers.
+
+Shown per item: the pair, the application directory, the reading rule (sheet intro) and the source
+around each site the AI reader was given for the pair, which joins both tools' sites without naming
+either. The AI's own cited site and reason are not shown.
+
+Question: as for sheet A (real / spurious / unclear).
+
+Scoring (`score-h2h.mjs`, test `score-h2h.test.mjs`). An answer agrees when it equals the final
+AI verdict; disagrees when both are real or spurious and differ; undecided when either is unclear
+(one mifos reading is unclear). Per group (mifos, Rima et al.'s subjects), in all and split by AI
+verdict: macros `\AuthorHH<Mifos|Rima>[Real|Spurious]<Items|Agree|Disagree|Undecided>` and
+`\AuthorHHItems`; disagreements in `h2h-comparison.json`. It refuses while any item is unanswered.

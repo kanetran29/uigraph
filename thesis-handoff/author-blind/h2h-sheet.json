@@ -1,0 +1,6868 @@
+{
+ "built": "make-h2h-sheet.mjs",
+ "title": "Head-to-head samples",
+ "intro": "A pair (s, t) is real if a user on screen s can trigger a navigation that lands on t: a link, or a handler that calls the router directly, through helpers or through an injected service, in a component shown on s (the routed components, the shell above the outlet, what their templates include, dialogs they open), possibly after an await or behind a guard, the trigger being shown while the user stays on s. Spurious if no such trigger exists. Unclear if the source does not decide it. A route parameter may take any value; a redirect counts. The sites shown under an item are starting points, constructs a tool relates to the pair or to its target (no tool is named); they are not evidence either way, so read the source around and beyond them.",
+ "questions": [
+  {
+   "key": "verdict",
+   "text": "Can a user on {from} trigger a navigation that lands on {to}, the trigger shown while the user stays on {from}?",
+   "options": [
+    "real",
+    "spurious",
+    "unclear"
+   ]
+  }
+ ],
+ "items": [
+  {
+   "id": "13bf8fc1f0",
+   "app": "mifos",
+   "from": "/groups/:groupId/loans-accounts/:loanId/dashboard",
+   "to": "/clients/:clientId/savings-accounts/:savingAccountId/documents",
+   "title": "mifos · /groups/:groupId/loans-accounts/:loanId/dashboard → /clients/:clientId/savings-accounts/:savingAccountId/documents",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/clients/clients-view/clients-view.component.html:468",
+     "lines": [
+      {
+       "n": 462,
+       "text": "      >",
+       "cited": false
+      },
+      {
+       "n": 463,
+       "text": "        <svg class=\"tab-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\">",
+       "cited": false
+      },
+      {
+       "n": 464,
+       "text": "          <path d=\"M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z\"></path>",
+       "cited": false
+      },
+      {
+       "n": 465,
+       "text": "        </svg>",
+       "cited": false
+      },
+      {
+       "n": 466,
+       "text": "        {{ 'labels.inputs.Identities' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 467,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 468,
+       "text": "      <a",
+       "cited": true
+      },
+      {
+       "n": 469,
+       "text": "        mat-tab-link",
+       "cited": false
+      },
+      {
+       "n": 470,
+       "text": "        [routerLink]=\"['./documents']\"",
+       "cited": false
+      },
+      {
+       "n": 471,
+       "text": "        routerLinkActive",
+       "cited": false
+      },
+      {
+       "n": 472,
+       "text": "        #documents=\"routerLinkActive\"",
+       "cited": false
+      },
+      {
+       "n": 473,
+       "text": "        [active]=\"documents.isActive\"",
+       "cited": false
+      },
+      {
+       "n": 474,
+       "text": "        *mifosxHasPermission=\"'READ_DOCUMENT'\"",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+     "lines": [
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 206,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/savings-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 209,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "      case 'fixedDeposit':",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "        this.notificationsService.getFixedDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "1724530543",
+   "app": "mifos",
+   "from": "/settings",
+   "to": "/groups/:groupId/savings-accounts/:savingAccountId/transactions",
+   "title": "mifos · /settings → /groups/:groupId/savings-accounts/:savingAccountId/transactions",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+     "lines": [
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 206,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/savings-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 209,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "      case 'fixedDeposit':",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "        this.notificationsService.getFixedDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "1a12f32ca8",
+   "app": "mifos",
+   "from": "/clients/:clientId/loans-accounts/:loanId/breach-actions",
+   "to": "/groups/:groupId/loans-accounts/:loanId/dashboard",
+   "title": "mifos · /clients/:clientId/loans-accounts/:loanId/breach-actions → /groups/:groupId/loans-accounts/:loanId/dashboard",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/loans/loans-view/loans-view.component.html:330",
+     "lines": [
+      {
+       "n": 324,
+       "text": "          #general=\"routerLinkActive\"",
+       "cited": false
+      },
+      {
+       "n": 325,
+       "text": "          [active]=\"general.isActive\"",
+       "cited": false
+      },
+      {
+       "n": 326,
+       "text": "        >",
+       "cited": false
+      },
+      {
+       "n": 327,
+       "text": "          {{ 'labels.inputs.General' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 328,
+       "text": "        </a>",
+       "cited": false
+      },
+      {
+       "n": 329,
+       "text": "        @if (loanProductService.isLoanProduct) {",
+       "cited": false
+      },
+      {
+       "n": 330,
+       "text": "          <a",
+       "cited": true
+      },
+      {
+       "n": 331,
+       "text": "            mat-tab-link",
+       "cited": false
+      },
+      {
+       "n": 332,
+       "text": "            [routerLink]=\"['./dashboard']\"",
+       "cited": false
+      },
+      {
+       "n": 333,
+       "text": "            [queryParams]=\"{",
+       "cited": false
+      },
+      {
+       "n": 334,
+       "text": "              productType: loanProductService.productType.value",
+       "cited": false
+      },
+      {
+       "n": 335,
+       "text": "            }\"",
+       "cited": false
+      },
+      {
+       "n": 336,
+       "text": "            routerLinkActive",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:198",
+     "lines": [
+      {
+       "n": 192,
+       "text": "    switch (objectType) {",
+       "cited": false
+      },
+      {
+       "n": 193,
+       "text": "      case 'loan':",
+       "cited": false
+      },
+      {
+       "n": 194,
+       "text": "        this.notificationsService.getLoanAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 195,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 196,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 197,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 198,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/loans-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 199,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 200,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 201,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "1d6f28a93f",
+   "app": "spring-petclinic-angular",
+   "from": "/owners",
+   "to": "/owners/:id/edit",
+   "title": "spring-petclinic-angular · /owners → /owners/:id/edit",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/owners/owner-list/owner-list.component.html:58",
+     "lines": [
+      {
+       "n": 52,
+       "text": "          <th>Pets</th>",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "        </tr>",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "        </thead>",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "        <tbody>",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "        <tr *ngFor=\"let owner of owners\">",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "          <td class=\"ownerFullName\"><a routerLink=\"/owners/{{owner.id}}\" routerLinkActive=\"active\"",
+       "cited": true
+      },
+      {
+       "n": 59,
+       "text": "                                       (click)=\"onSelect(owner); log('c11-owner-list-owner-name')\">{{ owner.firstName }} {{ owner.lastName }}</a></td>",
+       "cited": false
+      },
+      {
+       "n": 60,
+       "text": "          <td>{{ owner.address }}</td>",
+       "cited": false
+      },
+      {
+       "n": 61,
+       "text": "          <td>{{ owner.city }}</td>",
+       "cited": false
+      },
+      {
+       "n": 62,
+       "text": "          <td>{{ owner.telephone }}</td>",
+       "cited": false
+      },
+      {
+       "n": 63,
+       "text": "          <td>",
+       "cited": false
+      },
+      {
+       "n": 64,
+       "text": "        <tr *ngFor=\"let pet of owner.pets\">",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "1fa63c446d",
+   "app": "mifos",
+   "from": "/organization/manage-loan-originators/:id",
+   "to": "/organization/manage-loan-originators/:id/edit",
+   "title": "mifos · /organization/manage-loan-originators/:id → /organization/manage-loan-originators/:id/edit",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/organization/loan-originators/view-loan-originator/view-loan-originator.component.html:10",
+     "lines": [
+      {
+       "n": 4,
+       "text": "  This Source Code Form is subject to the terms of the Mozilla Public",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "  License, v. 2.0. If a copy of the MPL was not distributed with this",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "  file, You can obtain one at http://mozilla.org/MPL/2.0/.",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "-->",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "<div class=\"container m-b-20 layout-row align-end gap-20px\">",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "  <button mat-raised-button color=\"primary\" [routerLink]=\"['edit']\" *mifosxHasPermission=\"'UPDATE_LOAN_ORIGINATOR'\">",
+       "cited": true
+      },
+      {
+       "n": 11,
+       "text": "    <fa-icon icon=\"edit\" class=\"m-r-10\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "    {{ 'labels.buttons.Edit' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "</div>",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "<div class=\"container\">",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "28efa42c50",
+   "app": "mifos",
+   "from": "/organization/working-days",
+   "to": "/centers/:centerId/savings-accounts/:savingAccountId/charges",
+   "title": "mifos · /organization/working-days → /centers/:centerId/savings-accounts/:savingAccountId/charges",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+     "lines": [
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 206,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/savings-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 209,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "      case 'fixedDeposit':",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "        this.notificationsService.getFixedDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "2de8e2c5c3",
+   "app": "mifos",
+   "from": "/loans/:loanId/breach-actions",
+   "to": "/centers/:centerId/savings-accounts/:savingAccountId/documents",
+   "title": "mifos · /loans/:loanId/breach-actions → /centers/:centerId/savings-accounts/:savingAccountId/documents",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/clients/clients-view/clients-view.component.html:468",
+     "lines": [
+      {
+       "n": 462,
+       "text": "      >",
+       "cited": false
+      },
+      {
+       "n": 463,
+       "text": "        <svg class=\"tab-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\">",
+       "cited": false
+      },
+      {
+       "n": 464,
+       "text": "          <path d=\"M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z\"></path>",
+       "cited": false
+      },
+      {
+       "n": 465,
+       "text": "        </svg>",
+       "cited": false
+      },
+      {
+       "n": 466,
+       "text": "        {{ 'labels.inputs.Identities' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 467,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 468,
+       "text": "      <a",
+       "cited": true
+      },
+      {
+       "n": 469,
+       "text": "        mat-tab-link",
+       "cited": false
+      },
+      {
+       "n": 470,
+       "text": "        [routerLink]=\"['./documents']\"",
+       "cited": false
+      },
+      {
+       "n": 471,
+       "text": "        routerLinkActive",
+       "cited": false
+      },
+      {
+       "n": 472,
+       "text": "        #documents=\"routerLinkActive\"",
+       "cited": false
+      },
+      {
+       "n": 473,
+       "text": "        [active]=\"documents.isActive\"",
+       "cited": false
+      },
+      {
+       "n": 474,
+       "text": "        *mifosxHasPermission=\"'READ_DOCUMENT'\"",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+     "lines": [
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 206,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/savings-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 209,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "      case 'fixedDeposit':",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "        this.notificationsService.getFixedDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "30f1afc40a",
+   "app": "mifos",
+   "from": "/products/recurring-deposit-products/:productId/edit",
+   "to": "/products/recurring-deposit-products/:productId/general",
+   "title": "mifos · /products/recurring-deposit-products/:productId/edit → /products/recurring-deposit-products/:productId/general",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/products/recurring-deposit-products/edit-recurring-deposit-product/edit-recurring-deposit-product.component.ts:159",
+     "lines": [
+      {
+       "n": 153,
+       "text": "      recurringDepositProduct.description = '';",
+       "cited": false
+      },
+      {
+       "n": 154,
+       "text": "    }",
+       "cited": false
+      },
+      {
+       "n": 155,
+       "text": "    delete recurringDepositProduct.advancedAccountingRules;",
+       "cited": false
+      },
+      {
+       "n": 156,
+       "text": "    this.productsService",
+       "cited": false
+      },
+      {
+       "n": 157,
+       "text": "      .updateRecurringDepositProduct(this.recurringDepositProductsTemplate.id, recurringDepositProduct)",
+       "cited": false
+      },
+      {
+       "n": 158,
+       "text": "      .subscribe((response: any) => {",
+       "cited": false
+      },
+      {
+       "n": 159,
+       "text": "        this.router.navigate(['../'], { relativeTo: this.route });",
+       "cited": true
+      },
+      {
+       "n": 160,
+       "text": "      });",
+       "cited": false
+      },
+      {
+       "n": 161,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 162,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 163,
+       "text": "",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/products/recurring-deposit-products/recurring-deposit-product-stepper/recurring-deposit-product-preview-step/recurring-deposit-product-preview-step.component.html:572",
+     "lines": [
+      {
+       "n": 566,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 567,
+       "text": "<div class=\"layout-row responsive-column align-center gap-2px margin-t\">",
+       "cited": false
+      },
+      {
+       "n": 568,
+       "text": "  <button mat-raised-button matStepperPrevious>",
+       "cited": false
+      },
+      {
+       "n": 569,
+       "text": "    <fa-icon icon=\"arrow-left\" class=\"m-r-10\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 570,
+       "text": "    {{ 'labels.buttons.Previous' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 571,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 572,
+       "text": "  <button mat-raised-button [routerLink]=\"['../']\">",
+       "cited": true
+      },
+      {
+       "n": 573,
+       "text": "    {{ 'labels.buttons.Cancel' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 574,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 575,
+       "text": "  <button mat-raised-button color=\"primary\" (click)=\"submitEvent.emit()\">",
+       "cited": false
+      },
+      {
+       "n": 576,
+       "text": "    {{ 'labels.buttons.Submit' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 577,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 578,
+       "text": "</div>",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/products/recurring-deposit-products/view-recurring-deposit-product/view-recurring-deposit-product.component.html:14",
+     "lines": [
+      {
+       "n": 8,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "<mat-card class=\"product-card\">",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "  <mat-card-content>",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "    <nav mat-tab-nav-bar class=\"navigation-tabs\" [tabPanel]=\"tabPanel\">",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "      <a",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "        mat-tab-link",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "        [routerLink]=\"['./general']\"",
+       "cited": true
+      },
+      {
+       "n": 15,
+       "text": "        routerLinkActive",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "        #general=\"routerLinkActive\"",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "        [active]=\"general.isActive\"",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "      >",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "        {{ 'labels.heading.General' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "      </a>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "3c86c3323f",
+   "app": "event-booking-mean",
+   "from": "/Contact",
+   "to": "/create-event",
+   "title": "event-booking-mean · /Contact → /create-event",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/welcome/welcome.component.html:10",
+     "lines": [
+      {
+       "n": 4,
+       "text": "    <div id=\"heroCarousel\" class=\"container carousel carousel-fade\" data-bs-ride=\"carousel\" data-bs-interval=\"5000\">",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "      <!-- Slide 1 -->",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "      <div class=\"carousel-item active\">",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "        <div class=\"carousel-container\">",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "          <h2 class=\"animate__animated animate__fadeInDown\">Welcome to <span> EVENT NEST </span></h2>",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "          <a [routerLink]=\"['/create-event']\" class=\"btn-get-started animate__animated animate__fadeInUp\"> Create an Event </a>",
+       "cited": true
+      },
+      {
+       "n": 11,
+       "text": "        </div>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "      </div>",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "    ",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "    </div>",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "  </section><!-- End Hero -->",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "3e9b646e46",
+   "app": "mifos",
+   "from": "/settings",
+   "to": "/groups/:groupId/loans-accounts/:loanId/charges/:id",
+   "title": "mifos · /settings → /groups/:groupId/loans-accounts/:loanId/charges/:id",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:198",
+     "lines": [
+      {
+       "n": 192,
+       "text": "    switch (objectType) {",
+       "cited": false
+      },
+      {
+       "n": 193,
+       "text": "      case 'loan':",
+       "cited": false
+      },
+      {
+       "n": 194,
+       "text": "        this.notificationsService.getLoanAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 195,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 196,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 197,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 198,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/loans-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 199,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 200,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 201,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "43d5e69e04",
+   "app": "mifos",
+   "from": "/products/fixed-deposit-products/:productId/edit",
+   "to": "/centers/:centerId/savings-accounts/:savingAccountId/notes",
+   "title": "mifos · /products/fixed-deposit-products/:productId/edit → /centers/:centerId/savings-accounts/:savingAccountId/notes",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+     "lines": [
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 206,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/savings-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 209,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "      case 'fixedDeposit':",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "        this.notificationsService.getFixedDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "473243de37",
+   "app": "mifos",
+   "from": "/accounting/provisioning-entries/journal-entries/view/:id",
+   "to": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/charges",
+   "title": "mifos · /accounting/provisioning-entries/journal-entries/view/:id → /clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/charges",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:218",
+     "lines": [
+      {
+       "n": 212,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "      case 'fixedDeposit':",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "        this.notificationsService.getFixedDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 215,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 216,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 217,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 218,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/fixed-deposits-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 219,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 220,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 221,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 222,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 223,
+       "text": "      case 'recurringDepositAccount':",
+       "cited": false
+      },
+      {
+       "n": 224,
+       "text": "        this.notificationsService.getRecurringDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "4b10aa91e4",
+   "app": "mifos",
+   "from": "/system/manage-jobs",
+   "to": "/clients/:clientId/client-collateral/:collateralId",
+   "title": "mifos · /system/manage-jobs → /clients/:clientId/client-collateral/:collateralId",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/system/manage-jobs/cob-workflow/loan-locked/loan-locked.component.ts:175",
+     "lines": [
+      {
+       "n": 169,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 170,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 171,
+       "text": "  viewLoanAccount(loan: any) {",
+       "cited": false
+      },
+      {
+       "n": 172,
+       "text": "    const loanId = loan.loanId;",
+       "cited": false
+      },
+      {
+       "n": 173,
+       "text": "    this.loansService.getLoanAccountDetails(loanId).subscribe((loanData: any) => {",
+       "cited": false
+      },
+      {
+       "n": 174,
+       "text": "      const clientId = loanData.clientId;",
+       "cited": false
+      },
+      {
+       "n": 175,
+       "text": "      this.router.navigateByUrl(`/clients/${clientId}/loans-accounts/${loanId}/general`);",
+       "cited": true
+      },
+      {
+       "n": 176,
+       "text": "    });",
+       "cited": false
+      },
+      {
+       "n": 177,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 178,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 179,
+       "text": "  runInlineCOB(): void {",
+       "cited": false
+      },
+      {
+       "n": 180,
+       "text": "    const loanIds: any = [];",
+       "cited": false
+      },
+      {
+       "n": 181,
+       "text": "    this.selection.selected.forEach((row: any) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "4e574703ea",
+   "app": "mifos",
+   "from": "/clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/transactions",
+   "to": "/clients/:clientId/loans-accounts/:loanId/transfer-funds/make-account-transfer",
+   "title": "mifos · /clients/:clientId/fixed-deposits-accounts/:fixedDepositAccountId/transactions → /clients/:clientId/loans-accounts/:loanId/transfer-funds/make-account-transfer",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/deposits/fixed-deposits/fixed-deposit-account-view/fixed-deposit-account-view.component.ts:151",
+     "lines": [
+      {
+       "n": 145,
+       "text": "   * Refetches data fot the component",
+       "cited": false
+      },
+      {
+       "n": 146,
+       "text": "   * TODO: Replace by a custom reload component instead of hard-coded back-routing.",
+       "cited": false
+      },
+      {
+       "n": 147,
+       "text": "   */",
+       "cited": false
+      },
+      {
+       "n": 148,
+       "text": "  reload() {",
+       "cited": false
+      },
+      {
+       "n": 149,
+       "text": "    const clientId = this.fixedDepositsAccountData.clientId;",
+       "cited": false
+      },
+      {
+       "n": 150,
+       "text": "    const url: string = this.router.url;",
+       "cited": false
+      },
+      {
+       "n": 151,
+       "text": "    this.router",
+       "cited": true
+      },
+      {
+       "n": 152,
+       "text": "      .navigateByUrl(`/clients/${clientId}/fixed-deposits-accounts`, { skipLocationChange: true })",
+       "cited": false
+      },
+      {
+       "n": 153,
+       "text": "      .then(() => this.router.navigate([url]));",
+       "cited": false
+      },
+      {
+       "n": 154,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 155,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 156,
+       "text": "  /**",
+       "cited": false
+      },
+      {
+       "n": 157,
+       "text": "   * Performs action button/option action.",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/deposits/fixed-deposits/fixed-deposit-account-view/transactions-tab/transactions-tab.component.ts:245",
+     "lines": [
+      {
+       "n": 239,
+       "text": "      }",
+       "cited": false
+      },
+      {
+       "n": 240,
+       "text": "    });",
+       "cited": false
+      },
+      {
+       "n": 241,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 242,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 243,
+       "text": "  reload() {",
+       "cited": false
+      },
+      {
+       "n": 244,
+       "text": "    const url: string = this.router.url;",
+       "cited": false
+      },
+      {
+       "n": 245,
+       "text": "    this.router",
+       "cited": true
+      },
+      {
+       "n": 246,
+       "text": "      .navigateByUrl(`/clients/${this.clientId}/fixed-deposits-accounts`, { skipLocationChange: true })",
+       "cited": false
+      },
+      {
+       "n": 247,
+       "text": "      .then(() => this.router.navigate([url]));",
+       "cited": false
+      },
+      {
+       "n": 248,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 249,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 250,
+       "text": "  isFirstTransaction(idx: number): boolean {",
+       "cited": false
+      },
+      {
+       "n": 251,
+       "text": "    return idx + 1 === this.transactionsData.length;",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:198",
+     "lines": [
+      {
+       "n": 192,
+       "text": "    switch (objectType) {",
+       "cited": false
+      },
+      {
+       "n": 193,
+       "text": "      case 'loan':",
+       "cited": false
+      },
+      {
+       "n": 194,
+       "text": "        this.notificationsService.getLoanAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 195,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 196,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 197,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 198,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/loans-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 199,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 200,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 201,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "4f515c23de",
+   "app": "mifos",
+   "from": "/clients/:clientId/savings-accounts/:savingAccountId/transactions/:id/general",
+   "to": "/groups/:groupId/savings-accounts/:savingAccountId/charges",
+   "title": "mifos · /clients/:clientId/savings-accounts/:savingAccountId/transactions/:id/general → /groups/:groupId/savings-accounts/:savingAccountId/charges",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+     "lines": [
+      {
+       "n": 129,
+       "text": "   * Performs action button/option action.",
+       "cited": false
+      },
+      {
+       "n": 130,
+       "text": "   * @param name action name.",
+       "cited": false
+      },
+      {
+       "n": 131,
+       "text": "   */",
+       "cited": false
+      },
+      {
+       "n": 132,
+       "text": "  doAction(name: string): void {",
+       "cited": false
+      },
+      {
+       "n": 133,
+       "text": "    const transactionsPathIndex = this.router.url.indexOf('/transactions');",
+       "cited": false
+      },
+      {
+       "n": 134,
+       "text": "    const accountUrl = transactionsPathIndex > -1 ? this.router.url.slice(0, transactionsPathIndex) : this.router.url;",
+       "cited": false
+      },
+      {
+       "n": 135,
+       "text": "    this.router.navigateByUrl(`${accountUrl}/actions/${name}`);",
+       "cited": true
+      },
+      {
+       "n": 136,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 137,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 138,
+       "text": "",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+     "lines": [
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 206,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/savings-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 209,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "      case 'fixedDeposit':",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "        this.notificationsService.getFixedDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "50f88296ea",
+   "app": "spring-petclinic-angular",
+   "from": "/pettypes/:id/edit",
+   "to": "/owners",
+   "title": "spring-petclinic-angular · /pettypes/:id/edit → /owners",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/app.component.html:40",
+     "lines": [
+      {
+       "n": 34,
+       "text": "    <li class=\"dropdown\">",
+       "cited": false
+      },
+      {
+       "n": 35,
+       "text": "      <a class=\"dropdown-toggle\" data-toggle=\"dropdown\" role=\"button\"",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "          aria-haspopup=\"true\" aria-expanded=\"false\" (click)=\"log('c2-navbar-owners')\" data-testid=\"c2-navbar-owners\">",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "          <span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\"></span> Owners<span class=\"caret\"></span>",
+       "cited": false
+      },
+      {
+       "n": 38,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "      <ul class=\"dropdown-menu\">",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "        <li><a routerLink=\"/owners\" (click)=\"log('c3-navbar-owners-search')\" data-testid=\"c3-navbar-owners-search\"><span class=\"glyphicon glyphicon-search\"",
+       "cited": true
+      },
+      {
+       "n": 41,
+       "text": "                                          aria-hidden=\"true\"></span><span> Search</span></a></li>",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "        <li><a routerLink=\"/owners/add\" (click)=\"log('c4-navbar-owners-add-new')\" data-testid=\"c4-navbar-owners-add-new\"><span class=\"glyphicon glyphicon-plus\" aria-hidden=\"true\"></span><span> Add New</span></a>",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "        </li>",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "      </ul>",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "    </li>",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "    <li class=\"dropdown\">",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "5944e1703e",
+   "app": "mifos",
+   "from": "/products/near-breach-configurations/create",
+   "to": "/groups/:groupId/loans-accounts/:loanId/transactions/:id/reciept",
+   "title": "mifos · /products/near-breach-configurations/create → /groups/:groupId/loans-accounts/:loanId/transactions/:id/reciept",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:198",
+     "lines": [
+      {
+       "n": 192,
+       "text": "    switch (objectType) {",
+       "cited": false
+      },
+      {
+       "n": 193,
+       "text": "      case 'loan':",
+       "cited": false
+      },
+      {
+       "n": 194,
+       "text": "        this.notificationsService.getLoanAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 195,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 196,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 197,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 198,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/loans-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 199,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 200,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 201,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "5c95d79a93",
+   "app": "angular-jumpstart",
+   "from": "/customers/:id",
+   "to": "/orders",
+   "title": "angular-jumpstart · /customers/:id → /orders",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/DanWahlin__Angular-JumpStart"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/core/navbar/navbar.component.html:17",
+     "lines": [
+      {
+       "n": 11,
+       "text": "            <a class=\"navbar-brand\" routerLink=\"/customers\">",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "                <span class=\"app-title\">Customer Manager</span>",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "            </a>",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "            <span class=\"navbar-collapse\" [attr.data-collapse]=\"isCollapsed\">",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "                <ul class=\"nav navbar-nav nav-pills navBarPadding\">",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "                    <li routerLinkActive=\"active\"><a routerLink=\"/customers\">Customers</a></li>",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "                    <li routerLinkActive=\"active\"><a routerLink=\"/orders\">Orders</a></li>",
+       "cited": true
+      },
+      {
+       "n": 18,
+       "text": "                    <li routerLinkActive=\"active\"><a routerLink=\"/about\">About</a></li>",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "                    <li routerLinkActive=\"active\" (click)=\"loginOrOut()\" data-cy=\"login-logout\"><a>{{ loginLogoutText }}</a></li>",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "                </ul>",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "            </span>",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "        </div>",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "    </div>",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/customer/customer.component.html:16",
+     "lines": [
+      {
+       "n": 10,
+       "text": "                    <a routerLink=\"details\" routerLinkActive=\"active\">",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "                       <span class=\"glyphicon glyphicon-list\"></span>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "                       Customer Details",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "                    </a>",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "                </li>",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "                <li class=\"toolbar-item\">",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "                    <a routerLink=\"orders\" routerLinkActive=\"active\">",
+       "cited": true
+      },
+      {
+       "n": 17,
+       "text": "                        <span class=\"glyphicon glyphicon-tags\"></span>",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "                        Customer Orders",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "                    </a>",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "                </li>",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "                <li class=\"toolbar-item\">",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "                    <a routerLink=\"edit\" routerLinkActive=\"active\">",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "616243a7d2",
+   "app": "mifos",
+   "from": "/organization/employees/create",
+   "to": "/remittances/process",
+   "title": "mifos · /organization/employees/create → /remittances/process",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/core/shell/sidenav/sidenav.component.html:151",
+     "lines": [
+      {
+       "n": 145,
+       "text": "            <i class=\"fa fa-tasks\"></i>",
+       "cited": false
+      },
+      {
+       "n": 146,
+       "text": "          </mat-icon>",
+       "cited": false
+      },
+      {
+       "n": 147,
+       "text": "          <a matLine>{{ 'labels.menus.Individual Collection Sheet' | translate }}</a>",
+       "cited": false
+      },
+      {
+       "n": 148,
+       "text": "        </mat-list-item>",
+       "cited": false
+      },
+      {
+       "n": 149,
+       "text": "        <mat-list-item",
+       "cited": false
+      },
+      {
+       "n": 150,
+       "text": "          *ngIf=\"mifosRemittanceEnabled\"",
+       "cited": false
+      },
+      {
+       "n": 151,
+       "text": "          [routerLink]=\"['/remittances/process']\"",
+       "cited": true
+      },
+      {
+       "n": 152,
+       "text": "          [matTooltipPosition]=\"tooltipPosition\"",
+       "cited": false
+      },
+      {
+       "n": 153,
+       "text": "          matTooltip=\"{{ 'tooltips.Process Remittance' | translate }}\"",
+       "cited": false
+      },
+      {
+       "n": 154,
+       "text": "          routerLinkActive=\"active-menu\"",
+       "cited": false
+      },
+      {
+       "n": 155,
+       "text": "          [routerLinkActiveOptions]=\"{ exact: false }\"",
+       "cited": false
+      },
+      {
+       "n": 156,
+       "text": "        >",
+       "cited": false
+      },
+      {
+       "n": 157,
+       "text": "          <mat-icon matListIcon>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "623871bc68",
+   "app": "mifos",
+   "from": "/clients/:clientId/standing-instructions/make-account-transfer",
+   "to": "/groups/:groupId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/view",
+   "title": "mifos · /clients/:clientId/standing-instructions/make-account-transfer → /groups/:groupId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/view",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+     "lines": [
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 206,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/savings-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 209,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "      case 'fixedDeposit':",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "        this.notificationsService.getFixedDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/tasks/checker-inbox-and-tasks-tabs/checker-inbox/checker-inbox.component.html:205",
+     "lines": [
+      {
+       "n": 199,
+       "text": "      </ng-container>",
+       "cited": false
+      },
+      {
+       "n": 200,
+       "text": "      <ng-container matColumnDef=\"resourceId\">",
+       "cited": false
+      },
+      {
+       "n": 201,
+       "text": "        <th mat-header-cell *matHeaderCellDef>{{ 'labels.inputs.Resource ID' | translate }}</th>",
+       "cited": false
+      },
+      {
+       "n": 202,
+       "text": "        <td mat-cell *matCellDef=\"let makerChecker\">{{ makerChecker.resourceId }}</td>",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      </ng-container>",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "      <tr mat-header-row *matHeaderRowDef=\"displayedColumns\"></tr>",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "      <tr",
+       "cited": true
+      },
+      {
+       "n": 206,
+       "text": "        mat-row",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "        *matRowDef=\"let row; columns: displayedColumns\"",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "        [routerLink]=\"[row.id, 'view']\"",
+       "cited": false
+      },
+      {
+       "n": 209,
+       "text": "        class=\"select-row\"",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "      ></tr>",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "    </table>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "67c79c003d",
+   "app": "mifos",
+   "from": "/loans/:loanId/transactions/export",
+   "to": "/accounting",
+   "title": "mifos · /loans/:loanId/transactions/export → /accounting",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/core/shell/toolbar/toolbar.component.html:163",
+     "lines": [
+      {
+       "n": 157,
+       "text": "    {{ 'labels.menus.Groups' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 158,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 159,
+       "text": "  <button mat-menu-item routerLink=\"/centers\" tabindex=\"0\" *mifosxHasPermission=\"'READ_CENTER'\">",
+       "cited": false
+      },
+      {
+       "n": 160,
+       "text": "    {{ 'labels.menus.Centers' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 161,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 162,
+       "text": "  <span class=\"hide-lt-md\">",
+       "cited": false
+      },
+      {
+       "n": 163,
+       "text": "    <button",
+       "cited": true
+      },
+      {
+       "n": 164,
+       "text": "      mat-menu-item",
+       "cited": false
+      },
+      {
+       "n": 165,
+       "text": "      [routerLink]=\"['/accounting']\"",
+       "cited": false
+      },
+      {
+       "n": 166,
+       "text": "      tabindex=\"0\"",
+       "cited": false
+      },
+      {
+       "n": 167,
+       "text": "      *mifosxHasPermission=\"[",
+       "cited": false
+      },
+      {
+       "n": 168,
+       "text": "        'READ_JOURNALENTRY',",
+       "cited": false
+      },
+      {
+       "n": 169,
+       "text": "        'READ_GLACCOUNT',",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/core/shell/toolbar/toolbar.component.html:52",
+     "lines": [
+      {
+       "n": 46,
+       "text": "    >",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "      <fa-icon class=\"mr-05\" icon=\"university\" size=\"lg\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "      {{ 'labels.menus.Institution' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "    </a>",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "    <span class=\"hide-lt-md\">",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "      <a",
+       "cited": true
+      },
+      {
+       "n": 53,
+       "text": "        #accounting",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "        class=\"tab-link accounting-link\"",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "        [routerLink]=\"['/accounting']\"",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "        tabindex=\"0\"",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "        *mifosxHasPermission=\"[",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "          'READ_JOURNALENTRY',",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/core/shell/toolbar/toolbar.component.html:55",
+     "lines": [
+      {
+       "n": 49,
+       "text": "    </a>",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "    <span class=\"hide-lt-md\">",
+       "cited": false
+      },
+      {
+       "n": 52,
+       "text": "      <a",
+       "cited": false
+      },
+      {
+       "n": 53,
+       "text": "        #accounting",
+       "cited": false
+      },
+      {
+       "n": 54,
+       "text": "        class=\"tab-link accounting-link\"",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "        [routerLink]=\"['/accounting']\"",
+       "cited": true
+      },
+      {
+       "n": 56,
+       "text": "        tabindex=\"0\"",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "        *mifosxHasPermission=\"[",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "          'READ_JOURNALENTRY',",
+       "cited": false
+      },
+      {
+       "n": 59,
+       "text": "          'READ_GLACCOUNT',",
+       "cited": false
+      },
+      {
+       "n": 60,
+       "text": "          'READ_GLCLOSURE',",
+       "cited": false
+      },
+      {
+       "n": 61,
+       "text": "          'READ_ACCOUNTINGRULE',",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/core/shell/toolbar/toolbar.component.ts:220",
+     "lines": [
+      {
+       "n": 214,
+       "text": "        case 3:",
+       "cited": false
+      },
+      {
+       "n": 215,
+       "text": "          this.configurationWizardService.showDatatables = true;",
+       "cited": false
+      },
+      {
+       "n": 216,
+       "text": "          this.router.navigate(['/system']);",
+       "cited": false
+      },
+      {
+       "n": 217,
+       "text": "          break;",
+       "cited": false
+      },
+      {
+       "n": 218,
+       "text": "        case 4:",
+       "cited": false
+      },
+      {
+       "n": 219,
+       "text": "          this.configurationWizardService.showChartofAccounts = true;",
+       "cited": false
+      },
+      {
+       "n": 220,
+       "text": "          this.router.navigate(['/accounting']);",
+       "cited": true
+      },
+      {
+       "n": 221,
+       "text": "          break;",
+       "cited": false
+      },
+      {
+       "n": 222,
+       "text": "        case 5:",
+       "cited": false
+      },
+      {
+       "n": 223,
+       "text": "          this.configurationWizardService.showCharges = true;",
+       "cited": false
+      },
+      {
+       "n": 224,
+       "text": "          this.router.navigate(['/products']);",
+       "cited": false
+      },
+      {
+       "n": 225,
+       "text": "          break;",
+       "cited": false
+      },
+      {
+       "n": 226,
+       "text": "        case 6:",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "6d0e027079",
+   "app": "mifos",
+   "from": "/system/codes/:id/edit",
+   "to": "/clients/:clientId/savings-accounts/:savingAccountId/actions/:name",
+   "title": "mifos · /system/codes/:id/edit → /clients/:clientId/savings-accounts/:savingAccountId/actions/:name",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+     "lines": [
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 206,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/savings-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 209,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "      case 'fixedDeposit':",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "        this.notificationsService.getFixedDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "7031829ab6",
+   "app": "spring-petclinic-angular",
+   "from": "/owners/:id",
+   "to": "/pets/:id/visits/add",
+   "title": "spring-petclinic-angular · /owners/:id → /pets/:id/visits/add",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/pet-clinic/spring-petclinic-angular"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/pets/pet-list/pet-list.component.html:31",
+     "lines": [
+      {
+       "n": 25,
+       "text": "        <dt>Birth Date</dt>",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "        <dd>{{ pet.birthDate }}</dd>",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "        <dt>Type</dt>",
+       "cited": false
+      },
+      {
+       "n": 28,
+       "text": "        <dd *ngIf=\"!deleteSuccess\">{{ pet.type.name }}</dd>",
+       "cited": false
+      },
+      {
+       "n": 29,
+       "text": "        <button class=\"btn btn-default\" (click)=\"editPet(pet); log('c22-pet-list-edit-pet')\">Edit Pet</button>",
+       "cited": false
+      },
+      {
+       "n": 30,
+       "text": "        <button class=\"btn btn-default\" (click)=\"deletePet(pet); log('c23-pet-list-delete-pet')\">Delete Pet</button>",
+       "cited": false
+      },
+      {
+       "n": 31,
+       "text": "        <button class=\"btn btn-default\" (click)=\"addVisit(pet); log('c24-pet-list-add-visit')\">Add Visit</button>",
+       "cited": true
+      },
+      {
+       "n": 32,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "      </dl>",
+       "cited": false
+      },
+      {
+       "n": 34,
+       "text": "    </td>",
+       "cited": false
+      },
+      {
+       "n": 35,
+       "text": "    <td valign=\"top\">",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "      <app-visit-list [visits]=\"pet.visits\"></app-visit-list>",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "    </td>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "716eb47042",
+   "app": "posts-users-ui-ng",
+   "from": "/new-post",
+   "to": "/posts",
+   "title": "posts-users-ui-ng · /new-post → /posts",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/anonbnr__posts-users-ui-ng"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/header/header.component.html:7",
+     "lines": [
+      {
+       "n": 1,
+       "text": "<mat-toolbar color=\"primary\">",
+       "cited": false
+      },
+      {
+       "n": 2,
+       "text": "    <mat-icon>menu</mat-icon>",
+       "cited": false
+      },
+      {
+       "n": 3,
+       "text": "    <span>NG Posts & Users</span>",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "    <span class=\"spacer\"></span>",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "    <button mat-button [routerLink]=\"'/posts'\">Posts</button>",
+       "cited": true
+      },
+      {
+       "n": 8,
+       "text": "    <button mat-button [routerLink]=\"'/new-post'\">Add a New Post</button>",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "    <button mat-button [routerLink]=\"'/users'\">Users</button>",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "    <button mat-button [routerLink]=\"'/new-user'\">Add a New User</button>",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "    <button mat-button [routerLink]=\"'/user-search'\">Search Users</button>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "    <button mat-button [routerLink]=\"'/user-availability-schedule'\">Schedule Availability</button>",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "</mat-toolbar>",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/new-post/new-post.component.html:7",
+     "lines": [
+      {
+       "n": 1,
+       "text": "<mat-card class=\"new-post-container\">",
+       "cited": false
+      },
+      {
+       "n": 2,
+       "text": "    <mat-card-header>",
+       "cited": false
+      },
+      {
+       "n": 3,
+       "text": "        <mat-card-title class=\"title\">📝 Create a New Post</mat-card-title>",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "    </mat-card-header>",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "    <mat-card-content>",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "        <form [formGroup]=\"postForm\" (ngSubmit)=\"onSavePost()\">",
+       "cited": true
+      },
+      {
+       "n": 8,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "            <!-- Title Field -->",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "            <mat-form-field appearance=\"outline\" class=\"full-width\">",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "                <mat-label>Post Title</mat-label>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "                <mat-icon matPrefix>title</mat-icon>",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "                <input matInput id=\"title\" type=\"text\" formControlName=\"title\">",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/new-post/new-post.component.ts:41",
+     "lines": [
+      {
+       "n": 35,
+       "text": "      content: this.postForm.get('content')?.value,",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "      authorId: \"guest\"",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "    };",
+       "cited": false
+      },
+      {
+       "n": 38,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "    this.postService.addPost(postPayload).subscribe(() => {",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "      this.postService.getPosts();  // Ensure posts are refreshed with correct IDs",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "      this.router.navigate(['/posts']);",
+       "cited": true
+      },
+      {
+       "n": 42,
+       "text": "    });",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "766f9c3dcc",
+   "app": "event-booking-mean",
+   "from": "/Contact",
+   "to": "/login",
+   "title": "event-booking-mean · /Contact → /login",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/bekitos101__Event-Booking-App-MEAN-STACK/EventNest/Frontend/app"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/featured-events/featured-events.component.html:27",
+     "lines": [
+      {
+       "n": 21,
+       "text": "                <div class=\"info-item\">",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "                  <i class=\"bx bx-map\"></i>",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "                  <span style=\"font-family: 'Roboto', sans-serif; color: #1e4356;\">{{ event.location }}</span>",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "                </div>",
+       "cited": false
+      },
+      {
+       "n": 25,
+       "text": "              </div>",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "              <!-- RSVP Button -->",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "              <button class=\"rsvp-button\" (click)=\"promptRsvp(event._id)\" [ngClass]=\"{'rsvped': isEventRsvped(event._id)}\">RSVP</button>",
+       "cited": true
+      },
+      {
+       "n": 28,
+       "text": "            </div>",
+       "cited": false
+      },
+      {
+       "n": 29,
+       "text": "          </div>",
+       "cited": false
+      },
+      {
+       "n": 30,
+       "text": "        </div>",
+       "cited": false
+      },
+      {
+       "n": 31,
+       "text": "        <!-- End of Dynamic Event Card -->",
+       "cited": false
+      },
+      {
+       "n": 32,
+       "text": "      </div>",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "    </div>",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/header/header.component.html:19",
+     "lines": [
+      {
+       "n": 13,
+       "text": "              <li><a class=\"\" href=\"\">Home</a></li>",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "              <li><a href=\"\">Events</a></li>",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "              <li><a href=\"\"> Happening now </a></li>",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "              <li><a href=\"\"> For organizers </a></li>",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "              <li><a routerLink=\"/Contact\">Contact Us</a></li>",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "              <!-- When user is not logged in -->",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "              <li *ngIf=\"!isLoggedIn\"><a  routerLink=\"/login\" ><button class=\"btn login-btn\">Login</button></a></li>",
+       "cited": true
+      },
+      {
+       "n": 20,
+       "text": "               <li *ngIf=\"!isLoggedIn\" ><a  routerLink=\"/register\"><button class=\"btn signup-btn\">Sign up</button></a></li>",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "              <!-- When user is logged in -->",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "              <li><a *ngIf=\"isLoggedIn\" class=\"my-events\">RSVPs</a></li>",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "              <li *ngIf=\"isLoggedIn\" class=\"nav-item dropdown\" >",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "                <a class=\"nav-link dropdown-toggle custom-dropdown-toggle\" href=\"#\" id=\"navbarDropdown\" role=\"button\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">",
+       "cited": false
+      },
+      {
+       "n": 25,
+       "text": "                  <div class=\"user-initials\">{{ authService.getUserInitials() }}</div>",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/header/header.component.html:31",
+     "lines": [
+      {
+       "n": 25,
+       "text": "                  <div class=\"user-initials\">{{ authService.getUserInitials() }}</div>",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "                  </a>",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "                <ul class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">",
+       "cited": false
+      },
+      {
+       "n": 28,
+       "text": "                  ",
+       "cited": false
+      },
+      {
+       "n": 29,
+       "text": "                  <li class=\"dropdown-item\"  ><a routerLink=\"/my-Events\">My Events</a></li>",
+       "cited": false
+      },
+      {
+       "n": 30,
+       "text": "                  <li><hr class=\"dropdown-divider\"></li>",
+       "cited": false
+      },
+      {
+       "n": 31,
+       "text": "                  <li><a class=\"dropdown-item\" (click)=\"logout()\">Logout</a></li> ",
+       "cited": true
+      },
+      {
+       "n": 32,
+       "text": "                </ul>",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "              </li>            </ul>",
+       "cited": false
+      },
+      {
+       "n": 34,
+       "text": "            <i class=\"bi bi-list mobile-nav-toggle\"></i>",
+       "cited": false
+      },
+      {
+       "n": 35,
+       "text": "          </nav>",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "    <!-- .navbar -->",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "    ",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/header/header.component.ts:46",
+     "lines": [
+      {
+       "n": 40,
+       "text": "    this.loginStatusSubscription.unsubscribe();",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 42,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "  ",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "  logout() {",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "    this.authService.logout();",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "    this.router.navigate(['/login']); // Redirect to login page after logout",
+       "cited": true
+      },
+      {
+       "n": 47,
+       "text": "  } ",
+       "cited": false
+      },
+      {
+       "n": 48,
+       "text": "  ",
+       "cited": false
+      },
+      {
+       "n": 49,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 50,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 51,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "7c09998845",
+   "app": "mifos",
+   "from": "/organization/exchange-rates/:id",
+   "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/:standingInstructionsId/view",
+   "title": "mifos · /organization/exchange-rates/:id → /clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/:standingInstructionsId/view",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:228",
+     "lines": [
+      {
+       "n": 222,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 223,
+       "text": "      case 'recurringDepositAccount':",
+       "cited": false
+      },
+      {
+       "n": 224,
+       "text": "        this.notificationsService.getRecurringDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 225,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 226,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 227,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 228,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/recurring-deposits-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 229,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 230,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 231,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 232,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 233,
+       "text": "      case 'shareAccount':",
+       "cited": false
+      },
+      {
+       "n": 234,
+       "text": "        this.notificationsService.getShareAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/tasks/checker-inbox-and-tasks-tabs/checker-inbox/checker-inbox.component.html:205",
+     "lines": [
+      {
+       "n": 199,
+       "text": "      </ng-container>",
+       "cited": false
+      },
+      {
+       "n": 200,
+       "text": "      <ng-container matColumnDef=\"resourceId\">",
+       "cited": false
+      },
+      {
+       "n": 201,
+       "text": "        <th mat-header-cell *matHeaderCellDef>{{ 'labels.inputs.Resource ID' | translate }}</th>",
+       "cited": false
+      },
+      {
+       "n": 202,
+       "text": "        <td mat-cell *matCellDef=\"let makerChecker\">{{ makerChecker.resourceId }}</td>",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      </ng-container>",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "      <tr mat-header-row *matHeaderRowDef=\"displayedColumns\"></tr>",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "      <tr",
+       "cited": true
+      },
+      {
+       "n": 206,
+       "text": "        mat-row",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "        *matRowDef=\"let row; columns: displayedColumns\"",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "        [routerLink]=\"[row.id, 'view']\"",
+       "cited": false
+      },
+      {
+       "n": 209,
+       "text": "        class=\"select-row\"",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "      ></tr>",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "    </table>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "8609acd8d8",
+   "app": "mifos",
+   "from": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/account-transfers/:transferid",
+   "to": "/navigation",
+   "title": "mifos · /clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/account-transfers/:transferid → /navigation",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/core/shell/sidenav/sidenav.component.html:97",
+     "lines": [
+      {
+       "n": 91,
+       "text": "            <mat-icon matListIcon>",
+       "cited": false
+      },
+      {
+       "n": 92,
+       "text": "              <fa-icon icon=\"file-alt\" size=\"sm\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 93,
+       "text": "            </mat-icon>",
+       "cited": false
+      },
+      {
+       "n": 94,
+       "text": "            <a matLine #reportingDashboard>{{ 'labels.menus.Reporting Dashboard' | translate }}</a>",
+       "cited": false
+      },
+      {
+       "n": 95,
+       "text": "          </mat-list-item>",
+       "cited": false
+      },
+      {
+       "n": 96,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 97,
+       "text": "        <mat-list-item",
+       "cited": true
+      },
+      {
+       "n": 98,
+       "text": "          [routerLink]=\"['/navigation']\"",
+       "cited": false
+      },
+      {
+       "n": 99,
+       "text": "          [matTooltipPosition]=\"tooltipPosition\"",
+       "cited": false
+      },
+      {
+       "n": 100,
+       "text": "          matTooltip=\"{{ 'tooltips.Navigation' | translate }}\"",
+       "cited": false
+      },
+      {
+       "n": 101,
+       "text": "          routerLinkActive=\"active-menu\"",
+       "cited": false
+      },
+      {
+       "n": 102,
+       "text": "          [routerLinkActiveOptions]=\"{ exact: false }\"",
+       "cited": false
+      },
+      {
+       "n": 103,
+       "text": "          *mifosxHasPermission=\"'READ_CLIENT'\"",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/core/shell/sidenav/sidenav.component.html:98",
+     "lines": [
+      {
+       "n": 92,
+       "text": "              <fa-icon icon=\"file-alt\" size=\"sm\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 93,
+       "text": "            </mat-icon>",
+       "cited": false
+      },
+      {
+       "n": 94,
+       "text": "            <a matLine #reportingDashboard>{{ 'labels.menus.Reporting Dashboard' | translate }}</a>",
+       "cited": false
+      },
+      {
+       "n": 95,
+       "text": "          </mat-list-item>",
+       "cited": false
+      },
+      {
+       "n": 96,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 97,
+       "text": "        <mat-list-item",
+       "cited": false
+      },
+      {
+       "n": 98,
+       "text": "          [routerLink]=\"['/navigation']\"",
+       "cited": true
+      },
+      {
+       "n": 99,
+       "text": "          [matTooltipPosition]=\"tooltipPosition\"",
+       "cited": false
+      },
+      {
+       "n": 100,
+       "text": "          matTooltip=\"{{ 'tooltips.Navigation' | translate }}\"",
+       "cited": false
+      },
+      {
+       "n": 101,
+       "text": "          routerLinkActive=\"active-menu\"",
+       "cited": false
+      },
+      {
+       "n": 102,
+       "text": "          [routerLinkActiveOptions]=\"{ exact: false }\"",
+       "cited": false
+      },
+      {
+       "n": 103,
+       "text": "          *mifosxHasPermission=\"'READ_CLIENT'\"",
+       "cited": false
+      },
+      {
+       "n": 104,
+       "text": "        >",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "8692106816",
+   "app": "mifos",
+   "from": "/system",
+   "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/datatables/:datatableName",
+   "title": "mifos · /system → /clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/datatables/:datatableName",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:228",
+     "lines": [
+      {
+       "n": 222,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 223,
+       "text": "      case 'recurringDepositAccount':",
+       "cited": false
+      },
+      {
+       "n": 224,
+       "text": "        this.notificationsService.getRecurringDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 225,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 226,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 227,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 228,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/recurring-deposits-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 229,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 230,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 231,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 232,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 233,
+       "text": "      case 'shareAccount':",
+       "cited": false
+      },
+      {
+       "n": 234,
+       "text": "        this.notificationsService.getShareAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "8e61375a8c",
+   "app": "mifos",
+   "from": "/loans/:loanId/loan-collateral",
+   "to": "/reports",
+   "title": "mifos · /loans/:loanId/loan-collateral → /reports",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/core/shell/toolbar/toolbar.component.html:193",
+     "lines": [
+      {
+       "n": 187,
+       "text": "    </button>",
+       "cited": false
+      },
+      {
+       "n": 188,
+       "text": "  </span>",
+       "cited": false
+      },
+      {
+       "n": 189,
+       "text": "</mat-menu>",
+       "cited": false
+      },
+      {
+       "n": 190,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 191,
+       "text": "<!-- Toolbar Menus -->",
+       "cited": false
+      },
+      {
+       "n": 192,
+       "text": "<mat-menu #reportsMenu=\"matMenu\" [overlapTrigger]=\"false\">",
+       "cited": false
+      },
+      {
+       "n": 193,
+       "text": "  <button mat-menu-item [routerLink]=\"['/reports']\" tabindex=\"0\" *mifosxHasPermission=\"'READ_REPORT'\">",
+       "cited": true
+      },
+      {
+       "n": 194,
+       "text": "    {{ 'labels.menus.All' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 195,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 196,
+       "text": "  <button mat-menu-item [routerLink]=\"['/reports', 'Client']\" tabindex=\"0\" *mifosxHasPermission=\"'READ_REPORT'\">",
+       "cited": false
+      },
+      {
+       "n": 197,
+       "text": "    {{ 'labels.menus.Clients' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 198,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 199,
+       "text": "  <button mat-menu-item [routerLink]=\"['/reports', 'Loan']\" tabindex=\"0\" *mifosxHasPermission=\"'READ_REPORT'\">",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/reports/run-report/run-report.component.html:208",
+     "lines": [
+      {
+       "n": 202,
+       "text": "          </div>",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "        </div>",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "      </div>",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 206,
+       "text": "      <div class=\"card-foot\">",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "        <div class=\"right\">",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "          <button type=\"button\" class=\"btn btn-ghost\" [routerLink]=\"['/reports']\">",
+       "cited": true
+      },
+      {
+       "n": 209,
+       "text": "            {{ 'labels.buttons.Cancel' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "          </button>",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "          @if (isTableReport()) {",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "            <button",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "              type=\"button\"",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "              class=\"btn btn-outline\"",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/system/system.component.html:367",
+     "lines": [
+      {
+       "n": 361,
+       "text": "                }",
+       "cited": false
+      },
+      {
+       "n": 362,
+       "text": "              </div>",
+       "cited": false
+      },
+      {
+       "n": 363,
+       "text": "            </div>",
+       "cited": false
+      },
+      {
+       "n": 364,
+       "text": "          </mat-list-item>",
+       "cited": false
+      },
+      {
+       "n": 365,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 366,
+       "text": "          <div #manageReports>",
+       "cited": false
+      },
+      {
+       "n": 367,
+       "text": "            <mat-list-item [routerLink]=\"['reports']\">",
+       "cited": true
+      },
+      {
+       "n": 368,
+       "text": "              <div class=\"menu-list-item-content\">",
+       "cited": false
+      },
+      {
+       "n": 369,
+       "text": "                <div class=\"menu-left-section\" [routerLink]=\"['reports']\">",
+       "cited": false
+      },
+      {
+       "n": 370,
+       "text": "                  <mat-icon matListIcon>",
+       "cited": false
+      },
+      {
+       "n": 371,
+       "text": "                    <fa-icon icon=\"file-word\" size=\"sm\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 372,
+       "text": "                  </mat-icon>",
+       "cited": false
+      },
+      {
+       "n": 373,
+       "text": "                  <div matLine>",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/system/system.component.html:369",
+     "lines": [
+      {
+       "n": 363,
+       "text": "            </div>",
+       "cited": false
+      },
+      {
+       "n": 364,
+       "text": "          </mat-list-item>",
+       "cited": false
+      },
+      {
+       "n": 365,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 366,
+       "text": "          <div #manageReports>",
+       "cited": false
+      },
+      {
+       "n": 367,
+       "text": "            <mat-list-item [routerLink]=\"['reports']\">",
+       "cited": false
+      },
+      {
+       "n": 368,
+       "text": "              <div class=\"menu-list-item-content\">",
+       "cited": false
+      },
+      {
+       "n": 369,
+       "text": "                <div class=\"menu-left-section\" [routerLink]=\"['reports']\">",
+       "cited": true
+      },
+      {
+       "n": 370,
+       "text": "                  <mat-icon matListIcon>",
+       "cited": false
+      },
+      {
+       "n": 371,
+       "text": "                    <fa-icon icon=\"file-word\" size=\"sm\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 372,
+       "text": "                  </mat-icon>",
+       "cited": false
+      },
+      {
+       "n": 373,
+       "text": "                  <div matLine>",
+       "cited": false
+      },
+      {
+       "n": 374,
+       "text": "                    {{ 'labels.heading.Manage Reports' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 375,
+       "text": "                    @if (arrowBooleans[9]) {",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/system/system.component.html:376",
+     "lines": [
+      {
+       "n": 370,
+       "text": "                  <mat-icon matListIcon>",
+       "cited": false
+      },
+      {
+       "n": 371,
+       "text": "                    <fa-icon icon=\"file-word\" size=\"sm\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 372,
+       "text": "                  </mat-icon>",
+       "cited": false
+      },
+      {
+       "n": 373,
+       "text": "                  <div matLine>",
+       "cited": false
+      },
+      {
+       "n": 374,
+       "text": "                    {{ 'labels.heading.Manage Reports' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 375,
+       "text": "                    @if (arrowBooleans[9]) {",
+       "cited": false
+      },
+      {
+       "n": 376,
+       "text": "                      <p matLine [routerLink]=\"['reports']\" class=\"menu-explanation\">",
+       "cited": true
+      },
+      {
+       "n": 377,
+       "text": "                        {{ 'labels.text.Add new report and classify reports' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 378,
+       "text": "                      </p>",
+       "cited": false
+      },
+      {
+       "n": 379,
+       "text": "                    }",
+       "cited": false
+      },
+      {
+       "n": 380,
+       "text": "                  </div>",
+       "cited": false
+      },
+      {
+       "n": 381,
+       "text": "                </div>",
+       "cited": false
+      },
+      {
+       "n": 382,
+       "text": "                <div class=\"menu-right-section\">",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "8f7cc2d706",
+   "app": "mifos",
+   "from": "/clients/:clientId/standing-instructions/create-standing-instructions",
+   "to": "/groups/:groupId/savings-accounts/:savingAccountId/charges/:id",
+   "title": "mifos · /clients/:clientId/standing-instructions/create-standing-instructions → /groups/:groupId/savings-accounts/:savingAccountId/charges/:id",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+     "lines": [
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 206,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/savings-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 209,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "      case 'fixedDeposit':",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "        this.notificationsService.getFixedDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "9bd3d3de00",
+   "app": "mifos",
+   "from": "/groups/:groupId/loans-accounts/:loanId/original-schedule",
+   "to": "/:loanId/datatables",
+   "title": "mifos · /groups/:groupId/loans-accounts/:loanId/original-schedule → /:loanId/datatables",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/loans/loans-view/loans-view.component.html:675",
+     "lines": [
+      {
+       "n": 669,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 670,
+       "text": "            {{ 'labels.inputs.External Asset Owner' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 671,
+       "text": "          </a>",
+       "cited": false
+      },
+      {
+       "n": 672,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 673,
+       "text": "        @if (datatablesReady) {",
+       "cited": false
+      },
+      {
+       "n": 674,
+       "text": "          @for (loanDatatable of loanDatatables; track loanDatatable) {",
+       "cited": false
+      },
+      {
+       "n": 675,
+       "text": "            <a",
+       "cited": true
+      },
+      {
+       "n": 676,
+       "text": "              mat-tab-link",
+       "cited": false
+      },
+      {
+       "n": 677,
+       "text": "              *mifosxHasPermission=\"'READ_' + loanDatatable.registeredTableName\"",
+       "cited": false
+      },
+      {
+       "n": 678,
+       "text": "              [routerLink]=\"['./datatables', loanDatatable.registeredTableName]\"",
+       "cited": false
+      },
+      {
+       "n": 679,
+       "text": "              [queryParams]=\"{",
+       "cited": false
+      },
+      {
+       "n": 680,
+       "text": "                productType: loanProductService.productType.value",
+       "cited": false
+      },
+      {
+       "n": 681,
+       "text": "              }\"",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "9cc684e5fa",
+   "app": "mifos",
+   "from": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+   "to": "/system/roles-and-permissions/add",
+   "title": "mifos · /groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName → /system/roles-and-permissions/add",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+     "lines": [
+      {
+       "n": 129,
+       "text": "   * Performs action button/option action.",
+       "cited": false
+      },
+      {
+       "n": 130,
+       "text": "   * @param name action name.",
+       "cited": false
+      },
+      {
+       "n": 131,
+       "text": "   */",
+       "cited": false
+      },
+      {
+       "n": 132,
+       "text": "  doAction(name: string): void {",
+       "cited": false
+      },
+      {
+       "n": 133,
+       "text": "    const transactionsPathIndex = this.router.url.indexOf('/transactions');",
+       "cited": false
+      },
+      {
+       "n": 134,
+       "text": "    const accountUrl = transactionsPathIndex > -1 ? this.router.url.slice(0, transactionsPathIndex) : this.router.url;",
+       "cited": false
+      },
+      {
+       "n": 135,
+       "text": "    this.router.navigateByUrl(`${accountUrl}/actions/${name}`);",
+       "cited": true
+      },
+      {
+       "n": 136,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 137,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 138,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "9db3a134d5",
+   "app": "ever-traduora",
+   "from": "/projects",
+   "to": "/projects/:projectId/translations",
+   "title": "ever-traduora · /projects → /projects/:projectId/translations",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/projects/components/project-card/project-card.component.html:1",
+     "lines": [
+      {
+       "n": 1,
+       "text": "<div class=\"card btn\" [routerLink]=\"[project.id]\">",
+       "cited": true
+      },
+      {
+       "n": 2,
+       "text": "  <div class=\"card-body\">",
+       "cited": false
+      },
+      {
+       "n": 3,
+       "text": "    <div class=\"d-flex flex-row\">",
+       "cited": false
+      },
+      {
+       "n": 4,
+       "text": "      <h5>{{ project.name }}</h5>",
+       "cited": false
+      },
+      {
+       "n": 5,
+       "text": "      <span class=\"flex-1\"></span>",
+       "cited": false
+      },
+      {
+       "n": 6,
+       "text": "      <p class=\"mb-0\">",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "        <span class=\"ml-1 badge badge-secondary\">{{ project.role | titlecase }}</span>",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "a0e4cab18d",
+   "app": "mifos",
+   "from": "/loans/glim-account/:glimId",
+   "to": "/loans/:loanId/charges/:id",
+   "title": "mifos · /loans/glim-account/:glimId → /loans/:loanId/charges/:id",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/clients/clients-view/general-tab/general-tab.component.html:102",
+     "lines": [
+      {
+       "n": 96,
+       "text": "                >",
+       "cited": false
+      },
+      {
+       "n": 97,
+       "text": "                  <i class=\"fa fa-flag\"></i>",
+       "cited": false
+      },
+      {
+       "n": 98,
+       "text": "                </button>",
+       "cited": false
+      },
+      {
+       "n": 99,
+       "text": "              </td>",
+       "cited": false
+      },
+      {
+       "n": 100,
+       "text": "            </ng-container>",
+       "cited": false
+      },
+      {
+       "n": 101,
+       "text": "            <tr mat-header-row *matHeaderRowDef=\"upcomingChargesColumns\"></tr>",
+       "cited": false
+      },
+      {
+       "n": 102,
+       "text": "            <tr",
+       "cited": true
+      },
+      {
+       "n": 103,
+       "text": "              mat-row",
+       "cited": false
+      },
+      {
+       "n": 104,
+       "text": "              *matRowDef=\"let row; columns: upcomingChargesColumns\"",
+       "cited": false
+      },
+      {
+       "n": 105,
+       "text": "              [routerLink]=\"['../', 'charges', row.id]\"",
+       "cited": false
+      },
+      {
+       "n": 106,
+       "text": "            ></tr>",
+       "cited": false
+      },
+      {
+       "n": 107,
+       "text": "          </table>",
+       "cited": false
+      },
+      {
+       "n": 108,
+       "text": "        </div>",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/clients/clients-view/general-tab/general-tab.component.html:41",
+     "lines": [
+      {
+       "n": 35,
+       "text": "  </section>",
+       "cited": false
+      },
+      {
+       "n": 36,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 37,
+       "text": "  <!-- ════ UPCOMING CHARGES ═══════════════════════════════════ -->",
+       "cited": false
+      },
+      {
+       "n": 38,
+       "text": "  <section class=\"section\">",
+       "cited": false
+      },
+      {
+       "n": 39,
+       "text": "    <div class=\"section-head\">",
+       "cited": false
+      },
+      {
+       "n": 40,
+       "text": "      <span class=\"section-title\">{{ 'labels.heading.Upcoming Charges' | translate }}</span>",
+       "cited": false
+      },
+      {
+       "n": 41,
+       "text": "      <a class=\"section-link\" [routerLink]=\"['../', 'charges', 'overview']\" *mifosxHasPermission=\"'READ_CLIENTCHARGE'\">",
+       "cited": true
+      },
+      {
+       "n": 42,
+       "text": "        {{ 'labels.buttons.Charges Overview' | translate }} →",
+       "cited": false
+      },
+      {
+       "n": 43,
+       "text": "      </a>",
+       "cited": false
+      },
+      {
+       "n": 44,
+       "text": "    </div>",
+       "cited": false
+      },
+      {
+       "n": 45,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 46,
+       "text": "    @if (upcomingCharges?.length) {",
+       "cited": false
+      },
+      {
+       "n": 47,
+       "text": "      <div class=\"data-card\">",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "a562f39306",
+   "app": "mifos",
+   "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+   "to": "/clients/:clientId/savings-accounts/:savingAccountId/datatables/:datatableName",
+   "title": "mifos · /centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName → /clients/:clientId/savings-accounts/:savingAccountId/datatables/:datatableName",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+     "lines": [
+      {
+       "n": 129,
+       "text": "   * Performs action button/option action.",
+       "cited": false
+      },
+      {
+       "n": 130,
+       "text": "   * @param name action name.",
+       "cited": false
+      },
+      {
+       "n": 131,
+       "text": "   */",
+       "cited": false
+      },
+      {
+       "n": 132,
+       "text": "  doAction(name: string): void {",
+       "cited": false
+      },
+      {
+       "n": 133,
+       "text": "    const transactionsPathIndex = this.router.url.indexOf('/transactions');",
+       "cited": false
+      },
+      {
+       "n": 134,
+       "text": "    const accountUrl = transactionsPathIndex > -1 ? this.router.url.slice(0, transactionsPathIndex) : this.router.url;",
+       "cited": false
+      },
+      {
+       "n": 135,
+       "text": "    this.router.navigateByUrl(`${accountUrl}/actions/${name}`);",
+       "cited": true
+      },
+      {
+       "n": 136,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 137,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 138,
+       "text": "",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+     "lines": [
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 206,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/savings-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 209,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "      case 'fixedDeposit':",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "        this.notificationsService.getFixedDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "a8530f74f9",
+   "app": "mifos",
+   "from": "/clients/:clientId/loans-accounts/glim-account/create",
+   "to": "/reports",
+   "title": "mifos · /clients/:clientId/loans-accounts/glim-account/create → /reports",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/core/shell/toolbar/toolbar.component.html:193",
+     "lines": [
+      {
+       "n": 187,
+       "text": "    </button>",
+       "cited": false
+      },
+      {
+       "n": 188,
+       "text": "  </span>",
+       "cited": false
+      },
+      {
+       "n": 189,
+       "text": "</mat-menu>",
+       "cited": false
+      },
+      {
+       "n": 190,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 191,
+       "text": "<!-- Toolbar Menus -->",
+       "cited": false
+      },
+      {
+       "n": 192,
+       "text": "<mat-menu #reportsMenu=\"matMenu\" [overlapTrigger]=\"false\">",
+       "cited": false
+      },
+      {
+       "n": 193,
+       "text": "  <button mat-menu-item [routerLink]=\"['/reports']\" tabindex=\"0\" *mifosxHasPermission=\"'READ_REPORT'\">",
+       "cited": true
+      },
+      {
+       "n": 194,
+       "text": "    {{ 'labels.menus.All' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 195,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 196,
+       "text": "  <button mat-menu-item [routerLink]=\"['/reports', 'Client']\" tabindex=\"0\" *mifosxHasPermission=\"'READ_REPORT'\">",
+       "cited": false
+      },
+      {
+       "n": 197,
+       "text": "    {{ 'labels.menus.Clients' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 198,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 199,
+       "text": "  <button mat-menu-item [routerLink]=\"['/reports', 'Loan']\" tabindex=\"0\" *mifosxHasPermission=\"'READ_REPORT'\">",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/reports/run-report/run-report.component.html:208",
+     "lines": [
+      {
+       "n": 202,
+       "text": "          </div>",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "        </div>",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "      </div>",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 206,
+       "text": "      <div class=\"card-foot\">",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "        <div class=\"right\">",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "          <button type=\"button\" class=\"btn btn-ghost\" [routerLink]=\"['/reports']\">",
+       "cited": true
+      },
+      {
+       "n": 209,
+       "text": "            {{ 'labels.buttons.Cancel' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "          </button>",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "          @if (isTableReport()) {",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "            <button",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "              type=\"button\"",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "              class=\"btn btn-outline\"",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/system/system.component.html:367",
+     "lines": [
+      {
+       "n": 361,
+       "text": "                }",
+       "cited": false
+      },
+      {
+       "n": 362,
+       "text": "              </div>",
+       "cited": false
+      },
+      {
+       "n": 363,
+       "text": "            </div>",
+       "cited": false
+      },
+      {
+       "n": 364,
+       "text": "          </mat-list-item>",
+       "cited": false
+      },
+      {
+       "n": 365,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 366,
+       "text": "          <div #manageReports>",
+       "cited": false
+      },
+      {
+       "n": 367,
+       "text": "            <mat-list-item [routerLink]=\"['reports']\">",
+       "cited": true
+      },
+      {
+       "n": 368,
+       "text": "              <div class=\"menu-list-item-content\">",
+       "cited": false
+      },
+      {
+       "n": 369,
+       "text": "                <div class=\"menu-left-section\" [routerLink]=\"['reports']\">",
+       "cited": false
+      },
+      {
+       "n": 370,
+       "text": "                  <mat-icon matListIcon>",
+       "cited": false
+      },
+      {
+       "n": 371,
+       "text": "                    <fa-icon icon=\"file-word\" size=\"sm\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 372,
+       "text": "                  </mat-icon>",
+       "cited": false
+      },
+      {
+       "n": 373,
+       "text": "                  <div matLine>",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/system/system.component.html:369",
+     "lines": [
+      {
+       "n": 363,
+       "text": "            </div>",
+       "cited": false
+      },
+      {
+       "n": 364,
+       "text": "          </mat-list-item>",
+       "cited": false
+      },
+      {
+       "n": 365,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 366,
+       "text": "          <div #manageReports>",
+       "cited": false
+      },
+      {
+       "n": 367,
+       "text": "            <mat-list-item [routerLink]=\"['reports']\">",
+       "cited": false
+      },
+      {
+       "n": 368,
+       "text": "              <div class=\"menu-list-item-content\">",
+       "cited": false
+      },
+      {
+       "n": 369,
+       "text": "                <div class=\"menu-left-section\" [routerLink]=\"['reports']\">",
+       "cited": true
+      },
+      {
+       "n": 370,
+       "text": "                  <mat-icon matListIcon>",
+       "cited": false
+      },
+      {
+       "n": 371,
+       "text": "                    <fa-icon icon=\"file-word\" size=\"sm\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 372,
+       "text": "                  </mat-icon>",
+       "cited": false
+      },
+      {
+       "n": 373,
+       "text": "                  <div matLine>",
+       "cited": false
+      },
+      {
+       "n": 374,
+       "text": "                    {{ 'labels.heading.Manage Reports' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 375,
+       "text": "                    @if (arrowBooleans[9]) {",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/system/system.component.html:376",
+     "lines": [
+      {
+       "n": 370,
+       "text": "                  <mat-icon matListIcon>",
+       "cited": false
+      },
+      {
+       "n": 371,
+       "text": "                    <fa-icon icon=\"file-word\" size=\"sm\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 372,
+       "text": "                  </mat-icon>",
+       "cited": false
+      },
+      {
+       "n": 373,
+       "text": "                  <div matLine>",
+       "cited": false
+      },
+      {
+       "n": 374,
+       "text": "                    {{ 'labels.heading.Manage Reports' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 375,
+       "text": "                    @if (arrowBooleans[9]) {",
+       "cited": false
+      },
+      {
+       "n": 376,
+       "text": "                      <p matLine [routerLink]=\"['reports']\" class=\"menu-explanation\">",
+       "cited": true
+      },
+      {
+       "n": 377,
+       "text": "                        {{ 'labels.text.Add new report and classify reports' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 378,
+       "text": "                      </p>",
+       "cited": false
+      },
+      {
+       "n": 379,
+       "text": "                    }",
+       "cited": false
+      },
+      {
+       "n": 380,
+       "text": "                  </div>",
+       "cited": false
+      },
+      {
+       "n": 381,
+       "text": "                </div>",
+       "cited": false
+      },
+      {
+       "n": 382,
+       "text": "                <div class=\"menu-right-section\">",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bb26065cd5",
+   "app": "mifos",
+   "from": "/clients/:clientId/fixed-deposits-accounts/create",
+   "to": "/groups",
+   "title": "mifos · /clients/:clientId/fixed-deposits-accounts/create → /groups",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/core/shell/toolbar/toolbar.component.html:156",
+     "lines": [
+      {
+       "n": 150,
+       "text": "  <button mat-menu-item routerLink=\"/clients\" tabindex=\"0\" *mifosxHasPermission=\"'READ_CLIENT'\">",
+       "cited": false
+      },
+      {
+       "n": 151,
+       "text": "    {{ 'labels.menus.Clients' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 152,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 153,
+       "text": "  <button mat-menu-item routerLink=\"/loans\" tabindex=\"0\" *mifosxHasPermission=\"'READ_LOAN'\">",
+       "cited": false
+      },
+      {
+       "n": 154,
+       "text": "    {{ 'labels.menus.Loans' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 155,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 156,
+       "text": "  <button mat-menu-item routerLink=\"/groups\" tabindex=\"0\" *mifosxHasPermission=\"'READ_GROUP'\">",
+       "cited": true
+      },
+      {
+       "n": 157,
+       "text": "    {{ 'labels.menus.Groups' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 158,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 159,
+       "text": "  <button mat-menu-item routerLink=\"/centers\" tabindex=\"0\" *mifosxHasPermission=\"'READ_CENTER'\">",
+       "cited": false
+      },
+      {
+       "n": 160,
+       "text": "    {{ 'labels.menus.Centers' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 161,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 162,
+       "text": "  <span class=\"hide-lt-md\">",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "c14951f09f",
+   "app": "mifos",
+   "from": "/groups/:groupId/loans-accounts/:loanId/loan-documents",
+   "to": "/appusers",
+   "title": "mifos · /groups/:groupId/loans-accounts/:loanId/loan-documents → /appusers",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/core/shell/toolbar/toolbar.component.html:214",
+     "lines": [
+      {
+       "n": 208,
+       "text": "  <button mat-menu-item [routerLink]=\"['/reports', 'Accounting']\" tabindex=\"0\" *mifosxHasPermission=\"'READ_REPORT'\">",
+       "cited": false
+      },
+      {
+       "n": 209,
+       "text": "    {{ 'labels.menus.Accounting' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "</mat-menu>",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "<mat-menu #adminMenu=\"matMenu\" [overlapTrigger]=\"false\">",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "  <button mat-menu-item [routerLink]=\"['/appusers']\" tabindex=\"0\" *mifosxHasPermission=\"'READ_USER'\">",
+       "cited": true
+      },
+      {
+       "n": 215,
+       "text": "    {{ 'labels.menus.Users' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 216,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 217,
+       "text": "  <button mat-menu-item [routerLink]=\"['/organization']\" tabindex=\"0\" *mifosxHasPermission=\"'READ_OFFICE'\">",
+       "cited": false
+      },
+      {
+       "n": 218,
+       "text": "    {{ 'labels.menus.Organization' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 219,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 220,
+       "text": "  <button mat-menu-item [routerLink]=\"['/system']\" tabindex=\"0\" *mifosxHasPermission=\"'READ_CONFIGURATION'\">",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/users/view-user/view-user.component.html:14",
+     "lines": [
+      {
+       "n": 8,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "<div class=\"container m-b-20 layout-row layout-lt-md-column align-end gap-2percent\">",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "  <button mat-raised-button color=\"primary\" [routerLink]=\"['edit']\">",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "    <fa-icon icon=\"edit\" class=\"m-r-10\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "    {{ 'labels.buttons.Edit' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "  <button mat-raised-button color=\"warn\" (click)=\"delete()\">",
+       "cited": true
+      },
+      {
+       "n": 15,
+       "text": "    <fa-icon icon=\"trash\" class=\"m-r-10\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "    {{ 'labels.buttons.Delete' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "  <button mat-raised-button color=\"primary\" (click)=\"changeUserPassword()\">",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "    <fa-icon icon=\"cog\" class=\"m-r-10\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "    {{ 'labels.buttons.Change Password' | translate }}",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/users/view-user/view-user.component.html:18",
+     "lines": [
+      {
+       "n": 12,
+       "text": "    {{ 'labels.buttons.Edit' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "  <button mat-raised-button color=\"warn\" (click)=\"delete()\">",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "    <fa-icon icon=\"trash\" class=\"m-r-10\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "    {{ 'labels.buttons.Delete' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "  <button mat-raised-button color=\"primary\" (click)=\"changeUserPassword()\">",
+       "cited": true
+      },
+      {
+       "n": 19,
+       "text": "    <fa-icon icon=\"cog\" class=\"m-r-10\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "    {{ 'labels.buttons.Change Password' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "</div>",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "<div class=\"container\">",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/zitadel/users/edit-user/edit-user.component.html:12",
+     "lines": [
+      {
+       "n": 6,
+       "text": "  file, You can obtain one at http://mozilla.org/MPL/2.0/.",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "-->",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "<div class=\"container\">",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "  <mat-card>",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "    @if (editUserForm) {",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "      <form [formGroup]=\"editUserForm\" (ngSubmit)=\"submit()\">",
+       "cited": true
+      },
+      {
+       "n": 13,
+       "text": "        <mat-card-content>",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "          <div class=\"layout-row-wrap gap-2px responsive-column\">",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "            <mat-form-field class=\"flex-48\">",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "              <mat-label>{{ 'labels.inputs.Username' | translate }}</mat-label>",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "              <input matInput required formControlName=\"username\" readonline />",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "              @if (editUserForm.controls.username.hasError('required')) {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "c653808acd",
+   "app": "mifos",
+   "from": "/loans/:loanId/payment-rates",
+   "to": "/groups/:groupId/loans-accounts/:loanId/originators",
+   "title": "mifos · /loans/:loanId/payment-rates → /groups/:groupId/loans-accounts/:loanId/originators",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/loans/loans-view/loans-view.component.html:507",
+     "lines": [
+      {
+       "n": 501,
+       "text": "            #delinquencytags=\"routerLinkActive\"",
+       "cited": false
+      },
+      {
+       "n": 502,
+       "text": "            [active]=\"delinquencytags.isActive\"",
+       "cited": false
+      },
+      {
+       "n": 503,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 504,
+       "text": "            {{ 'labels.inputs.Delinquency Tags' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 505,
+       "text": "          </a>",
+       "cited": false
+      },
+      {
+       "n": 506,
+       "text": "        }",
+       "cited": false
+      },
+      {
+       "n": 507,
+       "text": "        <a",
+       "cited": true
+      },
+      {
+       "n": 508,
+       "text": "          mat-tab-link",
+       "cited": false
+      },
+      {
+       "n": 509,
+       "text": "          [routerLink]=\"['./originators']\"",
+       "cited": false
+      },
+      {
+       "n": 510,
+       "text": "          [queryParams]=\"{",
+       "cited": false
+      },
+      {
+       "n": 511,
+       "text": "            productType: loanProductService.productType.value",
+       "cited": false
+      },
+      {
+       "n": 512,
+       "text": "          }\"",
+       "cited": false
+      },
+      {
+       "n": 513,
+       "text": "          routerLinkActive",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:198",
+     "lines": [
+      {
+       "n": 192,
+       "text": "    switch (objectType) {",
+       "cited": false
+      },
+      {
+       "n": 193,
+       "text": "      case 'loan':",
+       "cited": false
+      },
+      {
+       "n": 194,
+       "text": "        this.notificationsService.getLoanAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 195,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 196,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 197,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 198,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/loans-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 199,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 200,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 201,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cafbe07b9f",
+   "app": "mifos",
+   "from": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+   "to": "/loans/:loanId/buy-down-fees",
+   "title": "mifos · /groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName → /loans/:loanId/buy-down-fees",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+     "lines": [
+      {
+       "n": 129,
+       "text": "   * Performs action button/option action.",
+       "cited": false
+      },
+      {
+       "n": 130,
+       "text": "   * @param name action name.",
+       "cited": false
+      },
+      {
+       "n": 131,
+       "text": "   */",
+       "cited": false
+      },
+      {
+       "n": 132,
+       "text": "  doAction(name: string): void {",
+       "cited": false
+      },
+      {
+       "n": 133,
+       "text": "    const transactionsPathIndex = this.router.url.indexOf('/transactions');",
+       "cited": false
+      },
+      {
+       "n": 134,
+       "text": "    const accountUrl = transactionsPathIndex > -1 ? this.router.url.slice(0, transactionsPathIndex) : this.router.url;",
+       "cited": false
+      },
+      {
+       "n": 135,
+       "text": "    this.router.navigateByUrl(`${accountUrl}/actions/${name}`);",
+       "cited": true
+      },
+      {
+       "n": 136,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 137,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 138,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cb98d7e7e6",
+   "app": "mifos",
+   "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/general",
+   "to": "/clients/:clientId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/edit",
+   "title": "mifos · /centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/general → /clients/:clientId/savings-accounts/:savingAccountId/transfer-funds/:standingInstructionsId/edit",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+     "lines": [
+      {
+       "n": 129,
+       "text": "   * Performs action button/option action.",
+       "cited": false
+      },
+      {
+       "n": 130,
+       "text": "   * @param name action name.",
+       "cited": false
+      },
+      {
+       "n": 131,
+       "text": "   */",
+       "cited": false
+      },
+      {
+       "n": 132,
+       "text": "  doAction(name: string): void {",
+       "cited": false
+      },
+      {
+       "n": 133,
+       "text": "    const transactionsPathIndex = this.router.url.indexOf('/transactions');",
+       "cited": false
+      },
+      {
+       "n": 134,
+       "text": "    const accountUrl = transactionsPathIndex > -1 ? this.router.url.slice(0, transactionsPathIndex) : this.router.url;",
+       "cited": false
+      },
+      {
+       "n": 135,
+       "text": "    this.router.navigateByUrl(`${accountUrl}/actions/${name}`);",
+       "cited": true
+      },
+      {
+       "n": 136,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 137,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 138,
+       "text": "",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+     "lines": [
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 206,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/savings-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 209,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "      case 'fixedDeposit':",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "        this.notificationsService.getFixedDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "d388489b37",
+   "app": "mifos",
+   "from": "/groups/:groupId/loans-accounts/:loanId/balances",
+   "to": "/groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/edit",
+   "title": "mifos · /groups/:groupId/loans-accounts/:loanId/balances → /groups/:groupId/savings-accounts/:savingAccountId/transactions/:id/edit",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:208",
+     "lines": [
+      {
+       "n": 202,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 203,
+       "text": "      case 'savingsAccount':",
+       "cited": false
+      },
+      {
+       "n": 204,
+       "text": "        this.notificationsService.getSavingsAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 205,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 206,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 207,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 208,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/savings-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 209,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "      case 'fixedDeposit':",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "        this.notificationsService.getFixedDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "d893dc4d5b",
+   "app": "mifos",
+   "from": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/standing-instructions-tab",
+   "to": "/appusers",
+   "title": "mifos · /clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/standing-instructions-tab → /appusers",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/core/shell/toolbar/toolbar.component.html:214",
+     "lines": [
+      {
+       "n": 208,
+       "text": "  <button mat-menu-item [routerLink]=\"['/reports', 'Accounting']\" tabindex=\"0\" *mifosxHasPermission=\"'READ_REPORT'\">",
+       "cited": false
+      },
+      {
+       "n": 209,
+       "text": "    {{ 'labels.menus.Accounting' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 210,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 211,
+       "text": "</mat-menu>",
+       "cited": false
+      },
+      {
+       "n": 212,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 213,
+       "text": "<mat-menu #adminMenu=\"matMenu\" [overlapTrigger]=\"false\">",
+       "cited": false
+      },
+      {
+       "n": 214,
+       "text": "  <button mat-menu-item [routerLink]=\"['/appusers']\" tabindex=\"0\" *mifosxHasPermission=\"'READ_USER'\">",
+       "cited": true
+      },
+      {
+       "n": 215,
+       "text": "    {{ 'labels.menus.Users' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 216,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 217,
+       "text": "  <button mat-menu-item [routerLink]=\"['/organization']\" tabindex=\"0\" *mifosxHasPermission=\"'READ_OFFICE'\">",
+       "cited": false
+      },
+      {
+       "n": 218,
+       "text": "    {{ 'labels.menus.Organization' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 219,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 220,
+       "text": "  <button mat-menu-item [routerLink]=\"['/system']\" tabindex=\"0\" *mifosxHasPermission=\"'READ_CONFIGURATION'\">",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/users/view-user/view-user.component.html:14",
+     "lines": [
+      {
+       "n": 8,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "<div class=\"container m-b-20 layout-row layout-lt-md-column align-end gap-2percent\">",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "  <button mat-raised-button color=\"primary\" [routerLink]=\"['edit']\">",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "    <fa-icon icon=\"edit\" class=\"m-r-10\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "    {{ 'labels.buttons.Edit' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "  <button mat-raised-button color=\"warn\" (click)=\"delete()\">",
+       "cited": true
+      },
+      {
+       "n": 15,
+       "text": "    <fa-icon icon=\"trash\" class=\"m-r-10\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "    {{ 'labels.buttons.Delete' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "  <button mat-raised-button color=\"primary\" (click)=\"changeUserPassword()\">",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "    <fa-icon icon=\"cog\" class=\"m-r-10\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "    {{ 'labels.buttons.Change Password' | translate }}",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/users/view-user/view-user.component.html:18",
+     "lines": [
+      {
+       "n": 12,
+       "text": "    {{ 'labels.buttons.Edit' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 13,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "  <button mat-raised-button color=\"warn\" (click)=\"delete()\">",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "    <fa-icon icon=\"trash\" class=\"m-r-10\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "    {{ 'labels.buttons.Delete' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "  <button mat-raised-button color=\"primary\" (click)=\"changeUserPassword()\">",
+       "cited": true
+      },
+      {
+       "n": 19,
+       "text": "    <fa-icon icon=\"cog\" class=\"m-r-10\"></fa-icon>",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "    {{ 'labels.buttons.Change Password' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "</div>",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "<div class=\"container\">",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/zitadel/users/edit-user/edit-user.component.html:12",
+     "lines": [
+      {
+       "n": 6,
+       "text": "  file, You can obtain one at http://mozilla.org/MPL/2.0/.",
+       "cited": false
+      },
+      {
+       "n": 7,
+       "text": "-->",
+       "cited": false
+      },
+      {
+       "n": 8,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 9,
+       "text": "<div class=\"container\">",
+       "cited": false
+      },
+      {
+       "n": 10,
+       "text": "  <mat-card>",
+       "cited": false
+      },
+      {
+       "n": 11,
+       "text": "    @if (editUserForm) {",
+       "cited": false
+      },
+      {
+       "n": 12,
+       "text": "      <form [formGroup]=\"editUserForm\" (ngSubmit)=\"submit()\">",
+       "cited": true
+      },
+      {
+       "n": 13,
+       "text": "        <mat-card-content>",
+       "cited": false
+      },
+      {
+       "n": 14,
+       "text": "          <div class=\"layout-row-wrap gap-2px responsive-column\">",
+       "cited": false
+      },
+      {
+       "n": 15,
+       "text": "            <mat-form-field class=\"flex-48\">",
+       "cited": false
+      },
+      {
+       "n": 16,
+       "text": "              <mat-label>{{ 'labels.inputs.Username' | translate }}</mat-label>",
+       "cited": false
+      },
+      {
+       "n": 17,
+       "text": "              <input matInput required formControlName=\"username\" readonline />",
+       "cited": false
+      },
+      {
+       "n": 18,
+       "text": "              @if (editUserForm.controls.username.hasError('required')) {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "e5db7225e9",
+   "app": "mifos",
+   "from": "/centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+   "to": "/loans/:loanId/transactions/:id/edit",
+   "title": "mifos · /centers/:centerId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName → /loans/:loanId/transactions/:id/edit",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+     "lines": [
+      {
+       "n": 129,
+       "text": "   * Performs action button/option action.",
+       "cited": false
+      },
+      {
+       "n": 130,
+       "text": "   * @param name action name.",
+       "cited": false
+      },
+      {
+       "n": 131,
+       "text": "   */",
+       "cited": false
+      },
+      {
+       "n": 132,
+       "text": "  doAction(name: string): void {",
+       "cited": false
+      },
+      {
+       "n": 133,
+       "text": "    const transactionsPathIndex = this.router.url.indexOf('/transactions');",
+       "cited": false
+      },
+      {
+       "n": 134,
+       "text": "    const accountUrl = transactionsPathIndex > -1 ? this.router.url.slice(0, transactionsPathIndex) : this.router.url;",
+       "cited": false
+      },
+      {
+       "n": 135,
+       "text": "    this.router.navigateByUrl(`${accountUrl}/actions/${name}`);",
+       "cited": true
+      },
+      {
+       "n": 136,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 137,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 138,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "e9daf733a2",
+   "app": "airbus-inventory",
+   "from": "/dashboard",
+   "to": "/update",
+   "title": "airbus-inventory · /dashboard → /update",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/Akash-goyal-github__Inventory-Management-System/AirbusInventory"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/get-all-products/get-all-products.component.html:60",
+     "lines": [
+      {
+       "n": 54,
+       "text": "            </td>",
+       "cited": false
+      },
+      {
+       "n": 55,
+       "text": "            <td>",
+       "cited": false
+      },
+      {
+       "n": 56,
+       "text": "                {{product.units}}",
+       "cited": false
+      },
+      {
+       "n": 57,
+       "text": "            </td>       ",
+       "cited": false
+      },
+      {
+       "n": 58,
+       "text": "            ",
+       "cited": false
+      },
+      {
+       "n": 59,
+       "text": "            <td>",
+       "cited": false
+      },
+      {
+       "n": 60,
+       "text": "                <span class=\"material-icons edit\" (click)=\"updateProduct(product)\">",
+       "cited": true
+      },
+      {
+       "n": 61,
+       "text": "                        border_color",
+       "cited": false
+      },
+      {
+       "n": 62,
+       "text": "                    </span>",
+       "cited": false
+      },
+      {
+       "n": 63,
+       "text": "            </td>    ",
+       "cited": false
+      },
+      {
+       "n": 64,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 65,
+       "text": "            <td>",
+       "cited": false
+      },
+      {
+       "n": 66,
+       "text": "                <span class=\"material-icons delete\" (click)=\"deleteProduct(product.productId)\">",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/services/router.service.ts:24",
+     "lines": [
+      {
+       "n": 18,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 19,
+       "text": "  routeToAllProduct(){",
+       "cited": false
+      },
+      {
+       "n": 20,
+       "text": "    this.router.navigate(['getAllProducts']);",
+       "cited": false
+      },
+      {
+       "n": 21,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "  routeToUpdateProduct(){",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "    this.router.navigate(['update']);",
+       "cited": true
+      },
+      {
+       "n": 25,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "eaa5f3906e",
+   "app": "mifos",
+   "from": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/list-standing-instructions",
+   "to": "/centers",
+   "title": "mifos · /clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/transfer-funds/list-standing-instructions → /centers",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/core/shell/toolbar/toolbar.component.html:159",
+     "lines": [
+      {
+       "n": 153,
+       "text": "  <button mat-menu-item routerLink=\"/loans\" tabindex=\"0\" *mifosxHasPermission=\"'READ_LOAN'\">",
+       "cited": false
+      },
+      {
+       "n": 154,
+       "text": "    {{ 'labels.menus.Loans' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 155,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 156,
+       "text": "  <button mat-menu-item routerLink=\"/groups\" tabindex=\"0\" *mifosxHasPermission=\"'READ_GROUP'\">",
+       "cited": false
+      },
+      {
+       "n": 157,
+       "text": "    {{ 'labels.menus.Groups' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 158,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 159,
+       "text": "  <button mat-menu-item routerLink=\"/centers\" tabindex=\"0\" *mifosxHasPermission=\"'READ_CENTER'\">",
+       "cited": true
+      },
+      {
+       "n": 160,
+       "text": "    {{ 'labels.menus.Centers' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 161,
+       "text": "  </button>",
+       "cited": false
+      },
+      {
+       "n": 162,
+       "text": "  <span class=\"hide-lt-md\">",
+       "cited": false
+      },
+      {
+       "n": 163,
+       "text": "    <button",
+       "cited": false
+      },
+      {
+       "n": 164,
+       "text": "      mat-menu-item",
+       "cited": false
+      },
+      {
+       "n": 165,
+       "text": "      [routerLink]=\"['/accounting']\"",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "f071c12436",
+   "app": "mifos",
+   "from": "/organization/exchange-rates/convert",
+   "to": "/clients/:clientId/shares-accounts/create",
+   "title": "mifos · /organization/exchange-rates/convert → /clients/:clientId/shares-accounts/create",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:238",
+     "lines": [
+      {
+       "n": 232,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 233,
+       "text": "      case 'shareAccount':",
+       "cited": false
+      },
+      {
+       "n": 234,
+       "text": "        this.notificationsService.getShareAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 235,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 236,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 237,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 238,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/shares-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 239,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 240,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 241,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 242,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 243,
+       "text": "      default:",
+       "cited": false
+      },
+      {
+       "n": 244,
+       "text": "        // Fallback to old behavior for unknown types",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "f78415e6fb",
+   "app": "mifos",
+   "from": "/clients/:clientId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName",
+   "to": "/clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/standing-instructions/make-account-transfer",
+   "title": "mifos · /clients/:clientId/savings-accounts/:savingAccountId/transactions/:id/datatables/:datatableName → /clients/:clientId/recurring-deposits-accounts/:recurringDepositAccountId/standing-instructions/make-account-transfer",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/savings/savings-account-view/transactions/view-transaction/view-transaction.component.ts:135",
+     "lines": [
+      {
+       "n": 129,
+       "text": "   * Performs action button/option action.",
+       "cited": false
+      },
+      {
+       "n": 130,
+       "text": "   * @param name action name.",
+       "cited": false
+      },
+      {
+       "n": 131,
+       "text": "   */",
+       "cited": false
+      },
+      {
+       "n": 132,
+       "text": "  doAction(name: string): void {",
+       "cited": false
+      },
+      {
+       "n": 133,
+       "text": "    const transactionsPathIndex = this.router.url.indexOf('/transactions');",
+       "cited": false
+      },
+      {
+       "n": 134,
+       "text": "    const accountUrl = transactionsPathIndex > -1 ? this.router.url.slice(0, transactionsPathIndex) : this.router.url;",
+       "cited": false
+      },
+      {
+       "n": 135,
+       "text": "    this.router.navigateByUrl(`${accountUrl}/actions/${name}`);",
+       "cited": true
+      },
+      {
+       "n": 136,
+       "text": "  }",
+       "cited": false
+      },
+      {
+       "n": 137,
+       "text": "}",
+       "cited": false
+      },
+      {
+       "n": 138,
+       "text": "",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/shared/notifications-tray/notifications-tray.component.ts:228",
+     "lines": [
+      {
+       "n": 222,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 223,
+       "text": "      case 'recurringDepositAccount':",
+       "cited": false
+      },
+      {
+       "n": 224,
+       "text": "        this.notificationsService.getRecurringDepositAccount(objectId).subscribe((account) => {",
+       "cited": false
+      },
+      {
+       "n": 225,
+       "text": "          if (account && (account.clientId || account.groupId)) {",
+       "cited": false
+      },
+      {
+       "n": 226,
+       "text": "            const entityType = account.clientId ? 'clients' : 'groups';",
+       "cited": false
+      },
+      {
+       "n": 227,
+       "text": "            const entityId = account.clientId || account.groupId;",
+       "cited": false
+      },
+      {
+       "n": 228,
+       "text": "            this.router.navigate([`/${entityType}/${entityId}/recurring-deposits-accounts/${account.accountId}`]);",
+       "cited": true
+      },
+      {
+       "n": 229,
+       "text": "          }",
+       "cited": false
+      },
+      {
+       "n": 230,
+       "text": "        });",
+       "cited": false
+      },
+      {
+       "n": 231,
+       "text": "        break;",
+       "cited": false
+      },
+      {
+       "n": 232,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 233,
+       "text": "      case 'shareAccount':",
+       "cited": false
+      },
+      {
+       "n": 234,
+       "text": "        this.notificationsService.getShareAccount(objectId).subscribe((account) => {",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fade3ab7d0",
+   "app": "ever-traduora",
+   "from": "/projects/:projectId",
+   "to": "/projects/:projectId/export",
+   "title": "ever-traduora · /projects/:projectId → /projects/:projectId/export",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/rima/src/parsaalian__autoe2e/benchmark/ever-traduora/webapp"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/projects/components/project-container/project-container.component.html:72",
+     "lines": [
+      {
+       "n": 66,
+       "text": "            routerLinkActive=\"active\"",
+       "cited": false
+      },
+      {
+       "n": 67,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 68,
+       "text": "            <i class=\"material-icons mr-1\">note_add</i>",
+       "cited": false
+      },
+      {
+       "n": 69,
+       "text": "            <ng-container >Import</ng-container>",
+       "cited": false
+      },
+      {
+       "n": 70,
+       "text": "          </a>",
+       "cited": false
+      },
+      {
+       "n": 71,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 72,
+       "text": "          <a",
+       "cited": true
+      },
+      {
+       "n": 73,
+       "text": "            class=\"nav-item nav-link text-sm px-3 mb-1 d-flex justify-content-start align-items-center\"",
+       "cited": false
+      },
+      {
+       "n": 74,
+       "text": "            routerLink=\"export\"",
+       "cited": false
+      },
+      {
+       "n": 75,
+       "text": "            routerLinkActive=\"active\"",
+       "cited": false
+      },
+      {
+       "n": 76,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 77,
+       "text": "            <i class=\"material-icons mr-1\">get_app</i>",
+       "cited": false
+      },
+      {
+       "n": 78,
+       "text": "            <ng-container >Export</ng-container></a",
+       "cited": false
+      }
+     ]
+    },
+    {
+     "label": "src/app/projects/components/project-container/project-container.component.html:74",
+     "lines": [
+      {
+       "n": 68,
+       "text": "            <i class=\"material-icons mr-1\">note_add</i>",
+       "cited": false
+      },
+      {
+       "n": 69,
+       "text": "            <ng-container >Import</ng-container>",
+       "cited": false
+      },
+      {
+       "n": 70,
+       "text": "          </a>",
+       "cited": false
+      },
+      {
+       "n": 71,
+       "text": "",
+       "cited": false
+      },
+      {
+       "n": 72,
+       "text": "          <a",
+       "cited": false
+      },
+      {
+       "n": 73,
+       "text": "            class=\"nav-item nav-link text-sm px-3 mb-1 d-flex justify-content-start align-items-center\"",
+       "cited": false
+      },
+      {
+       "n": 74,
+       "text": "            routerLink=\"export\"",
+       "cited": true
+      },
+      {
+       "n": 75,
+       "text": "            routerLinkActive=\"active\"",
+       "cited": false
+      },
+      {
+       "n": 76,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 77,
+       "text": "            <i class=\"material-icons mr-1\">get_app</i>",
+       "cited": false
+      },
+      {
+       "n": 78,
+       "text": "            <ng-container >Export</ng-container></a",
+       "cited": false
+      },
+      {
+       "n": 79,
+       "text": "          >",
+       "cited": false
+      },
+      {
+       "n": 80,
+       "text": "",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ff87c7fa65",
+   "app": "mifos",
+   "from": "/checker-inbox-and-tasks/loan-approval",
+   "to": "/checker-inbox-and-tasks/client-approval",
+   "title": "mifos · /checker-inbox-and-tasks/loan-approval → /checker-inbox-and-tasks/client-approval",
+   "claim": "Claim: a user on {from} can trigger a navigation that lands on {to}.",
+   "context": [
+    "Application directory: ~/personal/uigraph-work/corpus/mifos"
+   ],
+   "blocks": [
+    {
+     "label": "src/app/tasks/checker-inbox-and-tasks/checker-inbox-and-tasks.component.html:27",
+     "lines": [
+      {
+       "n": 21,
+       "text": "          *mifosxHasPermission=\"['ALL_FUNCTIONS_READ', 'READ_MAKERCHECKER', 'APPROVE_LOAN', 'APPROVE_LOAN_CHECKER']\"",
+       "cited": false
+      },
+      {
+       "n": 22,
+       "text": "        >",
+       "cited": false
+      },
+      {
+       "n": 23,
+       "text": "          {{ 'labels.inputs.Checker Inbox' | translate }}",
+       "cited": false
+      },
+      {
+       "n": 24,
+       "text": "        </a>",
+       "cited": false
+      },
+      {
+       "n": 25,
+       "text": "        <a",
+       "cited": false
+      },
+      {
+       "n": 26,
+       "text": "          mat-tab-link",
+       "cited": false
+      },
+      {
+       "n": 27,
+       "text": "          [routerLink]=\"['./client-approval']\"",
+       "cited": true
+      },
+      {
+       "n": 28,
+       "text": "          routerLinkActive",
+       "cited": false
+      },
+      {
+       "n": 29,
+       "text": "          #clientApproval=\"routerLinkActive\"",
+       "cited": false
+      },
+      {
+       "n": 30,
+       "text": "          [active]=\"clientApproval.isActive\"",
+       "cited": false
+      },
+      {
+       "n": 31,
+       "text": "          *mifosxHasPermission=\"'READ_CLIENT'\"",
+       "cited": false
+      },
+      {
+       "n": 32,
+       "text": "        >",
+       "cited": false
+      },
+      {
+       "n": 33,
+       "text": "          {{ 'labels.inputs.Client Approval' | translate }}",
+       "cited": false
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
