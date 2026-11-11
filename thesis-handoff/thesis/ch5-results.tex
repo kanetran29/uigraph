@@ -70,24 +70,16 @@ The two readers still disagree about a handful of addresses. Two qualifications 
 
 \begin{itemize}
 \item The denominator is the screens a \emph{static reader} can enumerate. Against the addresses
-the running framework mounts, the same node set is \ProbeNodes{}/\ProbeScreens{}. Almost all of the difference is one construct in one application
-that the extractor declares unread.
+the running framework mounts, the node set is incomplete, as the runtime route oracle below shows.
 \item The two static readers were partly corrected against each other, so their agreement is weaker evidence. The runtime route oracle is the external
 check, and it finds no node at an address where the framework mounts nothing.
 \end{itemize}
-
-\paragraph{The node set.} The number of screens the compared graph declares at unmounted
-addresses is \ProbeInvented{}. Every claimed address appears in the framework configuration. That
-match is external evidence for the six applications, because static readers can agree on an
-incorrect prefix. Node validity is a precondition of the must-tier property rather than part of it. The address-based census excludes named
-outlets and \texttt{UrlMatcher} entries (\ProbeUnaddressableScreens{} route entries) from both columns.
 
 \paragraph{The runtime route oracle.}\label{sec:res-probe} The oracle loads each application,
 built in its development configuration, in a headless browser. It reads the live router's route
 configuration after expanding every lazily loaded subtree. An address counts as mounted when the
 configuration places a component there on the primary outlet. The oracle parses no route file. Of the
-\ProbeScreens{} mounted addresses, the graph represents \ProbeNodes{}/\ProbeScreens{}. The
-\ProbeMissed{} missing addresses are leaf screens. Besides them, the mounted addresses without a
+\ProbeScreens{} mounted addresses, \ProbeMissed{} have no node, and these are leaf screens. Besides them, the mounted addresses without a
 node include prefixes, which are not missing screens: \ProbeMissedPrefixRedirect{} with a redirect
 into the subtree below and \ProbeMissedPrefixUnanswered{} with a layout alone,
 \ProbeMissedPrefixOnly{} in all.
@@ -100,6 +92,11 @@ and address sets on \ProbeFinalSame{} of the \ProbeFinalApps{} applications. The
 \ProbeAnswerAgreed{}/\ProbeAnswerChecked{} addresses, and the \ProbeMissed{} missing addresses were
 not checked individually.
 
+\paragraph{The node set.} The number of screens the compared graph declares at unmounted
+addresses is \ProbeInvented{}. Every claimed address appears in the framework configuration. That
+match is external evidence for the six applications, because static readers can agree on an
+incorrect prefix. Node validity is a precondition of the must-tier property rather than part of it. The address-based census excludes named
+outlets and \texttt{UrlMatcher} entries (\ProbeUnaddressableScreens{} route entries) from both columns.
 
 This completeness concerns only resolvable screens. Blind-spot counts identify but do not bound
 omissions: one unresolved route entry can conceal many screens.
@@ -179,7 +176,7 @@ Five classes were identified during development, each with at least two confirma
 nodes unlinked to their rendering component, has only the parser--graph comparison as evidence.
 It remains a candidate and has no instances in the final version.
 
-\begin{table}[t]\footnotesize
+\begin{table}[ht]\footnotesize
 \caption{Defect classes and the evidence for each.}
 \label{tab:defects}
 \begin{tabularx}{\textwidth}{@{}p{0.27\textwidth}Yrr@{}}
@@ -211,9 +208,7 @@ Table~\ref{tab:defects}; guards are assessed separately (Section~\ref{sec:metric
 \par\smallskip{\footnotesize\noindent\emph{Note.} Columns: realworld, alfresco, ghostfolio, k8s dashboard, bitwarden, mifos. All rows are measured on the final snapshot with attribution disabled.}
 \end{table}
 
-Under the loss rules' precedence, attribution is the largest loss category in every application.
-The two attribution categories contain \AttrLost{} of \RoundTwoInScopeAll{} constructs; no other
-loss category contains a tenth as many. Unresolved destinations are counted separately (Table~\ref{tab:loss}).
+No other loss category contains a tenth as many constructs as the two attribution categories. Unresolved destinations are counted separately (Table~\ref{tab:loss}).
 
 Ownership is tested before the target. Among attribution losses, \AttrNonLiteral{} targets fail the
 literal test; reversing this order would make target losses larger than attribution on
@@ -254,7 +249,7 @@ origins do not count as recovery.
 \par\smallskip{\footnotesize\noindent\emph{Note.} First, the constructs assigned to attribution in the baseline and how many recover onto must or may, the measure of RQ3. Then must conversion (RQ1) in per cent and its change in percentage points, and must-tier edges whose destination the witness check read and passed; a construct's tier is the modality its own witness earns. The remaining must edges are unread destinations, all \MustWitnessUnread{} of them on k8s dashboard, which are neither passes nor failures; no edge failed. Constructs converted from other baseline categories are in Table~\ref{tab:recovery-source}.}
 \end{table}
 
-Attribution recovers \AttrRecovered{}/\AttrLost{} assigned constructs: a per-application median of
+The per-application median is
 \AttrRecoveredMedian{} (range \AttrRecoveredRange{}) and a pooled share of \AttrRecoveredShare{}.
 Most recoveries occur on mifos. Excluding it reduces the share to \AttrRecoveredShareNoMifos{}, and
 recovery stays under half on \AttrUnderHalfApps{} of the six applications. Edge counts rise from
@@ -275,8 +270,9 @@ conversion rises on \AttrAppsGained{} of the six applications. The must construc
 constructs that the baseline already converted at may and attribution raises to must. The recovery count does not include them.
 
 Counted in edges, the must tier grows from \AttrMustBefore{} to \AttrMustAfter{}.
-The edges added are the links of two application shells, drawn once for each screen the shell
-renders (Section~\ref{sec:res-round2}).
+The edges added are the links of navigation components that several screens render (the header and
+footer of one application, the toolbar of another and a tab bar in a third), drawn once for each
+screen that renders the component (Section~\ref{sec:res-soundness}).
 
 Construct identifiers are tracked across the two runs. The number of conversion regressions they
 show is \AttrRegressed{}, and the number of must-to-may demotions is \AttrDemoted{}. No baseline
@@ -336,7 +332,7 @@ node.
 \paragraph{What the attribution discriminates.}
 \label{sec:res-width}
 
-Since the rendered-interface check cannot establish over-attribution, Table~\ref{tab:scopebaseline}
+The rendered-interface check (Section~\ref{sec:res-scope}) cannot establish over-attribution, so Table~\ref{tab:scopebaseline}
 compares computed scopes with assigning every represented site to every screen. This widest
 assignment places sites but neither resolves unknown targets nor adds missing destinations, and it
 does not recover every construct. The ratio measures how much the analysis narrows source scopes.
@@ -508,10 +504,9 @@ levels, but is less precise than both those levels and the class join.
   every screen whose components inject it, but its only caller is a button on the settings screen.
 \item \emph{An AI assistant built the alfresco reference without the graph,} using realworld's rules
   under a protocol committed before scoring (\path{ground-truth/ALFRESCO-PROTOCOL.txt}).
-  \GTAlfUndetermined{} undetermined sites are not scored. Afterwards, a second assistant run read the four lines
-  that the scorer reported as placed but unlisted, using only line numbers and no graph placements
-  (Table~\ref{tab:ai-readings}). None was a navigation site. They were added to the reference as excluded; no figure changes
-  because unlisted lines are not scored (cf.~Appendix~\ref{app:deviations}).
+  \GTAlfUndetermined{} undetermined sites are not scored. A second assistant run read the four lines
+  that the scorer placed but the reference did not list, and they were added to the reference as
+  excluded; no figure changes (Table~\ref{tab:ai-readings}, Appendix~\ref{app:deviations}).
 \item \emph{A configuration-driven site accounts for all full-level excess on alfresco.}
   The number of sites with full-level excess is \GTAlfFullExcessSites{}:
   \texttt{navigateToSearch} produces all \GTAlfFullExcess{} excess pairs. Its only caller is an
@@ -679,7 +674,7 @@ commits, so each subject uses its last commit before its ground-truth date. The 
 assessed both comparisons, and a stronger model reassessed a gated subset (Table~\ref{tab:ai-readings}).
 
 The preregistered unit is a reference pair: when an entry's terminal differs from every start
-route, each start is paired with the terminal. The paper reports that every
+route, each start is paired with the terminal. The chapter reports that every
 workflow their tool enumerates matches this ground truth, so the reference is not independent of
 their tool. Their published measure is
 test-execution success rather than graph recall. This comparison therefore measures how many of

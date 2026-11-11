@@ -37,14 +37,14 @@ edge relation. An \emph{unplaced origin} represents a component and navigation s
 could not be assigned to a screen. A \emph{dynamic target} represents an unresolved
 destination. These preserve unplaced sites, which the loss counts need, and unresolved destinations that may
 still occur at run time. An edge from an unplaced origin is labelled \emph{may}, or \emph{unknown}
-if it reaches a dynamic target, and counts in its tier although, with a nonscreen source, it lies outside $E$. An edge to a dynamic target records outgoing navigation without identifying the destination
+if it reaches a dynamic target, and counts in its tier although, with a nonscreen source, it lies outside $E$. An edge to a dynamic target likewise lies outside $E$, since its target is no screen; it records outgoing navigation without identifying the destination
 screen. Claim~\ref{claim:must} and must conversion (RQ1) concern only edges between screens.
 
 \textbf{Modalities.} A \emph{must} edge is claimed to fire for every input on which the
 enclosing code executes. A \emph{may} edge is possible but conditional. \emph{Unknown} marks an
 edge whose modality could not be determined, including unresolved destinations. The
 extractor uses it for exactly the edges to a dynamic target, the \texttt{u\_}\,sink that records
-events with unresolved targets. Unknown edges count towards totals
+events with unresolved targets. Unknown edges lie outside $E$, because their target is not a screen; they count towards totals
 but towards no rate. The model also assigns \emph{unknown} to navigation inside signal effects
 (Section~\ref{sec:boundary}), but this version emits none.
 
