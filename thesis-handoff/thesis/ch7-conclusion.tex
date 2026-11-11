@@ -9,8 +9,8 @@ edges hold only under the assumptions of Claim~\ref{claim:must} (Section~\ref{se
 \item[RQ2] Extraction fails mostly at the edge, in placing navigation on the screens it fires from
 (Section~\ref{sec:rq2}).
 \item[RQ3] Scope attribution recovers a median of \AttrRecoveredMedian{} of the constructs lost to
-attribution, almost all as may edges; on the alfresco reference its added step trades precision
-for recall (Section~\ref{sec:rq3}).
+attribution, almost all as may edges and mostly through the simpler levels; the most elaborate step adds
+little and, on the alfresco reference, trades precision for recall (Section~\ref{sec:rq3}).
 \item[RQ4] The graph responded to all \MutScored{} scored mutants in the constructs it represents;
 change-impact accuracy is unmeasured (Section~\ref{sec:rq4}).
 \item[RQ5] The explained losses are mostly the extractor's; two causes lie beyond any reader of a route table, and
@@ -33,9 +33,9 @@ on two applications only, against references that apply the analysis's own relat
 Rendered-interface checks covered only screens reachable without signing in; the rest
 needs signed-in execution (Section~\ref{sec:future}). Consumer benefit is unmeasured.
 
-Part of the evidence rests on AI readings: the AI assistant checked the must tier against the source, and two readings by one model family
-measure consistency rather than correctness. A runtime check that rests on no reading then clicked
-\MustRunConfirmedConstructs{} of its constructs with one input per check and found no failure
+Part of the evidence rests on AI readings by one model family, which measure consistency rather
+than correctness; for the must tier, a runtime check then clicked \MustRunConfirmedConstructs{} of
+the \CensusMustSites{} must constructs, one input per check, and found no failure
 (Section~\ref{sec:res-soundness}). The
 comparison with Rima et al.'s tool uses small AI-read samples, and I agreed with
 \HHAuthorAgree{} of the \HHAuthorJudged{} cases I re-read (Section~\ref{sec:res-h2h}).

@@ -75,27 +75,31 @@ can recover.
 \label{sec:rq3}
 
 Scope attribution recovers a per-application median of \AttrRecoveredMedian{} (range
-\AttrRecoveredRange{}) of the constructs lost to attribution, and \AttrRecoveredShare{} pooled. On the one reference that can tell, the step above \emph{outlet} lowers precision, and no check
-establishes that the computed scopes are not too large.
+\AttrRecoveredRange{}) of the constructs lost to attribution, and \AttrRecoveredShare{} pooled. The
+main finding is where that recovery comes from: the simpler levels place most of it, and the most
+elaborate level adds little; only \AttrServiceRecovered{} of the \AttrRecovered{} recovered
+constructs lie outside components (Table~\ref{tab:recovery-source}).
 
 Scope attribution is one model whose lower levels reimplement the mechanisms of earlier work: the
 shell rule is the \emph{rooted} level, and the rule of Rima et al.\ that activates the
 components of a route and its ancestors is the \emph{outlet} level (Section~\ref{sec:res-compare}).
-By sites, the levels below \emph{full} place most of the sites added above \emph{owned}: nesting adds
-\AblationNestingAddedSites{}, rooted \AblationRootedAddedSites{}, outlet \AblationOutletAddedSites{}
-and full \AblationFullAddedSites{} (Table~\ref{tab:ablation}). The step above \emph{outlet} places navigation that
-belongs to no component, in services, guards and effects, which no lower level can place on a
-screen. On alfresco, the one structural reference with enough service navigation to tell, the step
-raises recall and lowers precision below that of the lower levels and of the \emph{class} level
-(Section~\ref{sec:res-groundtruth}). Across the six applications, \emph{full} places
-\AblationFullOnlyPairs{} pairs that the \emph{class} level lacks, and the \emph{class} level
-\AblationClassOnlyPairs{} that \emph{full} lacks (Section~\ref{sec:res-ablation}). On the two applications with suites, it adds no transition the
-suites exercised beyond \emph{outlet} (Section~\ref{sec:res-earlier}). Most recovered constructs
-earn may, so attribution raises must conversion little (Section~\ref{sec:res-after}). The
-contribution of scope attribution is therefore one model that contains the mechanisms of earlier
-work as levels, and a measurement of what each level adds: by sites, most of the gain lies in the
-levels below \emph{full}, and only the step above \emph{outlet} places navigation outside components, at a cost in
-precision.
+By sites, nesting adds \AblationNestingAddedSites{} above \emph{owned}, rooted
+\AblationRootedAddedSites{}, outlet \AblationOutletAddedSites{} and full \AblationFullAddedSites{}
+(Table~\ref{tab:ablation}). Of the nested levels, only \emph{full} places navigation that belongs to no
+component, in services, guards and effects. On alfresco, the one structural reference with enough
+such navigation to tell, it raises recall and lowers precision below that of the lower levels and
+of the \emph{class} level (Section~\ref{sec:res-groundtruth}); on the two applications with suites,
+it adds no transition the suites exercised beyond \emph{outlet} (Section~\ref{sec:res-earlier}).
+Most recovered constructs earn may, so attribution raises must conversion little; its largest
+effect on the must tier, counted in edges, is to raise the k8s dashboard toolbar from may to must
+(Section~\ref{sec:res-after}).
+
+For a tool builder, this means that rules over components alone, up to \emph{outlet}, recover
+most of what attribution can, while the step to \emph{full} pays off only in applications that
+navigate from services, guards or effects, and on alfresco it costs precision. Apart from the
+must constructs clicked at run time, no check establishes that the computed scopes are not too
+large. The contribution of scope attribution is therefore one model that contains the mechanisms of
+earlier work as levels, and a measurement of which of them carries the gain.
 
 \subsubsection{RQ4: response to source changes}
 \label{sec:rq4}
@@ -476,7 +480,7 @@ Priorities, ordered by their potential effect on the claims, are:
 
 Three implications follow for static extraction of UI transition graphs. A route table alone is not
 enough: under the loss rules' precedence attribution is the largest loss category, and by sites, most of the sites added above \emph{owned} come from the
-levels below \emph{full}. Deterministic transitions are rare, so may edges are
+levels below \emph{full}, which attribute through components alone. Deterministic transitions are rare, so may edges are
 candidates for runtime confirmation rather than transitions. An evaluation should report losses
 construct by construct and check computed scopes in both directions, which this study could do only
 in part. The heaviest threat to the answers of Section~\ref{sec:findings} is that every corpus figure is
