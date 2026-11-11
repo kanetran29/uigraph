@@ -668,8 +668,9 @@ Over-attribution can pass witness checks, and the suites test omissions alone.
 \paragraph{On the applications of Rima et al.}
 \label{sec:res-rima}
 
-Rima et al.\ publish seven Angular subjects with ground truths. Each ground truth is a set of
-enumerated workflows with manually annotated start and terminal routes \cite{rima2026e2e}. None of
+Rima et al.\ publish seven Angular subjects with ground truths. Each ground truth lists enumerated
+workflows with their start and terminal routes; a single auditor built it from the source and
+checked it against their tool's artifacts \cite{rima2026e2e}. None of
 the subjects was used in extractor development. Two preregistered comparisons use them. The first
 is this thesis's only out-of-sample measurement: preregistration preceded the scorer and the
 results, and the extractor was frozen before extraction. The second uses the extractor repaired
@@ -678,8 +679,9 @@ commits, so each subject uses its last commit before its ground-truth date. The 
 assessed both comparisons, and a stronger model reassessed a gated subset (Table~\ref{tab:ai-readings}).
 
 The preregistered unit is a reference pair: when an entry's terminal differs from every start
-route, each start is paired with the terminal. Their tool contains every reference pair by
-construction, because its output generated the reference. Their published measure is
+route, each start is paired with the terminal. The paper reports that every
+workflow their tool enumerates matches this ground truth, so the reference is not independent of
+their tool. Their published measure is
 test-execution success rather than graph recall. This comparison therefore measures how many of
 their pipeline's pairs the graph contains and examines the graph's additional pairs. It does not
 rank the tools.

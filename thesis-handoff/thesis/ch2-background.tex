@@ -137,16 +137,15 @@ Two recent works statically analyse client-side router configuration for other p
 Rima et al.\ parse Angular sources and templates into a graph of navigation, interaction
 sites and execution conditions, including guards. They compile workflows enumerated from
 the graph into browser tests and use it as a coverage denominator \cite{rima2026e2e}.
-This account draws on the publisher's abstract, the replication package's operational specification
-\path{softscanner-sw/softscanner_fa}/\path{docs/paper/approach.md}, and the anonymised
-manuscript \path{docs/paper/main.pdf} in the same repository. The published chapter was
-unavailable and may differ from both documents. Both describe attribution beyond containment:
-active components include those activated by the route and its ancestors, closed under
-composition, plus bootstrap components. Handlers are traced into same-class
-helpers to depth one and into the first \texttt{subscribe} callback. The specification excludes
-router-outlet modelling, provider resolution beyond module and root providers, and service
-calls. The implementation nevertheless traces calls into services whose class names match a
-router or navigation pattern, to depth one. Navigation inside these services is attributed to
+The chapter defines a workflow as one trigger with its effects, from start routes to a single
+terminal, and takes a workflow's active components to be those activated by the route and its
+ancestors, closed under composition. The further rules below are not in the chapter; they come
+from the replication package's operational specification
+\path{softscanner-sw/softscanner_fa}/\path{docs/paper/approach.md} and its code. Bootstrap
+components are also active, and handlers are traced into same-class helpers to depth one and into
+the first \texttt{subscribe} callback. The specification excludes router-outlet modelling, provider
+resolution beyond module and root providers, and service calls. The implementation nevertheless
+traces calls into services whose class names match a router or navigation pattern, to depth one. Navigation inside these services is attributed to
 their callers' screens.
 
 Zhang et al.\ parse compiled JavaScript bundles, using declared routes as vertices and
@@ -154,8 +153,8 @@ navigation calls as edges. They check an access-control policy against screens r
 from an authorised screen. Two of their four subjects are multi-page applications, analysed
 by crawling instead. Their graph is an over-approximation and is not narrowed. The paper does
 not explain source-screen attribution, and guards remain unmodelled runtime conditions
-\cite{zhang2025veriflow}. Rima et al.\ compare their output with a ground truth derived from
-their pipeline's output and annotated by hand. Neither work classifies losses by construct
+\cite{zhang2025veriflow}. Rima et al.\ compare their output with a ground truth that a single
+auditor built from the source and checked against their tool's artifacts. Neither work classifies losses by construct
 or measures them across a corpus. The problem is therefore neither new nor settled (cf.~Section~\ref{sec:gap}).
 
 \subsection{Static analysis of JavaScript and TypeScript source}
@@ -575,8 +574,8 @@ Section~\ref{sec:dynamic-spa} sets out what their approach leaves out. The other
 their graphs without narrowing them: as a generated test suite's coverage denominator
 \cite{rima2026e2e}, or as an over-approximated reachability relation for access-control checks
 \cite{zhang2025veriflow}.
-Rima et al.\ already analyse nested and lazy route trees, constrain edges with guards and trace
-router-service calls to a bounded depth. No earlier work found in this review combines
+Rima et al.'s tool already analyses nested route hierarchies, constrains edges with guards and
+traces router-service calls to a bounded depth. No earlier work found in this review combines
 cross-class and service attribution under provider bindings, which generalises that bounded
 tracing, with modalities that separate unconditional transitions from guarded or scope-uncertain
 ones, and with construct-level loss measurement on applications large enough to contain
