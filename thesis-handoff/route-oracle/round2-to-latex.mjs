@@ -130,7 +130,7 @@ out.push('\\end{tabular}}')
 out.push('\\newcommand{\\TabRoundTwoAccounting}{%')
 out.push('\\begin{tabular}{lrrrrrr}')
 out.push('\\toprule')
-out.push('Application & Sites & Excl. & In scope & Recovered & Dynamic & Unplaced \\\\')
+out.push('Application & Constructs & Excl. & In scope & Recovered & Dynamic & Unplaced \\\\')
 out.push('\\midrule')
 for (const r of rows) {
   const d = r.l1.tally.ACCOUNTED_DYNAMIC || 0
@@ -188,7 +188,7 @@ if (reasonsTotal !== tot.lost) throw new Error(`the reason rows account for ${re
 out.push('\\newcommand{\\TabRoundTwoReasons}{%')
 out.push('\\begin{tabular}{rl}')
 out.push('\\toprule')
-out.push('Sites & Reason the site is not a transition \\\\')
+out.push('Constructs & Reason the construct is not a transition \\\\')
 out.push('\\midrule')
 for (const [k, v] of Object.entries(reasons).sort((a, b) => b[1] - a[1])) {
   out.push(`${v} & ${k} \\\\`)

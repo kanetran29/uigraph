@@ -76,9 +76,9 @@ Scope attribution recovers a per-application median of \AttrRecoveredMedian{} (r
 establishes that the computed scopes are not too large.
 
 Scope attribution is one model whose lower levels reimplement the mechanisms of earlier work: the
-shell rule is the \emph{rooted} level, and the outlet descent of Rima et al., which activates the
-components of a route and its ancestors, is the \emph{outlet} level (Section~\ref{sec:res-ablation}).
-By sites, the levels below \emph{full} account for most of what attribution recovers: nesting adds
+shell rule is the \emph{rooted} level, and the rule of Rima et al.\ that activates the
+components of a route and its ancestors is the \emph{outlet} level (Section~\ref{sec:res-compare}).
+By sites, the levels below \emph{full} place most of the sites added above \emph{owned}: nesting adds
 \AblationNestingAddedSites{}, rooted \AblationRootedAddedSites{}, outlet \AblationOutletAddedSites{}
 and full \AblationFullAddedSites{} (Table~\ref{tab:ablation}). The step above \emph{outlet} places navigation that
 belongs to no component, in services, guards and effects, which no lower level can place on a
@@ -123,7 +123,7 @@ The cause trace of Section~\ref{sec:res-losses} assigns every repaired class to 
 open causes as well: the named outlets and ghostfolio's computed routes. Two other causes lie beyond
 any reader of a route table, each found in one application; they are the only evidence for a limit
 of the approach. The rest is unassigned. The losses that this study can explain are therefore
-mostly limits of this extractor rather than of static extraction. Assigning the remaining attribution losses would need a check that separates tool gaps from
+mostly limits of this extractor rather than of static extraction. Assigning the remaining attribution losses would need a check that separates extractor gaps from
 components that no screen may render. Assigning the may-only constructs behind application decisions
 would need rules that test whether a decision can vary. The harness also checks only that every
 construct has a label, not that the label is correct.
@@ -458,7 +458,7 @@ Priorities, ordered by their potential effect on the claims, are:
 \begin{itemize}
 \item \emph{An oracle for screen sets on a large application.} The references in Section~\ref{sec:res-groundtruth} cover the two smallest applications using the analysis's relations, but most attributions concern applications with hundreds of screens (Table~\ref{tab:scopebaseline}). Observe rendered links after sign-in or annotate a stratified sample of sites.
 \item \emph{Unimplemented model features.} These include dispatch relations for NgRx effects and router events, the injector hierarchy, since provider bindings are currently resolved application-wide (Section~\ref{sec:approximations}), and guards returning a \texttt{UrlTree}. The broader guard model in Chapter~\ref{ch:analysis} requires substantial work, and guard-removal tests currently reach only recorded guards (Section~\ref{sec:res-mutation}).
-\item \emph{A runtime tier.} Observation identifiers are already valid witnesses. Comparison with dynamic approaches \cite{crawljax2012,feedex2013,fraggen2022} would measure transitions found only by a crawler or only statically. Observation confirms a may edge in one run without promoting it to must, and an unobserved candidate remains may, preserving Claim~\ref{claim:must}. This tier is not built or evaluated here.
+\item \emph{A runtime layer.} Observation identifiers are already valid witnesses. Comparison with dynamic approaches \cite{crawljax2012,feedex2013,fraggen2022} would measure transitions found only by a crawler or only statically. Observation confirms a may edge in one run without promoting it to must, and an unobserved candidate remains may, preserving Claim~\ref{claim:must}. This layer is not built or evaluated here.
 \item \emph{A broader corpus.} Automated selection from a larger repository pool, retaining poorly handled applications \cite{kalliamvakou2014promises,kalliamvakou2016indepth}, would reduce extractor-driven bias (Section~\ref{sec:limitations}). A proprietary industrial case study, reporting aggregates, would address external validity. A minimum density of user-interface tests should become an explicit selection criterion whenever execution-based evidence is needed. Route-tree size and test density were inversely related among the candidates (Section~\ref{sec:corpus}), and without such a criterion a study ends up with its oracle and its scale on different applications.
 \item \emph{Consumer evaluation.} Controlled experiments are needed to test benefits for mobile testing agents, coding agents (Chapter~\ref{ch:introduction}) and automated test generation. None was attempted here.
 \end{itemize}
@@ -466,10 +466,10 @@ Priorities, ordered by their potential effect on the claims, are:
 \subsection{Summary}
 
 Three implications follow for static extraction of UI transition graphs. A route table alone is not
-enough: under the loss rules' precedence attribution is the largest loss category, and by sites, most of what is recovered comes from the
+enough: under the loss rules' precedence attribution is the largest loss category, and by sites, most of the sites added above \emph{owned} come from the
 levels below \emph{full}. Deterministic transitions are rare, so may edges are
 candidates for runtime confirmation rather than transitions. An evaluation should report losses
 construct by construct and check computed scopes in both directions, which this study could do only
 in part. The heaviest threat to the answers of Section~\ref{sec:findings} is that every corpus figure is
 in-sample, and transfer to other routers remains unmeasured. The priorities are an oracle for screen sets on a
-large application and a runtime tier that extends the graph to signed-in use.
+large application and a runtime layer that extends the graph to signed-in use.

@@ -140,9 +140,9 @@ for (const [k, label] of DIAG) { const v = diag.map((d) => d[k] || 0); tex2 += `
 tex2 += `\\bottomrule\n\\end{tabular}}\n`
 // held back until every check below has passed; see the single write at the end
 
-// Which baseline class did each construct that attribution converted come out of? The
-// loss rules assign a construct to one class, so a conversion out of a node class means
-// the classes are not independent and the attribution class is not an upper bound.
+// Which baseline category did each construct that attribution converted come out of? The
+// loss rules assign a construct to one category, so a conversion out of a node category means
+// the categories are not independent and the attribution category is not an upper bound.
 const ATTR_CLS = ['ATTRIBUTION_SHARED', 'ATTRIBUTION_SERVICE']
 const NODE_CLS = ['LAZY_BOUNDARY', 'CONSTANT_PATH', 'COMPONENT_UNLINKED', 'NODE_MISS', 'CONSTANT_TARGET']
 const moves = {}
@@ -165,9 +165,9 @@ const CLS_LABEL = {
   LAZY_BOUNDARY: 'Lazy boundary', CONSTANT_PATH: 'Constant path',
   COMPONENT_UNLINKED: 'Component unlinked', NODE_MISS: 'Node missing', CONSTANT_TARGET: 'Constant target',
   EXCLUDED_NO_COMMANDS: 'Excluded in the baseline: named no destination',
-  OTHER: 'Other, no class rule applied',
+  OTHER: 'Other, no category rule applied',
 }
-let tex3 = `\n\\newcommand{\\TabRecoverySource}{%\n\\begin{tabular}{@{}lrrr@{}}\n\\toprule\nBaseline class of the construct & must & may & total \\\\\n\\midrule\n`
+let tex3 = `\n\\newcommand{\\TabRecoverySource}{%\n\\begin{tabular}{@{}lrrr@{}}\n\\toprule\nBaseline category of the construct & must & may & total \\\\\n\\midrule\n`
 const gt = { attribution: { must: 0, may: 0 }, node: { must: 0, may: 0 }, other: { must: 0, may: 0 } }
 for (const g of ['attribution', 'node']) {
   for (const [cls, v] of Object.entries(moves).filter(([c]) => group(c) === g).sort((a, b2) => (b2[1].must + b2[1].may) - (a[1].must + a[1].may))) {
@@ -182,9 +182,9 @@ for (const cls of OTHER_CLS) {
   gt.other.must += v.must; gt.other.may += v.may
 }
 if (OTHER_CLS.length) tex3 += `\\addlinespace\n`
-tex3 += `\\midrule\nOut of the attribution classes & ${gt.attribution.must} & ${gt.attribution.may} & ${gt.attribution.must + gt.attribution.may} \\\\\n`
-tex3 += `Out of the node classes & ${gt.node.must} & ${gt.node.may} & ${gt.node.must + gt.node.may} \\\\\n`
-if (OTHER_CLS.length) tex3 += `Out of the remaining classes & ${gt.other.must} & ${gt.other.may} & ${gt.other.must + gt.other.may} \\\\\n`
+tex3 += `\\midrule\nOut of the attribution categories & ${gt.attribution.must} & ${gt.attribution.may} & ${gt.attribution.must + gt.attribution.may} \\\\\n`
+tex3 += `Out of the node categories & ${gt.node.must} & ${gt.node.may} & ${gt.node.must + gt.node.may} \\\\\n`
+if (OTHER_CLS.length) tex3 += `Out of the remaining categories & ${gt.other.must} & ${gt.other.may} & ${gt.other.must + gt.other.may} \\\\\n`
 {
   const m = gt.attribution.must + gt.node.must + gt.other.must
   const y = gt.attribution.may + gt.node.may + gt.other.may

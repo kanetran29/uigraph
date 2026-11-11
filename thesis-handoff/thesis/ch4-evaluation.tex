@@ -64,7 +64,7 @@ support was not one of the six criteria; it became a rejection criterion after s
 The selection follows Kalliamvakou et al.'s recommendation to use and report explicit criteria
 \cite{kalliamvakou2014promises,kalliamvakou2016indepth}, with the departures stated above.
 External validity remains limited because open-source applications may differ from proprietary ones.
-Selection bias is also possible because I selected the corpus and wrote the extractor. The selection was also not blind to tool support, which became a rejection criterion after screening began. Mifos dominates pooled percentages, so per-application figures are the primary summary where
+Selection bias is also possible because I selected the corpus and wrote the extractor. The selection was also not blind to extractor support, which became a rejection criterion after screening began. Mifos dominates pooled percentages, so per-application figures are the primary summary where
 available. The corpus spans nearly two orders of magnitude in route counts, and the pinned commits
 and released harness permit repeated measurement.
 
@@ -126,7 +126,7 @@ corrections followed disagreements with the extractor.
 witnessed by at least one must edge. Three rules make it precise.
 \begin{itemize}
 \item A construct is matched to a witness on its own line or on a line either side, to absorb
-offsets in the extractor's locations. Two constructs on adjacent lines can therefore both be
+offsets in the extractor's recorded lines. Two constructs on adjacent lines can therefore both be
 credited by one witness, so the ratio is an upper bound at line granularity.
 \item Query-only navigations and the two exclusions of Table~\ref{tab:loss-rules} are left out of
 the denominator as well as the numerator.
@@ -142,12 +142,12 @@ declared and says nothing about how much is recovered. The loss tables measure t
 constructs, or recovery gap.
 
 \textbf{Agreement between a scope and the rendered interface (RQ3).} The measures above do not test
-whether a construct's computed scope matches the screens from which it can fire. The
+whether a site's computed scope matches the screens from which it can fire. The
 \emph{rendered-interface check} tests one direction using the runtime route oracle's harness
 (Section~\ref{sec:protocol}). It navigates to each screen in the graph, extracts in-app links from
 the DOM and compares them with the graph's per-screen edges.
 
-A rendered link without an edge shows that a construct was under-attributed or not extracted. The
+A rendered link without an edge shows that a site was under-attributed or not extracted. The
 converse is weaker, because links may render conditionally and the harness does not sign in. A may edge, even one to a literal target, asserts a possible link and not a rendered one. The
 converse is therefore assessed only for predictions carried by a must edge, whose count is
 reported; a may edge is never judged as over-attribution. Three restrictions apply. Only template
@@ -162,7 +162,7 @@ improves agreement with a structural reference or merely produces larger screen 
 The ablation extracts the whole corpus at \AblationLevels{} cumulative levels of the mechanisms of
 Section~\ref{sec:attribution}, each adding mechanisms to the one before:
 \begin{itemize}
-\item \emph{Owned}: a construct belongs to the screen whose routed component's own file holds it, the
+\item \emph{Owned}: a site belongs to the screen whose routed component's own file holds it, the
 direct ownership of the Android literature.
 \item \emph{Nesting}: adds component nesting through template element selectors.
 \item \emph{Rooted}: adds the shell rule, so a component the root renders is attributed to every

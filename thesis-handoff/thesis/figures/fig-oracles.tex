@@ -2,10 +2,10 @@
 \centering
 \begin{tikzpicture}[node distance=9mm and 16mm]
   \node[box, hl, minimum width=30mm, minimum height=12mm] (g) {extracted\\graph};
-  \node[box, above left=of g, minimum width=38mm, font=\footnotesize] (b) {\textbf{witness check}\\truth: the source line\\each edge cites};
-  \node[box, above right=of g, minimum width=38mm, font=\footnotesize] (c) {\textbf{differential test}\\truth: an independent\\route parser};
-  \node[box, below left=of g, minimum width=38mm, font=\footnotesize] (d) {\textbf{test-source cross-check}\\truth: URLs named in\\test sources};
-  \node[box, below right=of g, minimum width=38mm, font=\footnotesize] (f) {\textbf{mutation}\\truth: the change\\that was injected};
+  \node[box, above left=of g, minimum width=38mm, font=\footnotesize] (b) {\textbf{witness check}\\reference: the source line\\each edge cites};
+  \node[box, above right=of g, minimum width=38mm, font=\footnotesize] (c) {\textbf{differential test}\\reference: an independent\\route parser};
+  \node[box, below left=of g, minimum width=38mm, font=\footnotesize] (d) {\textbf{test-source cross-check}\\reference: URLs named in\\test sources};
+  \node[box, below right=of g, minimum width=38mm, font=\footnotesize] (f) {\textbf{mutation}\\reference: the change\\that was injected};
   \draw[<->] (b) -- node[lbl, above right, pos=0.4] {must edges} (g);
   \draw[<->] (c) -- node[lbl, above left, pos=0.4] {nodes} (g);
   \draw[<->] (d) -- node[lbl, below right, pos=0.4] {nodes} (g);
@@ -15,7 +15,7 @@
   \node[font=\scriptsize, text=muted, below=0.5mm of d] {named subset only, no test run};
   \node[font=\scriptsize, text=muted, below=0.5mm of f] {needs the construct in the graph};
 \end{tikzpicture}
-\caption{The four evaluation methods that read the applications' sources, the graph part each checks, and its ground truth.}
+\caption{The four evaluation methods that read the applications' sources, the graph part each checks, and its reference.}
 \label{fig:oracles}
-\par\smallskip{\footnotesize\noindent\emph{Note.} The fifth method, the runtime route oracle, is not drawn because its ground truth is the running application rather than any part of the graph. No method sees everything; the grey notes give the blind spot of each, as listed in Table~\ref{tab:methods}.}
+\par\smallskip{\footnotesize\noindent\emph{Note.} The fifth method, the runtime route oracle, is not drawn because its reference is the running application rather than any part of the graph. No method sees everything; the grey notes give the blind spot of each, as listed in Table~\ref{tab:methods}.}
 \end{figure}

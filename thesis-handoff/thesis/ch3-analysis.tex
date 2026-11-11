@@ -37,7 +37,7 @@ edge relation. An \emph{unplaced origin} represents a component and navigation c
 could not be assigned to a screen. A \emph{dynamic target} represents an unresolved
 destination. These preserve unplaced constructs, which the loss counts need, and unresolved destinations that may
 still occur at run time. An edge from an unplaced origin is labelled \emph{may}, or \emph{unknown}
-if it reaches a dynamic target, and counts in its tier although, with a nonscreen source, it lies outside $E$. An edge to a dynamic target likewise lies outside $E$, since its target is no screen; it records outgoing navigation without identifying the destination
+if it reaches a dynamic target, and counts in its tier although, with a nonscreen source, it lies outside $E$. An edge to a dynamic target records outgoing navigation without identifying the destination
 screen. Claim~\ref{claim:must} and must conversion (RQ1) concern only edges between screens.
 
 \textbf{Modalities.} A \emph{must} edge is claimed to fire for every input on which the
@@ -464,7 +464,7 @@ also renders on descendant screens, where links still resolve against that compo
 Write $\mathit{holder}(s, c)$ for the nearest route at or above screen $s$ whose component is
 $c$. A relative target at a site in component $c$ that fires on $s$ resolves against the path of $\mathit{holder}(s, c)$. If no route on that chain renders $c$, as with template-nested
 components, the full target's base is unresolved and the edge is may
-(Table~\ref{tab:demotion}). A target prefix, the static leading segments of a target whose later segments are parameters, falls back to $s$'s address, and all prefix edges are may.
+(Table~\ref{tab:demotion}). A target prefix, the static text before the first non-literal part of a target, falls back to $s$'s address, and all prefix edges are may.
 
 \subsubsection{Extensions not evaluated}
 \label{sec:extensions}
